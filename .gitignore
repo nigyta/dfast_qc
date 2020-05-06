@@ -1,0 +1,24 @@
+# git ignore
+
+# for development
+dev/
+dev_old/
+OUT/
+bin/
+
+# environment
+env/
+setenv.sh
+
+# DQC reference dir.
+dqc_reference
+dqc_reference_dev
+
+
+# python
+__pycache__/
+*.pyc
+
+
+# pyenv
+.python-version

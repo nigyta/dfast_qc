@@ -1,0 +1,83 @@
+#!/bin/env python
+
+import os
+import sys
+from datetime import datetime
+from argparse import ArgumentParser
+
+from dqc.config import config
+
+def parse_args():
+    parser = ArgumentParser(description="DFAST_QC: Taxonomy and completeness check")
+    parser.add_argument(
+        "-i",
+        "--input_fasta",
+        type=str,
+        required=True,
+        help="Input FASTA file (raw or gzipped) [required]",
+        metavar="PATH"
+    )
+    parser.add_argument(
+        "-o",
+        "--out_dir",
+        type=str,
+        help="Output directory (default: OUT)",
+        metavar="PATH"
+    )
+    parser.add_argument(
+        "-p",
+        "--prefix",
+        type=str,
+        help="Prefix for output (default: None)",
+        metavar="STR"
+    )
+    parser.add_argument(
+        '--force',
+        action='store_true',
+        help='Force overwriting result'
+    )
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Debug mode'
+    )
+    args = parser.parse_args()
+    return args
+
+args = parse_args()
+if not os.path.isfile(args.input_fasta):
+    sys.stderr.write(f"Query FASTA file not found. Aborted. [PATH:{args.input_fasta}]\n")
+    exit(1)
+else:
+    config.QUERY_GENOME = args.input_fasta
+if args.out_dir:
+    config.OUT_DIR = args.out_dir
+if args.prefix:
+    config.PREFIX = args.prefix
+if args.debug:
+    config.DEBUG = True
+if args.force:
+    config.FORCE = True
+
+
+from dqc.common import get_logger, prepare_output_directory
+from dqc import taxonomy_check
+
+logger = get_logger(__name__)
+
+
+prepare_output_directory()
+
+start_time = datetime.now()
+logger.info("DFAST_QC started.")
+
+taxonomy_check.run()
+
+end_time = datetime.now()
+running_time = end_time - start_time
+running_time = running_time.total_seconds()
+h, remainder = divmod(running_time, 3600)
+m, s = divmod(remainder, 60)
+
+logger.info("DFAST_QC completed!")
+logger.info("Total running time: {0:.0f}h{1:.0f}m{2:.0f}s".format(h, m, s))
