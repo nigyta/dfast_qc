@@ -1,0 +1,5 @@
+biopython==1.76
+checkm-genome==1.1.2
+ete3==3.1.1
+more-itertools==8.2.0
+peewee==3.13.3

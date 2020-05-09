@@ -34,6 +34,14 @@ def prepare_sqlite_db(args):
     from dqc.admin.prepare_sqlite_db import prepare_sqlite_db
     prepare_sqlite_db(asm_report=args.asm, ani_report=args.ani, type_strain_report=args.tsr, out_dir=args.out_dir)
 
+def prepare_checkm_data(args):
+    from dqc.admin.prepare_checkm_data import main as prepare_checkm_data
+    prepare_checkm_data(out_dir=args.out_dir, delete_existing_data=args.delete_existing_data)
+
+def update_taxdump(args):
+    from dqc.admin.update_taxdump import main as update_taxdump
+    update_taxdump()
+
 def update_all(args):
     pass
 
@@ -54,9 +62,9 @@ def parse_args():
     parser_master = subparsers.add_parser('download_master_files', help='Download master files.', parents=[common_parser])
     parser_master.add_argument(
         "--targets", type=str, required=False, metavar="STR", 
-        choices=['asm', 'ani', 'tsr', "hmm"], nargs="*",
+        choices=['asm', 'ani', 'tsr', "hmm", "checkm", "taxdump"], nargs="*",
         help="Target(s) for downloading. " + 
-             "[asm: Assembly report, ani: ANI report, tsr: Type strain report, hmm: HMMER profile] "
+             "[asm: Assembly report, ani: ANI report, tsr: Type strain report, hmm: TIGR HMMER profile, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz] "
              "(default: asm ani tsr)"
     )
     parser_master.set_defaults(func=download_master_files)
@@ -93,6 +101,15 @@ def parse_args():
     parser_prep_sqlite.add_argument("--tsr", type=str, metavar="PATH",
         help="Type strain report (not implemented)")
     parser_prep_sqlite.set_defaults(func=prepare_sqlite_db)
+
+    # subparser for prepare_checkm_data
+    parser_prep_checkm = subparsers.add_parser('prepare_checkm', help='Prepare CheckM data root', parents=[common_parser])
+    parser_prep_checkm.add_argument('--delete_existing_data', action='store_true', help='Delete existing data directory.')
+    parser_prep_checkm.set_defaults(func=prepare_checkm_data)
+
+    # subparser for update_taxdump
+    parser_prep_checkm = subparsers.add_parser('update_taxdump', help='Update NCBI taxdump data', parents=[common_parser])
+    parser_prep_checkm.set_defaults(func=update_taxdump)
 
     args = parser.parse_args()
     if not hasattr(args, "func"):

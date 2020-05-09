@@ -5,9 +5,14 @@ class DefaultConfig:
 
     QUERY_GENOME = None
     OUT_DIR = "OUT"
+    CHECKM_TAXID = None
+    PREFIX = ""  # for debugging use
+    NUM_THREADS = 1
     LOG_FILE = "application.log"
-    PREFIX = ""
 
+    DISABLE_TC = False
+    DISABLE_CC = False
+    
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
     
     # Reference data
@@ -21,6 +26,7 @@ class DefaultConfig:
     ASSEMBLY_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "assembly_summary_genbank.txt") 
     ANI_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "ANI_report_prokaryotes.txt") 
     TYPE_STRAIN_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "prokaryote_type_strain_report.txt") 
+    CHECKM_DATA_ROOT = "checkm_data"
     REFERENCE_MARKERS = {
         "TIGR00665": ("dnaB", "replicative DNA helicase"),
         "TIGR00717": ("rpsA", "ribosomal protein bS1"),
@@ -43,30 +49,38 @@ class DefaultConfig:
     BLAST_OPTIONS = "-outfmt 6 -max_hsps 1 -num_alignments 5"
 
     # output file names and options for calc_ANI
-    FASTANI_THREADS = 2
     FASTANI_RESULT = "fastani_result.tsv"
     DQC_RESULT = "tc_result.tsv"
     DQC_RESULT_JSON = "tc_result.json"
 
+    # output file names and options for completeness check (CheckM)
+    CHECKM_INPUT_DIR = "checkm_input"
+    CHECKM_RESULT_DIR = "checkm_result"
+    CC_RESULT = "cc_result.tsv"
+    CC_RESULT_JSON = "cc_result.json"
+
     # admin settings
     NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov"
+    ETE3_SQLITE_DB = "ete3_taxonomy.db"
     URLS = {
         "asm": "ftp://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt",
         "ani": "ftp://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/ANI_report_prokaryotes.txt",
         "tsr": "ftp://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/prokaryote_type_strain_report.txt",
         "hmm": "ftp://ftp.tigr.org//pub/data/TIGRFAMs/TIGRFAMs_15.0_HMM.LIB.gz",
+        "checkm": "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz",
+        "taxdump": "https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
     }
     ADMIN = False
 
 class DevelopmentConfig(DefaultConfig):
-    DEBUG = True
+    # DEBUG = True
     FORCE = True
     # LOG_FILE = None
 
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 
     # Reference data
-    DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference_dev")
+    DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference")
     REFERENCE_GENOME_DIR = os.path.join(DQC_REFERENCE_DIR, "genomes")
     REFERENCE_MARKER_DIR = os.path.join(DQC_REFERENCE_DIR, "markers")
     SQLITE_REFERENCE_DB = os.path.join(DQC_REFERENCE_DIR, "references.db")

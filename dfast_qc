@@ -9,11 +9,12 @@ from dqc.config import config
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC: Taxonomy and completeness check")
+
     parser.add_argument(
         "-i",
         "--input_fasta",
         type=str,
-        required=True,
+        # required=True,
         help="Input FASTA file (raw or gzipped) [required]",
         metavar="PATH"
     )
@@ -25,11 +26,38 @@ def parse_args():
         metavar="PATH"
     )
     parser.add_argument(
+        "-t",
+        "--taxid",
+        type=int,
+        default=None,
+        help="NCBI taxid for completeness check. Use '--show_taxon' for available taxids. (Default: Automatically inferred from taxonomy check)",
+        metavar="INT"
+    )
+    parser.add_argument(
         "-p",
         "--prefix",
         type=str,
-        help="Prefix for output (default: None)",
+        help="Prefix for output (for debugging use, default: None)",
         metavar="STR"
+    )
+    parser.add_argument(
+        "-n",
+        "--num_threads",
+        type=int,
+        default=1,
+        help="Number of threads for parallel processing (default: 1)",
+        metavar="INT"
+    )
+    group_disable = parser.add_mutually_exclusive_group()
+    group_disable.add_argument(
+        '--disable_tc',
+        action='store_true',
+        help='Disable taxonomy check using ANI'
+    )
+    group_disable.add_argument(
+        '--disable_cc',
+        action='store_true',
+        help='Disable completeness check using CheckM'
     )
     parser.add_argument(
         '--force',
@@ -41,37 +69,82 @@ def parse_args():
         action='store_true',
         help='Debug mode'
     )
+    parser.add_argument(
+        '--show_taxon',
+        action='store_true',
+        help='Show available taxa for competeness check'
+
+    )
+    if len(sys.argv)==1:
+        parser.print_help()
+        exit()
     args = parser.parse_args()
     return args
 
+
 args = parse_args()
+
+if args.show_taxon:
+    from dqc.checkm_helper import show_taxon
+    show_taxon()
+    exit()
+if args.input_fasta is None:
+    sys.stderr.write("dfast_qc: error: Query FASTA is not specified. Aborted")
+    exit(1)
+# set input query
 if not os.path.isfile(args.input_fasta):
-    sys.stderr.write(f"Query FASTA file not found. Aborted. [PATH:{args.input_fasta}]\n")
+    sys.stderr.write(f"dfast_qc: error: Query FASTA file not found. Aborted. [PATH:{args.input_fasta}]\n")
     exit(1)
 else:
     config.QUERY_GENOME = args.input_fasta
+
+# set other options
 if args.out_dir:
     config.OUT_DIR = args.out_dir
+if args.taxid:
+    config.CHECKM_TAXID = args.taxid
+if args.num_threads:
+    config.NUM_THREADS = args.num_threads
 if args.prefix:
     config.PREFIX = args.prefix
+if args.disable_tc:
+    config.DISABLE_TC = True
+if args.disable_cc:
+    config.DISABLE_CC = True
 if args.debug:
     config.DEBUG = True
 if args.force:
     config.FORCE = True
 
+# check invalid options
+if config.DISABLE_TC and config.CHECKM_TAXID is None:
+    sys.stderr.write("dfast_qc: error: '--taxid' is required when '--disable_tx' is specified.\n")
+    exit(1)
 
 from dqc.common import get_logger, prepare_output_directory
-from dqc import taxonomy_check
+from dqc import taxonomy_check, completeness_check
 
 logger = get_logger(__name__)
-
 
 prepare_output_directory()
 
 start_time = datetime.now()
-logger.info("DFAST_QC started.")
+logger.info("DFAST_QC pipeline started.")
 
-taxonomy_check.run()
+if not config.DISABLE_TC:
+    tc_result = taxonomy_check.run() # tc_result is a list containing dictionaries of fastANI result
+
+    if config.CHECKM_TAXID is None:  # taxid is automatically inferred from taxonomy check
+        if len(tc_result) > 0:
+            first_hit = tc_result[0]
+            config.CHECKM_TAXID = first_hit["species_taxid"]
+            logger.info("Taxid for CheckM is set to %d.", first_hit["species_taxid"])
+        else:
+            logger.warning("Failed to determine species. Taxid 0 (Prokaryote) is set for CheckM.")
+            config.CHECKM_TAXID = 0
+
+if not config.DISABLE_CC:
+    cc_result = completeness_check.run()
 
 end_time = datetime.now()
 running_time = end_time - start_time

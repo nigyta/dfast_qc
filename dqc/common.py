@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+import shutil
 from logging import StreamHandler, FileHandler, Formatter, INFO, DEBUG, getLogger
 from .config import config
 
@@ -28,18 +29,20 @@ def get_logger(name=None):
 logger = get_logger(__name__)
 
 
-def run_command(cmd, task_name, shell=True):
-    logger.info("Task started: %s", task_name)
+def run_command(cmd, task_name=None, shell=True):
+    if task_name:
+        logger.info("Task started: %s", task_name)
     if shell:
         cmd = " ".join(cmd)
     logger.info("Running command: %s", cmd)
     p = subprocess.run(cmd, shell=shell, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if p.returncode != 0:
-        logger.error("%s failed. Aborted. [%s]", task_name, cmd)
-        logger.error("%s output: %s\n%s", task_name, "-" * 80, p.stdout)
+        logger.error("Command failed. Aborted. [%s]", cmd)
+        logger.error("Output: %s\n%s", "-" * 80, p.stdout)
         exit(1)
     else:
-        logger.info("Task succeeded: %s", task_name)
+        if task_name:
+            logger.info("Task succeeded: %s", task_name)
         if p.stdout:
             logger.debug("%s output %s\n%s%s", task_name, "-" * 50, p.stdout, "-" * 50)
 
@@ -57,12 +60,23 @@ def prepare_output_directory():
             config.FASTANI_RESULT,
             config.DQC_RESULT,
             config.DQC_RESULT_JSON,
-            config.LOG_FILE
+            config.LOG_FILE,
+            config.CC_RESULT,
+            config.CC_RESULT_JSON
         ]
         for file_name in result_file_names:
             file_path = os.path.join(config.OUT_DIR, file_name)
             if os.path.exists(file_path):
                 os.remove(file_path)
+        result_dir_names = [
+            config.CHECKM_INPUT_DIR,
+            config.CHECKM_RESULT_DIR
+        ]
+        for dir_name in result_dir_names:
+            dir_path = os.path.join(config.OUT_DIR, dir_name)
+            if os.path.exists(dir_path):
+                shutil.rmtree(dir_path)
+
 
     if os.path.exists(config.OUT_DIR):   
         if config.FORCE:

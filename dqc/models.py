@@ -21,9 +21,24 @@ class Reference(Model):
     def __str__(self):
         return f"<{self.accession} {self.organism_name} {self.infraspecific_name}, {self.relation_to_type_material}, {'validated' if self.is_valid else '-'}>"
 
+class Taxon(Model):
+    taxid = IntegerField(primary_key=True)
+    rank = CharField()
+    taxon = IntegerField()
+    genomes = IntegerField()
+    marker_genes = IntegerField()
+    marker_sets = IntegerField()
+
+    class Meta:
+        database = db
+
+    def __str__(self):
+        return f"<{self.taxid}: {self.rank} {self.taxon}>"
+
+
 def init_db():
     db.connect()
-    db.create_tables([Reference])
+    db.create_tables([Reference, Taxon])
 
 
 if __name__ == '__main__':
