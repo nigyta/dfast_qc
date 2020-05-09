@@ -5,9 +5,9 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 from ..config import config
-from ..common import get_logger, run_command
+from ..common import get_logger, run_command, get_ref_path
 from ..prepare_marker_fasta import main as prepare_marker_fasta
-from .download_all_reference_fasta import get_existing_genomes
+from .download_all_reference_genomes import get_existing_genomes
 
 logger = get_logger(__name__)
 
@@ -27,16 +27,14 @@ def get_existing_markers(marker_dir):
             existing_markers.append(accession)
     return existing_markers
 
-def concat_result_files(out_dir, marker_dir):
-    ref_marker_fasta_base = os.path.basename(config.REFERENCE_MARKERS_FASTA)  # reference_markers.fasta
-    ref_summary_tsv_base = os.path.basename(config.REFERENCE_SUMMARY_TSV)  # reference_summary.tsv
+def concat_result_files(marker_dir):
     
-    out_fasta = os.path.join(out_dir, ref_marker_fasta_base)
-    out_summary = os.path.join(out_dir, ref_summary_tsv_base)
-    cmd1 = ["cat", f"{marker_dir}/*/*markers.fasta", ">", out_fasta]
+    out_fasta = get_ref_path(config.REFERENCE_MARKERS_FASTA) # reference_markers.fasta
+    out_summary = get_ref_path(config.REFERENCE_SUMMARY_TSV) # reference_summary.tsv
+    cmd1 = ["cat", f"{marker_dir}/*/markers.fasta", ">", out_fasta]
     run_command(cmd1, "concat-fasta", shell=True)
     logger.info("Reference marker FASTA was written to %s", out_fasta)
-    cmd2 = ["cat", f"{marker_dir}/*/*.summary.tsv", ">", out_summary]
+    cmd2 = ["cat", f"{marker_dir}/*/marker.summary.tsv", ">", out_summary]
     run_command(cmd2, "concat-summary", shell=True)
     logger.info("Reference marker summary was written to %s", out_summary)
     format_reference_fasta(out_fasta)
@@ -46,18 +44,15 @@ def format_reference_fasta(reference_fasta):
     cmd = ["makeblastdb", "-in", reference_fasta, "-dbtype nucl", "-hash_index"]
     run_command(cmd, "makeblastdb", shell=True)
 
-def prepare_reference_marker_fasta(out_dir=None, threads=1, delete_existing=False):
-    logger.info("===== Prepare reference marker FASTA (reference_markers.fasta) =====")
-    ref_genome_dir_base = os.path.basename(config.REFERENCE_GENOME_DIR)  # genomes 
-    ref_marker_dir_base = os.path.basename(config.REFERENCE_MARKER_DIR)  # markers 
+def prepare_reference_marker_fasta(delete_existing=False):
+    
+    threads = config.NUM_THREADS
 
-    # check out_dir (default: DQC_REFERENCE_DIR)
-    if out_dir is None:
-        out_dir = config.DQC_REFERENCE_DIR
-    os.makedirs(out_dir, exist_ok=True)
+    logger.info("===== Prepare reference marker FASTA (reference_markers.fasta) =====")
+
 
     # check reference genome dir. (default: genomes)
-    ref_genome_dir = os.path.join(out_dir, ref_genome_dir_base)
+    ref_genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
     if not os.path.exists(ref_genome_dir):
         logger.error("Reference genome directory does not exist. [%s]", ref_genome_dir)
         exit(1)
@@ -66,7 +61,7 @@ def prepare_reference_marker_fasta(out_dir=None, threads=1, delete_existing=Fals
 
     # check reference marker dir. (default: markers)
     # Deleted if 'delete_existing == True'
-    ref_marker_dir = os.path.join(out_dir, ref_marker_dir_base)
+    ref_marker_dir = get_ref_path(config.REFERENCE_MARKER_DIR)
     if delete_existing and os.path.exists(ref_marker_dir):
         shutil.rmtree(ref_marker_dir)
         logger.warning("Deleted existing markers: %s", ref_marker_dir)
@@ -101,6 +96,6 @@ def prepare_reference_marker_fasta(out_dir=None, threads=1, delete_existing=Fals
         delete_unwanted_markers(unwanted_markers, ref_marker_dir)
         logger.info("Deleted %d markers.", len(unwanted_markers))
 
-    concat_result_files(out_dir, ref_marker_dir)
+    concat_result_files(ref_marker_dir)
     
     logger.info("===== Completed preparing reference marker FASTA =====")

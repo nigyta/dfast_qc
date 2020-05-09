@@ -10,52 +10,60 @@ config.ADMIN = True
 from dqc.common import get_logger
 logger = get_logger(__name__)
 
-def download_genomes(args):
-    from dqc.admin.download_all_reference_fasta import download_all_genomes
-    download_all_genomes(asm_report=args.asm, ani_report=args.ani, type_strain_report=args.tsr, out_dir=args.out_dir, threads=args.threads)
-
 def download_master_files(args):
     from dqc.admin.download_master_files import download_master_files
-    if (not hasattr(args, "targets")) or args.targets is None:
+    if args.targets is None:
         target_files = ["asm", "ani", "tsr"]
     else:
         target_files = args.targets
-    download_master_files(target_files, args.out_dir, threads=args.threads)
+    download_master_files(target_files)
+
+def download_genomes(args):
+    from dqc.admin.download_all_reference_genomes import download_all_genomes
+    download_all_genomes()
 
 def prepare_reference_hmm(args):
     from dqc.admin.prepare_reference_hmm import prepare_reference_hmm
-    prepare_reference_hmm(master_hmm_file=args.master_hmm_file, out_dir=args.out_dir)
+    prepare_reference_hmm()
 
 def prepare_reference_marker_fasta(args):
     from dqc.admin.prepare_reference_marker_fasta import prepare_reference_marker_fasta
-    prepare_reference_marker_fasta(out_dir=args.out_dir, threads=args.threads, delete_existing=args.delete_existing_marker)
+    prepare_reference_marker_fasta(delete_existing=args.delete_existing_marker)
 
 def prepare_sqlite_db(args):
     from dqc.admin.prepare_sqlite_db import prepare_sqlite_db
-    prepare_sqlite_db(asm_report=args.asm, ani_report=args.ani, type_strain_report=args.tsr, out_dir=args.out_dir)
+    prepare_sqlite_db()
 
 def prepare_checkm_data(args):
     from dqc.admin.prepare_checkm_data import main as prepare_checkm_data
-    prepare_checkm_data(out_dir=args.out_dir, delete_existing_data=args.delete_existing_data)
+    prepare_checkm_data(delete_existing_data=args.delete_existing_data)
 
 def update_taxdump(args):
     from dqc.admin.update_taxdump import main as update_taxdump
     update_taxdump()
 
 def update_all(args):
-    pass
+    from dqc.admin.download_master_files import download_master_files
+    download_master_files(target_files=["asm", "ani", "tsr"])
+    from dqc.admin.download_all_reference_genomes import download_all_genomes
+    download_all_genomes()
+    from dqc.admin.prepare_reference_marker_fasta import prepare_reference_marker_fasta
+    prepare_reference_marker_fasta()
+    from dqc.admin.prepare_sqlite_db import prepare_sqlite_db
+    prepare_sqlite_db()
+    from dqc.admin.update_taxdump import main as update_taxdump
+    update_taxdump()
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC utility tools for admin.")
     subparsers = parser.add_subparsers(help="")
 
     # common parser
-    # todo: outdirではなくて、configの DQC_REFERENCEを書き換えるようにする。
     common_parser = ArgumentParser(add_help=False)
     common_parser.add_argument('--debug', action='store_true', help='Debug mode')
-    common_parser.add_argument("-o", "--out_dir", default=None, type=str, metavar="PATH",
-        help="Output directory (default: DQC_REFERENCE_DIR)")
-    common_parser.add_argument("-t", "--threads", default=1, type=int, metavar="INT",
+    common_parser.add_argument("-r", "--ref_dir", default=None, type=str, metavar="PATH",
+        help="DQC reference directory (default: DQC_REFERENCE_DIR)")
+    common_parser.add_argument("-n", "--num_threads", default=1, type=int, metavar="INT",
         help="Number of threads for parallel processing (default:1)")
 
     # subparser for download master files
@@ -70,21 +78,15 @@ def parse_args():
     parser_master.set_defaults(func=download_master_files)
 
     # subparser for download reference genomes
-    parser_genome = subparsers.add_parser('download_genomes', help='Download reference genomes from AssemblyDB.', parents=[common_parser])
-    parser_genome.add_argument("--asm", type=str, required=False, metavar="PATH",
-        help="Assembly report file (auto detected if not specified)")
-    parser_genome.add_argument("--ani", type=str, required=False, metavar="PATH",
-        help="ANI report file (auto detected if not specified)")
-    parser_genome.add_argument("--tsr", type=str, required=False, metavar="PATH",
-        help="Type strain report (not implemented)")
+    parser_genome = subparsers.add_parser('download_genomes', help='Download reference genomes from Assembly DB.', parents=[common_parser])
     parser_genome.set_defaults(func=download_genomes)
 
     # subparser for prepare_reference_hmm
     parser_prep_ref_hmm = subparsers.add_parser('prepare_reference_hmm', help='Prepare reference profile HMM file　(reference_markers.hmm).', parents=[common_parser])
-    parser_prep_ref_hmm.add_argument(
-        "--master_hmm_file", type=str, required=False, metavar="PATH", 
-        help="Path to profile HMM for TIGRFAMs_15 (raw or gzipped). (Default: auto download)"
-    )
+    # parser_prep_ref_hmm.add_argument(
+    #     "--master_hmm_file", type=str, required=False, metavar="PATH", 
+    #     help="Path to profile HMM for TIGRFAMs_15 (raw or gzipped). (Default: auto download)"
+    # )
     parser_prep_ref_hmm.set_defaults(func=prepare_reference_hmm)
 
     # subparser for prepare_reference_fasta
@@ -94,12 +96,6 @@ def parse_args():
 
     # subparser for prepare sqlite DB
     parser_prep_sqlite = subparsers.add_parser('prepare_sqlite_db', help='Prepare SQLite database (references.db).', parents=[common_parser])
-    parser_prep_sqlite.add_argument("--asm", type=str, metavar="PATH",
-        help="Assembly report file (auto detected if not specified)")
-    parser_prep_sqlite.add_argument("--ani", type=str, metavar="PATH",
-        help="ANI report file (auto detected if not specified)")
-    parser_prep_sqlite.add_argument("--tsr", type=str, metavar="PATH",
-        help="Type strain report (not implemented)")
     parser_prep_sqlite.set_defaults(func=prepare_sqlite_db)
 
     # subparser for prepare_checkm_data
@@ -110,6 +106,10 @@ def parse_args():
     # subparser for update_taxdump
     parser_prep_checkm = subparsers.add_parser('update_taxdump', help='Update NCBI taxdump data', parents=[common_parser])
     parser_prep_checkm.set_defaults(func=update_taxdump)
+
+    # subparser for update_all
+    parser_prep_checkm = subparsers.add_parser('update_all', help='Update all reference data', parents=[common_parser])
+    parser_prep_checkm.set_defaults(func=update_all)
 
     args = parser.parse_args()
     if not hasattr(args, "func"):
@@ -122,6 +122,8 @@ if __name__ == "__main__":
     args = parse_args()
     if args.debug:
         config.DEBUG = True
-
-
+    if args.ref_dir:
+        config.DQC_REFERENCE_DIR = args.ref_dir
+    if args.num_threads:
+        config.NUM_THREADS = args.num_threads
     args.func(args)

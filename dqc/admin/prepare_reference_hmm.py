@@ -2,7 +2,7 @@ import os
 import gzip
 from argparse import ArgumentParser
 
-from ..common import get_logger
+from ..common import get_logger, get_ref_path
 from ..config import config
 from .download_master_files import download_file
 
@@ -39,26 +39,25 @@ def extract_target_hmms(master_hmm_file, output_hmm_file, target_hmms):
         f.write(ret)
     logger.info("Found %d HMMs and extracted to %s", cnt, output_hmm_file)
 
-def prepare_reference_hmm(master_hmm_file=None, out_dir=None):
+def prepare_reference_hmm():
     logger.info("===== Prepare reference profile HMM (reference_markers.hmm) =====")
-    reference_marker_hmm = config.REFERENCE_MARKERS_HMM
-    reference_marker_hmm_base = os.path.basename(reference_marker_hmm)
+
+    ref_dir = config.DQC_REFERENCE_DIR
+    os.makedirs(ref_dir, exist_ok=True)
+    reference_marker_hmm_base = config.REFERENCE_MARKERS_HMM
+    reference_marker_hmm = get_ref_path(config.REFERENCE_MARKERS_HMM)
+
     target_hmms = list(config.REFERENCE_MARKERS.keys())
-    if out_dir is None:
-        out_dir = config.DQC_REFERENCE_DIR
-    os.makedirs(out_dir, exist_ok=True)
 
     # check master hmm file. Will be downloaded if not exists.
-    if master_hmm_file is None:
-        master_hmm_url = config.URLS["hmm"]
-        master_hmm_basename = os.path.basename(master_hmm_url)  # TIGRFAMs_15.0_HMM.LIB.gz
-        master_hmm_file = os.path.join(out_dir, master_hmm_basename)
-        if not os.path.exists(master_hmm_file):
-            logger.warn("%s does not exist in DQC_REFERENCE_DIR. Will try to download.", master_hmm_basename)
-            download_file(master_hmm_url, out_dir)
+    master_hmm_url = config.URLS["hmm"]
+    master_hmm_basename = os.path.basename(master_hmm_url)  # TIGRFAMs_15.0_HMM.LIB.gz
+    master_hmm_file = os.path.join(ref_dir, master_hmm_basename)
+    if not os.path.exists(master_hmm_file):
+        logger.warn("%s does not exist in DQC_REFERENCE_DIR. Will try to download.", master_hmm_basename)
+        download_file(master_hmm_url, ref_dir)
 
-    output_hmm_file = os.path.join(out_dir, reference_marker_hmm_base)
-    logger.info("Will create '%s' in %s", reference_marker_hmm_base, out_dir)
+    logger.info("Will create '%s' in %s", reference_marker_hmm_base, ref_dir)
     logger.info("Target HMMs: %s", target_hmms)
-    extract_target_hmms(master_hmm_file, output_hmm_file, target_hmms)
+    extract_target_hmms(master_hmm_file, reference_marker_hmm, target_hmms)
     logger.info("===== Completed preparing reference profile HMM =====")

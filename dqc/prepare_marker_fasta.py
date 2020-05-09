@@ -5,7 +5,7 @@ import subprocess
 from argparse import ArgumentError, ArgumentParser
 from logging import StreamHandler, Formatter, INFO, DEBUG, getLogger
 from Bio import SeqIO
-from .common import get_logger, run_command
+from .common import get_logger, run_command, get_ref_path
 from .config import config
 
 logger = get_logger(__name__)
@@ -83,7 +83,7 @@ def main(input_file, out_dir, prefix=None):
     input_file_abs = os.path.abspath(input_file)
     cds_fasta = os.path.join(out_dir, config.PRODIGAL_CDS_FASTA)
     protein_fasta = os.path.join(out_dir, config.PRODIGAL_PROTEIN_FASTA)
-    reference_marker_hmm = config.REFERENCE_MARKERS_HMM
+    reference_marker_hmm = get_ref_path(config.REFERENCE_MARKERS_HMM)
     hmm_result_file = os.path.join(out_dir, config.HMMER_RESULT)
     out_query_marker_fasta = os.path.join(out_dir, config.QUERY_MARKERS_FASTA)
     out_summary_file = os.path.join(out_dir, config.MARKER_SUMMARY_FILE)

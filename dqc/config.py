@@ -17,15 +17,15 @@ class DefaultConfig:
     
     # Reference data
     DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference")
-    REFERENCE_GENOME_DIR = os.path.join(DQC_REFERENCE_DIR, "genomes")
-    REFERENCE_MARKER_DIR = os.path.join(DQC_REFERENCE_DIR, "markers")
-    SQLITE_REFERENCE_DB = os.path.join(DQC_REFERENCE_DIR, "references.db")
-    REFERENCE_MARKERS_HMM = os.path.join(DQC_REFERENCE_DIR, "reference_markers.hmm")
-    REFERENCE_MARKERS_FASTA = os.path.join(DQC_REFERENCE_DIR, "reference_markers.fasta")
-    REFERENCE_SUMMARY_TSV = os.path.join(DQC_REFERENCE_DIR, "reference_summary.tsv")
-    ASSEMBLY_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "assembly_summary_genbank.txt") 
-    ANI_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "ANI_report_prokaryotes.txt") 
-    TYPE_STRAIN_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "prokaryote_type_strain_report.txt") 
+    REFERENCE_GENOME_DIR = "genomes"
+    REFERENCE_MARKER_DIR = "markers"
+    SQLITE_REFERENCE_DB = "references.db"
+    REFERENCE_MARKERS_HMM = "reference_markers.hmm"
+    REFERENCE_MARKERS_FASTA = "reference_markers.fasta"
+    REFERENCE_SUMMARY_TSV = "reference_summary.tsv"
+    ASSEMBLY_REPORT_FILE = "assembly_summary_genbank.txt"
+    ANI_REPORT_FILE = "ANI_report_prokaryotes.txt"
+    TYPE_STRAIN_REPORT_FILE = "prokaryote_type_strain_report.txt"
     CHECKM_DATA_ROOT = "checkm_data"
     REFERENCE_MARKERS = {
         "TIGR00665": ("dnaB", "replicative DNA helicase"),
@@ -41,7 +41,7 @@ class DefaultConfig:
     HMMER_RESULT = "hmmer_result.tsv"
     HMMER_OPTIONS = "-E 1E-5"
     MARKER_SUMMARY_FILE = "marker.summary.tsv"
-    QUERY_MARKERS_FASTA = "query_markers.fasta"
+    QUERY_MARKERS_FASTA = "markers.fasta"
 
     # output file names and options for select_target_genomes
     BLAST_RESULT = "blast.markers.tsv"
@@ -77,19 +77,9 @@ class DevelopmentConfig(DefaultConfig):
     FORCE = True
     # LOG_FILE = None
 
-    DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-
     # Reference data
-    DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference")
-    REFERENCE_GENOME_DIR = os.path.join(DQC_REFERENCE_DIR, "genomes")
-    REFERENCE_MARKER_DIR = os.path.join(DQC_REFERENCE_DIR, "markers")
-    SQLITE_REFERENCE_DB = os.path.join(DQC_REFERENCE_DIR, "references.db")
-    REFERENCE_MARKERS_HMM = os.path.join(DQC_REFERENCE_DIR, "reference_markers.hmm")
-    REFERENCE_MARKERS_FASTA = os.path.join(DQC_REFERENCE_DIR, "reference_markers.fasta")
-    REFERENCE_SUMMARY_TSV = os.path.join(DQC_REFERENCE_DIR, "reference_summary.tsv")
-    ASSEMBLY_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "assembly_summary_genbank.txt") 
-    ANI_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "ANI_report_prokaryotes.txt") 
-    TYPE_STRAIN_REPORT_FILE = os.path.join(DQC_REFERENCE_DIR, "prokaryote_type_strain_report.txt") 
+    DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
+    DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference_dev2")
 
 
 DQC_ENV = os.environ.get("DQC_ENV", "default")

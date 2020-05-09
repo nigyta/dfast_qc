@@ -1,8 +1,9 @@
 import argparse
 from peewee import Model, CharField, IntegerField, BooleanField, SqliteDatabase
+from .common import get_ref_path
 from .config import config
 
-sqlite_db_path = config.SQLITE_REFERENCE_DB
+sqlite_db_path = get_ref_path(config.SQLITE_REFERENCE_DB)
 db = SqliteDatabase(sqlite_db_path)
 
 class Reference(Model):

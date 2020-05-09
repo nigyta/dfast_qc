@@ -19,10 +19,10 @@ def download_file(url, out_dir):
     logger.info("Downloaded %s", base_name)
 
 
-def download_master_files(target_files, out_dir=None, threads=1):
+def download_master_files(target_files):
     
-    if out_dir is None:
-        out_dir = config.DQC_REFERENCE_DIR
+    out_dir = config.DQC_REFERENCE_DIR
+    threads = config.NUM_THREADS
 
     logger.info("===== Download master files =====")
     logger.info("Files will be downloaded to %s", out_dir)

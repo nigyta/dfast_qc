@@ -100,3 +100,6 @@ def is_empty_file(file_name):
             return True
         else:
             return False
+
+def get_ref_path(base_name):
+    return os.path.join(config.DQC_REFERENCE_DIR, base_name)

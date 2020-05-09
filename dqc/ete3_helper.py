@@ -1,14 +1,15 @@
 import os
 from ete3 import NCBITaxa
 from .config import config
-from .common import get_logger
+from .common import get_logger, get_ref_path
 
 logger = get_logger(__name__)
 
 
-ete3_db_file = os.path.join(config.DQC_REFERENCE_DIR, config.ETE3_SQLITE_DB)
-# if not os.path.exists(ete3_db_file):
-#     open(ete3_db_file, "w")  # create an empty file if not exists
+ete3_db_file = get_ref_path(config.ETE3_SQLITE_DB)
+if not os.path.exists(ete3_db_file):
+    logger.error("ETE3 DB file does not exist. Run 'dqc_admin_tools.py update_taxdump' to create it.")
+    exit()
 
 ncbi_taxonomy = NCBITaxa(dbfile=ete3_db_file)
 

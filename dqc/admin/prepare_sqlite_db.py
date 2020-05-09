@@ -1,7 +1,7 @@
 import os
-from ..common import get_logger
+from ..common import get_logger, get_ref_path
 from ..config import config
-from ..models import Reference, init_db
+from ..models import Reference, init_db, db
 from .asm_report_parser import Assembly
 from .ani_report_parser import get_filtered_ANI_report
 logger = get_logger(__name__)
@@ -24,26 +24,25 @@ def clean_organism_name(asm_rep, ani_rep):
             organism_name = organism_name.replace("strain", "").strip(" =")
     return organism_name, infraspecific_name, is_filtered, is_valid
 
-def prepare_sqlite_db(asm_report=None, ani_report=None, type_strain_report=None, out_dir=None):
+def prepare_sqlite_db():
     logger.info("===== Prepare SQLite DB file (references.db) =====")
-    if asm_report is None:
-        asm_report = config.ASSEMBLY_REPORT_FILE
-    if ani_report is None:
-        ani_report = config.ANI_REPORT_FILE
-    if type_strain_report is None:
-        type_strain_report = config.TYPE_STRAIN_REPORT_FILE
-    if out_dir is None:
-        out_dir = config.DQC_REFERENCE_DIR
-    logger.debug("%s\t%s\t%s\t%s", asm_report, ani_report, type_strain_report, out_dir)
+
+    asm_report = get_ref_path(config.ASSEMBLY_REPORT_FILE)
+    ani_report = get_ref_path(config.ANI_REPORT_FILE)
+    type_strain_report = get_ref_path(config.TYPE_STRAIN_REPORT_FILE)
+
+
+    logger.debug("%s\t%s\t%s", asm_report, ani_report, type_strain_report)
 
     # check output file (delete and regenerate)
-    output_sqlitedb_file = os.path.join(out_dir, os.path.basename(config.SQLITE_REFERENCE_DB))
+    output_sqlitedb_file = get_ref_path(config.SQLITE_REFERENCE_DB)
     if os.path.exists(output_sqlitedb_file):
-        os.remove(output_sqlitedb_file)
-        logger.warning("Removed existing DB file [%s]", output_sqlitedb_file)
-
-    init_db()
-    logger.info("SQLite DB will be created in %s", output_sqlitedb_file)
+        Reference.drop_table()
+        db.create_tables([Reference])
+        logger.warning("Dropped and re-created 'Reference' table. [%s]", output_sqlitedb_file)
+    else:
+        init_db()
+        logger.info("New SQLite DB is created. [%s]", output_sqlitedb_file)
 
     target_reports = get_filtered_ANI_report(ani_report)
     cnt = 0

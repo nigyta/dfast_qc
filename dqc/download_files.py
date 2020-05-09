@@ -3,7 +3,7 @@ from ftplib import FTP
 from ftplib import all_errors as FTP_all_errors
 from concurrent.futures import ThreadPoolExecutor
 from more_itertools import distribute
-from .common import get_logger
+from .common import get_logger, get_ref_path
 from .config import config
 
 logger = get_logger(__name__)
@@ -38,7 +38,7 @@ def download_genomes_from_assembly(accessions, out_dir=None):
     ncbi_ftp_server = config.NCBI_FTP_SERVER
     logger.debug("Logging in to the FTP server. [%s]", ncbi_ftp_server)
     if out_dir is None:
-        out_dir = config.REFERENCE_GENOME_DIR
+        out_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
     logger.debug("Files will be downloaded to %s", out_dir)
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)

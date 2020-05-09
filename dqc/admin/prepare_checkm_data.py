@@ -1,6 +1,6 @@
 import os
 import shutil
-from ..common import get_logger, run_command
+from ..common import get_logger, run_command, get_ref_path
 from ..config import config
 from .download_master_files import download_file
 
@@ -41,9 +41,8 @@ def set_root(data_root):
     run_command(cmd)
     logger.info("Data root is set to %s", data_root)
     
-def main(out_dir=None, delete_existing_data=False):
-    if out_dir is None:
-        out_dir = config.DQC_REFERENCE_DIR
+def main(delete_existing_data=False):
+    out_dir = config.DQC_REFERENCE_DIR
     logger.info("===== Prepare CheckM data root =====")
 
     checkm_data_tarfile = download_checkm_data_if_not_exist(out_dir, delete_existing_data=delete_existing_data)

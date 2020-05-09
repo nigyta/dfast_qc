@@ -9,10 +9,10 @@ from .download_master_files import download_file
 
 logger = get_logger(__name__)
 
-def init_ete3_db():
-    ref_dir = config.DQC_REFERENCE_DIR
-    ncbi_taxdump_file = download_taxdump(out_dir)
-    update_ete3_db(ref_dir, ncbi_taxdump_file)
+# def init_ete3_db():
+#     ref_dir = config.DQC_REFERENCE_DIR
+#     ncbi_taxdump_file = download_taxdump(out_dir)
+#     update_ete3_db(ref_dir, ncbi_taxdump_file)
 
 def download_taxdump(out_dir):
     ncbi_taxdump_url = config.URLS["taxdump"]
@@ -74,9 +74,8 @@ def update_taxon_table_for_checkM():
                 taxids.append(taxid)
     logger.info("Inserted %d records.", len(taxids))
 
-def main(out_dir=None):
-    if out_dir is None:
-        out_dir = config.DQC_REFERENCE_DIR
+def main():
+    out_dir = config.DQC_REFERENCE_DIR
     logger.info("===== Update NCBI taxdump =====")
     ncbi_taxdump_file = download_taxdump(out_dir)
     update_ete3_db(out_dir, ncbi_taxdump_file)
