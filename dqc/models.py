@@ -22,8 +22,8 @@ class Reference(Model):
     def __str__(self):
         return f"<{self.accession} {self.organism_name} {self.infraspecific_name}, {self.relation_to_type_material}, {'validated' if self.is_valid else '-'}>"
 
-class Taxon(Model):
-    taxid = IntegerField(primary_key=True)
+class Taxon(Model):  # for checkm reference data
+    taxid = IntegerField(index=True)
     rank = CharField()
     taxon = IntegerField()
     genomes = IntegerField()

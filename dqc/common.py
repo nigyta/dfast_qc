@@ -58,11 +58,11 @@ def prepare_output_directory():
             config.BLAST_RESULT,
             config.TARGET_GENOME_LIST,
             config.FASTANI_RESULT,
-            config.DQC_RESULT,
+            config.TC_RESULT,
+            config.CC_RESULT,
             config.DQC_RESULT_JSON,
             config.LOG_FILE,
-            config.CC_RESULT,
-            config.CC_RESULT_JSON
+            "checkm.log",
         ]
         for file_name in result_file_names:
             file_path = os.path.join(config.OUT_DIR, file_name)

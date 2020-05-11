@@ -1,6 +1,6 @@
 import sys
 import os
-from .common import get_logger, run_command
+from .common import get_logger, run_command, get_ref_path
 from argparse import ArgumentError, ArgumentParser
 from logging import StreamHandler, Formatter, INFO, DEBUG, getLogger
 
@@ -20,7 +20,7 @@ def check_blast_db(db_path):
             run_command(cmd, "makeblastdb", shell=True)
 
 def run_blastn(input_file, output_file):
-    db_file = config.REFERENCE_MARKERS_FASTA
+    db_file = get_ref_path(config.REFERENCE_MARKERS_FASTA)
     blast_options = config.BLAST_OPTIONS
     check_blast_db(db_file)
     cmd = ["blastn", "-query", input_file, "-db", db_file, "-out", output_file, blast_options]
@@ -30,11 +30,12 @@ def run_blastn(input_file, output_file):
 def print_selected_genomes(str_result):
     logger.debug("\n%s\n%s%s", "-"*80, str_result, "-"*80)
 
+
 def main(query_markers_fasta, out_dir):
     """
     Search query_markers_fasta against reference_markers_fasta to select target genomes.
     """
-    genome_dir = os.path.join(config.DQC_REFERENCE_DIR, "genomes")
+    genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
     blast_result_file = os.path.join(out_dir, config.BLAST_RESULT)
     target_genome_list_file = os.path.join(out_dir, config.TARGET_GENOME_LIST)
 

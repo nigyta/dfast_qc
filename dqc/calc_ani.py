@@ -1,6 +1,5 @@
 import sys
 import os
-import json
 from .common import get_logger, run_command
 from argparse import ArgumentError, ArgumentParser
 from .models import Reference
@@ -35,7 +34,7 @@ def run_fastani(input_file, reference_list_file, output_file):
 def add_organism_info_to_fastani_result(fastani_result_file, output_file):
     # parse fastANI result and add organism info
     # also, result dict will be generated
-    header = ["organism_name", "strain", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "matched_fragments", "total_fragments"]
+    header = ["organism_name", "strain", "accession", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "matched_fragments", "total_fragments"]
     ret = "\t".join(header) + "\n"
     hit_cnt, hit_cnt_above_cutoff = 0, 0
     tc_result = []
@@ -53,7 +52,7 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
         hit_cnt += 1
         if ani_value > ani_cutoff:
             hit_cnt_above_cutoff += 1
-        result_row = [organism_name, strain, taxid, species_taxid, relation_to_type_material, validated, ani_value, matched_frag, total_frag]
+        result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, matched_frag, total_frag]
         ret += "\t".join(map(str, result_row)) + "\n"
         ret_dict = {key: value for key, value in zip(header, result_row)}
         tc_result.append(ret_dict)
@@ -66,17 +65,13 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
 
 def main(query_fasta, reference_list, out_dir):
     fastani_result_file = os.path.join(out_dir, config.FASTANI_RESULT)
-    dqc_result_file = os.path.join(out_dir, config.DQC_RESULT)
-    dqc_result_file_json = os.path.join(out_dir, config.DQC_RESULT_JSON)
+    dqc_result_file = os.path.join(out_dir, config.TC_RESULT)
 
     check_fasta_existence(reference_list)
     run_fastani(query_fasta, reference_list, fastani_result_file)
     tc_result = add_organism_info_to_fastani_result(fastani_result_file, dqc_result_file)
     if not config.DEBUG:
         os.remove(fastani_result_file)
-    with open(dqc_result_file_json, "w") as f:
-        json.dump(tc_result, f, indent=4)
-    logger.info("DFAST Taxonomy check result json was written to %s", dqc_result_file_json)
     return tc_result
 
 if __name__ == '__main__':

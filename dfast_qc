@@ -2,6 +2,7 @@
 
 import os
 import sys
+import json
 from datetime import datetime
 from argparse import ArgumentParser
 
@@ -33,6 +34,13 @@ def parse_args():
         help="NCBI taxid for completeness check. Use '--show_taxon' for available taxids. (Default: Automatically inferred from taxonomy check)",
         metavar="INT"
     )
+    parser.add_argument(
+        "-r",
+        "--ref_dir",
+        default=None,
+        type=str,
+        metavar="PATH",
+        help="DQC reference directory (default: DQC_REFERENCE_DIR)")
     parser.add_argument(
         "-p",
         "--prefix",
@@ -83,6 +91,9 @@ def parse_args():
 
 
 args = parse_args()
+
+if args.ref_dir:
+    config.DQC_REFERENCE_DIR = args.ref_dir
 
 if args.show_taxon:
     from dqc.checkm_helper import show_taxon
@@ -142,9 +153,21 @@ if not config.DISABLE_TC:
         else:
             logger.warning("Failed to determine species. Taxid 0 (Prokaryote) is set for CheckM.")
             config.CHECKM_TAXID = 0
+else:
+    tc_result = []
 
 if not config.DISABLE_CC:
     cc_result = completeness_check.run()
+else:
+    cc_result = {}
+
+dqc_result = {"tc_result": tc_result, "cc_result": cc_result}
+dqc_result_file_json = os.path.join(config.OUT_DIR, config.DQC_RESULT_JSON)
+logger.debug("DQC result json %s\n%s\n%s", "-"*80, json.dumps(dqc_result, indent=4), "-"*80)
+with open(dqc_result_file_json, "w") as f:
+    json.dump(dqc_result, f, indent=4)
+logger.info("DFAST_QC result json was written to %s", dqc_result_file_json)
+
 
 end_time = datetime.now()
 running_time = end_time - start_time

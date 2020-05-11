@@ -11,6 +11,12 @@ from .config import config
 logger = get_logger(__name__)
 
 
+def delete_unwanted_files(checkm_input_dir, checkm_result_dir):
+    logger.debug("Delete temprorary files for CheckM [%s, %s]", checkm_input_dir, checkm_result_dir)
+    shutil.rmtree(checkm_input_dir)
+    shutil.rmtree(checkm_result_dir)
+
+
 def prepare_checkm_genome(input_file, checkm_input_dir):
     os.makedirs(checkm_input_dir, exist_ok=True)
     checkm_input_file = os.path.join(checkm_input_dir, "query.fna")
@@ -59,13 +65,12 @@ def run():
     checkm_input_dir = os.path.join(out_dir, config.CHECKM_INPUT_DIR)
     checkm_result_dir = os.path.join(out_dir, config.CHECKM_RESULT_DIR)
     checkm_result_file = os.path.join(out_dir, config.CC_RESULT)
-    checkm_result_json = os.path.join(out_dir, config.CC_RESULT_JSON)
 
     logger.info("===== Start completeness check using CheckM =====")
     checkm_rank, checkm_taxon = get_checkm_taxon(checkm_taxid)
     prepare_checkm_genome(input_file, checkm_input_dir)
     cmd = [
-        "checkm", "taxonomy_wf", "--tab_table", "-f", checkm_result_file,
+        "checkm", "taxonomy_wf", "--tab_table", "-f", checkm_result_file, "-t", str(config.NUM_THREADS),
         checkm_rank, f'"{checkm_taxon}"', checkm_input_dir, checkm_result_dir
     ]
     run_command(cmd, task_name="CheckM")
@@ -79,5 +84,11 @@ def run():
         "contamination": contamination,
         "strain_heterogeneity": heterogeneity
     }
+
+    shutil.copy(os.path.join(checkm_result_dir, "checkm.log"), out_dir)
+    if not config.DEBUG:
+        # delete unwanted files
+        delete_unwanted_files(checkm_input_dir, checkm_result_dir)
+
     logger.info("===== Completeness check finished =====")
     return cc_result

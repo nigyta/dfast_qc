@@ -30,9 +30,11 @@ class DefaultConfig:
     REFERENCE_MARKERS = {
         "TIGR00665": ("dnaB", "replicative DNA helicase"),
         "TIGR00717": ("rpsA", "ribosomal protein bS1"),
-        "TIGR02393": ("rpoD", "RNA polymerase sigma factor RpoD"),
+        # "TIGR02393": ("rpoD", "RNA polymerase sigma factor RpoD"),
         "TIGR02012": ("recA", "protein RecA"),
-        "TIGR01063": ("gyrA", "DNA gyrase, A subunit")
+        "TIGR01063": ("gyrA", "DNA gyrase, A subunit"),
+        "TIGR00468": ("pheS", "phenylalanine--tRNA ligase, alpha subunit"),
+        "TIGR00755": ("ksgA", "ribosomal RNA small subunit methyltransferase A"),
     }
 
     # output file names and options for prepare_marker_fasta
@@ -50,14 +52,15 @@ class DefaultConfig:
 
     # output file names and options for calc_ANI
     FASTANI_RESULT = "fastani_result.tsv"
-    DQC_RESULT = "tc_result.tsv"
-    DQC_RESULT_JSON = "tc_result.json"
+    TC_RESULT = "tc_result.tsv"
 
     # output file names and options for completeness check (CheckM)
     CHECKM_INPUT_DIR = "checkm_input"
     CHECKM_RESULT_DIR = "checkm_result"
     CC_RESULT = "cc_result.tsv"
-    CC_RESULT_JSON = "cc_result.json"
+
+    # DQC result json
+    DQC_RESULT_JSON = "dqc_result.json"
 
     # admin settings
     NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov"
@@ -73,20 +76,19 @@ class DefaultConfig:
     ADMIN = False
 
 class DevelopmentConfig(DefaultConfig):
-    # DEBUG = True
+    DEBUG = False
     FORCE = True
     # LOG_FILE = None
 
     # Reference data
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-    DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference_dev2")
+    DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference")
+
 
 
 DQC_ENV = os.environ.get("DQC_ENV", "default")
-
 configs = {
     "default": DefaultConfig,
     "development": DevelopmentConfig,
 }
-
 config = configs[DQC_ENV]
