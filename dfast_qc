@@ -136,13 +136,12 @@ from dqc.common import get_logger, prepare_output_directory
 
 prepare_output_directory()
 logger = get_logger(__name__)
+start_time = datetime.now()
+logger.info("DFAST_QC pipeline started.")
+logger.info("DQC Reference Directory: %s", config.DQC_REFERENCE_DIR)
 
 from dqc import taxonomy_check, completeness_check
 
-
-
-start_time = datetime.now()
-logger.info("DFAST_QC pipeline started.")
 
 if not config.DISABLE_TC:
     tc_result = taxonomy_check.run() # tc_result is a list containing dictionaries of fastANI result
