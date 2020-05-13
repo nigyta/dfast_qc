@@ -84,11 +84,15 @@ class DevelopmentConfig(DefaultConfig):
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
     DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference")
 
+class DockerConfig(DefaultConfig):
+    DQC_REFERENCE_DIR = os.path.join("/dqc_reference")
+
 
 
 DQC_ENV = os.environ.get("DQC_ENV", "default")
 configs = {
     "default": DefaultConfig,
     "development": DevelopmentConfig,
+    "docker": DockerConfig,
 }
 config = configs[DQC_ENV]

@@ -135,9 +135,10 @@ if config.DISABLE_TC and config.CHECKM_TAXID is None:
 from dqc.common import get_logger, prepare_output_directory
 from dqc import taxonomy_check, completeness_check
 
+prepare_output_directory()
+
 logger = get_logger(__name__)
 
-prepare_output_directory()
 
 start_time = datetime.now()
 logger.info("DFAST_QC pipeline started.")

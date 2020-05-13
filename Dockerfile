@@ -1,0 +1,5 @@
+FROM continuumio/miniconda3:4.8.2 
+
+# 環境変数の設定
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
