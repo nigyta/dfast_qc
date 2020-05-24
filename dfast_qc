@@ -5,12 +5,12 @@ import sys
 import json
 from datetime import datetime
 from argparse import ArgumentParser
-
+from dqc import dqc_version
 from dqc.config import config
 
 def parse_args():
-    parser = ArgumentParser(description="DFAST_QC: Taxonomy and completeness check")
-
+    parser = ArgumentParser(description=f"DFAST_QC: Taxonomy and completeness check (ver. {dqc_version})")
+    parser.add_argument('--version', version=f'DFAST_QC ver. {dqc_version}', action='version', help="Show program version", default=False)
     parser.add_argument(
         "-i",
         "--input_fasta",
@@ -138,6 +138,7 @@ prepare_output_directory()
 logger = get_logger(__name__)
 start_time = datetime.now()
 logger.info("DFAST_QC pipeline started.")
+logger.info("DFAST_QC version: %s", dqc_version)
 logger.info("DQC Reference Directory: %s", config.DQC_REFERENCE_DIR)
 
 from dqc import taxonomy_check, completeness_check

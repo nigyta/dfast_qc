@@ -57,12 +57,15 @@ def get_valid_name(taxid):
         ==> Lactobacillus delbrueckii subsp. jakobsenii
     """
     for _tid in get_ascendants(taxid):
-        if get_rank(_tid) == "no rank":
+        rank = get_rank(_tid)
+        if rank == "no rank":
             continue
         else:
-            return get_name(_tid)
+            if not (rank == "species" or rank == "subspecies"):
+                logger.warning("'%s' (taxid: %s) may not be a valid species or subspecies name.", get_name(_tid), str(_tid))
+            return _tid, get_name(_tid)
     else:
-        return None
+        return None, None
 
 def get_names(taxid_list):  # only used for debugging
     if len(taxid_list) == 1 and taxid_list[0] == 0:

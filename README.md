@@ -1,13 +1,13 @@
-# DFAST_qc: DFAST Qauality Control
+# DFAST_QC: DFAST Qauality Control
 
-DFAST_qc conducts taxonomy and completeness check of the assembled genome.  
+DFAST_QC conducts taxonomy and completeness check of the assembled genome.  
 
 - Taxonomy check  
-DFAST_qc evaluates taxonomic identity of the genome by querying against 13,000 reference genomes from type strains. To shorten the runtime, it first inspects  universally-conserved housekeeping genes, such as _dnaB_ and _rpsA_ in the query genome, and they are searched against refernce nucleotide databases to narrow down the number of reference genomes used in the downstream process. Then, average nucleotide identity is calculated against the selected reference genomes.  
-DFAST_qc uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
+DFAST_QC evaluates taxonomic identity of the genome by querying against 13,000 reference genomes from type strains. To shorten the runtime, it first inspects  universally-conserved housekeeping genes, such as _dnaB_ and _rpsA_ in the query genome, and they are searched against refernce nucleotide databases to narrow down the number of reference genomes used in the downstream process. Then, average nucleotide identity is calculated against the selected reference genomes.  
+DFAST_QC uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
 
 - Completeness check  
-DFAST_qc employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_qc automatically determines the reference marker set for CheckM based on the result of taxonomy check. Alternatively, users can arbitrarily specify the marker set.
+DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Alternatively, users can arbitrarily specify the marker set.
 
 ## Installation
 1. Source code
@@ -21,7 +21,7 @@ DFAST_qc employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calcula
     ```
 
 ## Initial set up
-Reference data of DFAST_qc is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_qc is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
+Reference data of DFAST_QC is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_QC is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
 In general, you do not need to change this, but you can specify it in the config file or by using `-r` option.
 
 To prepare reference data, reference data must be prepared as following. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
@@ -113,10 +113,10 @@ optional arguments:
   --show_taxon          Show available taxa for competeness check
   ```
 
-# Example of Result
+## Example of Result
 - `tc_result.tsv`: Taxonomy check result
 - `cc_result.tsv`: Completeness check result
-- `dqc_result.json`: DFAST_qc result in a json format as show below:
+- `dqc_result.json`: DFAST_QC result in a json format as show below:
     ```
     {
         "tc_result": [
@@ -148,3 +148,10 @@ optional arguments:
         }
     }
     ```
+
+## Run in Docker
+
+The example below shows how to invoke DFAST_QC with an input FASTA file (genome.fa) in the current directory.
+```
+docker run -it --rm --name dqc -v /path/to/dqc_reference:/dqc_reference -v $PWD:$PWD nigyta/dfast_qc dfast_qc -i $PWD/genome.fa -o $PWD/dfastqc_out
+```

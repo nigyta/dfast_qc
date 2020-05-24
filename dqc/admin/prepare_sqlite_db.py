@@ -12,9 +12,9 @@ def clean_organism_name(asm_rep):
     organism_name_org = asm_rep.organism_name
     infraspecific_name = asm_rep.infraspecific_name
     taxid = asm_rep.taxid
-    organism_name = get_valid_name(taxid)
+    valid_taxid, organism_name = get_valid_name(taxid)
     # logger.debug("%s ==> %s", organism_name_org, organism_name)
-    return organism_name_org, organism_name, infraspecific_name
+    return valid_taxid, organism_name_org, organism_name, infraspecific_name
 
 # def clean_organism_name(asm_rep, ani_rep):
 
@@ -60,7 +60,7 @@ def prepare_sqlite_db():
         if asm_rep.assembly_accession in target_reports:
             ani_rep = target_reports[asm_rep.assembly_accession]
             # organism_name, infraspecific_name, is_filtered, is_valid = clean_organism_name(asm_rep, ani_rep)
-            organism_name_org, organism_name, infraspecific_name = clean_organism_name(asm_rep)
+            valid_taxid, organism_name_org, organism_name, infraspecific_name = clean_organism_name(asm_rep)
             if organism_name is None:
                 logger.debug("Could not determine valid organism name for %s", organism_name_org)
                 organism_name = organism_name_org
@@ -68,7 +68,7 @@ def prepare_sqlite_db():
             cnt += 1
             Reference.create(
                 accession=asm_rep.assembly_accession,
-                taxid=ani_rep.taxid,
+                taxid=valid_taxid,
                 species_taxid=ani_rep.species_taxid,
                 organism_name=organism_name,
                 species_name=ani_rep.species_name,

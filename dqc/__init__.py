@@ -1,3 +1,1 @@
-# from . import models
-# from . import common
-# from . import find_candidates_by_blast
+dqc_version = "0.2.1"
