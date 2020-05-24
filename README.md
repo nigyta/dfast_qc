@@ -7,7 +7,7 @@ DFAST_qc evaluates taxonomic identity of the genome by querying against 13,000 r
 DFAST_qc uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
 
 - Completeness check  
-DFAST_qc employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_qc automatically determines the reference marker set for CheckM based on the result of taxonomy check. Alternatively, users can arbitrarily specify thr marker set.
+DFAST_qc employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_qc automatically determines the reference marker set for CheckM based on the result of taxonomy check. Alternatively, users can arbitrarily specify the marker set.
 
 ## Installation
 1. Source code
@@ -20,11 +20,12 @@ DFAST_qc employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calcula
     $ pip install -r requirements.txt
     ```
 
-## Initial setup
+## Initial set up
 Reference data of DFAST_qc is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_qc is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
 In general, you do not need to change this, but you can specify it in the config file or by using `-r` option.
 
-To prepare reference data, reference data must be prepared as following:  
+To prepare reference data, reference data must be prepared as following. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
+  
 
 1. Download master files  
     ```
@@ -67,3 +68,83 @@ To prepare reference data, reference data must be prepared as following:
     $ dqc_admin_tools.py update_checkm_db
     ```
     Will insert auxiliary data for CheckM into `DQC_REFERENCE/references.db`
+
+
+Once, reference data has been prepared, it can be updated by running command:
+```
+$ dqc_admin_tools.py update_all
+```
+
+## Usage
+- Minimum  
+    ```
+    $ dfast_qc -i /path/to/input_genome.fasta
+    ```
+- Basic  
+    ```
+    $ dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --num_threads 2
+    ```
+
+```
+usage: dfast_qc [-h] [-i PATH] [-o PATH] [-t INT] [-r PATH] [-p STR] [-n INT]
+                [--disable_tc | --disable_cc] [--force] [--debug]
+                [--show_taxon]
+
+DFAST_QC: Taxonomy and completeness check
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i PATH, --input_fasta PATH
+                        Input FASTA file (raw or gzipped) [required]
+  -o PATH, --out_dir PATH
+                        Output directory (default: OUT)
+  -t INT, --taxid INT   NCBI taxid for completeness check. Use '--show_taxon'
+                        for available taxids. (Default: Automatically inferred
+                        from taxonomy check)
+  -r PATH, --ref_dir PATH
+                        DQC reference directory (default: DQC_REFERENCE_DIR)
+  -p STR, --prefix STR  Prefix for output (for debugging use, default: None)
+  -n INT, --num_threads INT
+                        Number of threads for parallel processing (default: 1)
+  --disable_tc          Disable taxonomy check using ANI
+  --disable_cc          Disable completeness check using CheckM
+  --force               Force overwriting result
+  --debug               Debug mode
+  --show_taxon          Show available taxa for competeness check
+  ```
+
+# Example of Result
+- `tc_result.tsv`: Taxonomy check result
+- `cc_result.tsv`: Completeness check result
+- `dqc_result.json`: DFAST_qc result in a json format as show below:
+    ```
+    {
+        "tc_result": [
+            {
+                "organism_name": "Lactobacillus parakefiri",
+                "strain": "strain=JCM 8573",
+                "accession": "GCA_002157585.1",
+                "taxid": 152332,
+                "species_taxid": 152332,
+                "relation_to_type": "type",
+                "validated": true,
+                "ani": 99.9803,
+                "matched_fragments": 770,
+                "total_fragments": 778
+            },
+            {
+                "organism_name": "Lactobacillus parakefiri",
+                "strain": "strain=DSM 10551",
+                "accession": "GCA_004354625.1",
+                ...
+                "matched_fragments": 172,
+                "total_fragments": 778
+            }
+        ],
+        "cc_result": {
+            "completeness": 98.71,
+            "contamination": 0.81,
+            "strain_heterogeneity": 0.0
+        }
+    }
+    ```
