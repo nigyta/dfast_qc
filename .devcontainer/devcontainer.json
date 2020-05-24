@@ -1,0 +1,9 @@
+{
+	"dockerComposeFile": "docker-compose.yml",
+
+	"service": "dqc",
+
+	"workspaceFolder": "/dfast_qc",
+
+	"extensions": []
+}

@@ -4,25 +4,35 @@ from ..config import config
 from ..models import Reference, init_db, db
 from .asm_report_parser import Assembly
 from .ani_report_parser import get_filtered_ANI_report
+from ..ete3_helper import get_valid_name
+
 logger = get_logger(__name__)
 
-def clean_organism_name(asm_rep, ani_rep):
-
-    is_filtered, is_valid = ani_rep.validate()
-    organism_name = asm_rep.organism_name
+def clean_organism_name(asm_rep):
+    organism_name_org = asm_rep.organism_name
     infraspecific_name = asm_rep.infraspecific_name
-    infraspecific_name = infraspecific_name.replace("strain=", "").strip()
-    if ";" in infraspecific_name:
-        infraspecific_name = infraspecific_name.split(";")[0].strip()
-    if "=" in organism_name:
-        organism_name = organism_name.split("=")[0].strip()
-    if organism_name.endswith(infraspecific_name):
-        organism_name = organism_name.replace(infraspecific_name, "").strip(" =")
-        if organism_name.endswith("str."):
-            organism_name = organism_name.replace("str.", "").strip(" =")
-        elif organism_name.endswith("strain"):
-            organism_name = organism_name.replace("strain", "").strip(" =")
-    return organism_name, infraspecific_name, is_filtered, is_valid
+    taxid = asm_rep.taxid
+    organism_name = get_valid_name(taxid)
+    # logger.debug("%s ==> %s", organism_name_org, organism_name)
+    return organism_name_org, organism_name, infraspecific_name
+
+# def clean_organism_name(asm_rep, ani_rep):
+
+#     is_filtered, is_valid = ani_rep.validate()
+#     organism_name = asm_rep.organism_name
+#     infraspecific_name = asm_rep.infraspecific_name
+#     infraspecific_name = infraspecific_name.replace("strain=", "").strip()
+#     if ";" in infraspecific_name:
+#         infraspecific_name = infraspecific_name.split(";")[0].strip()
+#     if "=" in organism_name:
+#         organism_name = organism_name.split("=")[0].strip()
+#     if organism_name.endswith(infraspecific_name):
+#         organism_name = organism_name.replace(infraspecific_name, "").strip(" =")
+#         if organism_name.endswith("str."):
+#             organism_name = organism_name.replace("str.", "").strip(" =")
+#         elif organism_name.endswith("strain"):
+#             organism_name = organism_name.replace("strain", "").strip(" =")
+#     return organism_name, infraspecific_name, is_filtered, is_valid
 
 def prepare_sqlite_db():
     logger.info("===== Prepare SQLite DB file (references.db) =====")
@@ -49,7 +59,12 @@ def prepare_sqlite_db():
     for asm_rep in Assembly.parse(asm_report):
         if asm_rep.assembly_accession in target_reports:
             ani_rep = target_reports[asm_rep.assembly_accession]
-            organism_name, infraspecific_name, is_filtered, is_valid = clean_organism_name(asm_rep, ani_rep)
+            # organism_name, infraspecific_name, is_filtered, is_valid = clean_organism_name(asm_rep, ani_rep)
+            organism_name_org, organism_name, infraspecific_name = clean_organism_name(asm_rep)
+            if organism_name is None:
+                logger.debug("Could not determine valid organism name for %s", organism_name_org)
+                organism_name = organism_name_org
+            is_filtered, is_valid = ani_rep.validate()
             cnt += 1
             Reference.create(
                 accession=asm_rep.assembly_accession,

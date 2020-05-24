@@ -18,6 +18,10 @@ def download_master_files(args):
         target_files = args.targets
     download_master_files(target_files)
 
+def update_taxdump(args):
+    from dqc.admin.update_taxdump import main as update_taxdump
+    update_taxdump()
+
 def download_genomes(args):
     from dqc.admin.download_all_reference_genomes import download_all_genomes
     download_all_genomes()
@@ -38,21 +42,23 @@ def prepare_checkm_data(args):
     from dqc.admin.prepare_checkm_data import main as prepare_checkm_data
     prepare_checkm_data(delete_existing_data=args.delete_existing_data)
 
-def update_taxdump(args):
-    from dqc.admin.update_taxdump import main as update_taxdump
-    update_taxdump()
+def update_checkm_db(args):
+    from dqc.admin.update_checkm_db import main as update_checkm_db
+    update_checkm_db()
 
 def update_all(args):
     from dqc.admin.download_master_files import download_master_files
     download_master_files(target_files=["asm", "ani", "tsr"])
+    from dqc.admin.update_taxdump import main as update_taxdump
+    update_taxdump()
     from dqc.admin.download_all_reference_genomes import download_all_genomes
     download_all_genomes()
     from dqc.admin.prepare_reference_marker_fasta import prepare_reference_marker_fasta
     prepare_reference_marker_fasta()
     from dqc.admin.prepare_sqlite_db import prepare_sqlite_db
     prepare_sqlite_db()
-    from dqc.admin.update_taxdump import main as update_taxdump
-    update_taxdump()
+    from dqc.admin.update_checkm_db import main as update_checkm_db
+    update_checkm_db()
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC utility tools for admin.")
@@ -76,6 +82,10 @@ def parse_args():
              "(default: asm ani tsr)"
     )
     parser_master.set_defaults(func=download_master_files)
+
+    # subparser for update_taxdump
+    parser_update_taxdump = subparsers.add_parser('update_taxdump', help='Update NCBI taxdump data', parents=[common_parser])
+    parser_update_taxdump.set_defaults(func=update_taxdump)
 
     # subparser for download reference genomes
     parser_genome = subparsers.add_parser('download_genomes', help='Download reference genomes from Assembly DB.', parents=[common_parser])
@@ -103,9 +113,9 @@ def parse_args():
     parser_prep_checkm.add_argument('--delete_existing_data', action='store_true', help='Delete existing data directory.')
     parser_prep_checkm.set_defaults(func=prepare_checkm_data)
 
-    # subparser for update_taxdump
-    parser_prep_checkm = subparsers.add_parser('update_taxdump', help='Update NCBI taxdump data', parents=[common_parser])
-    parser_prep_checkm.set_defaults(func=update_taxdump)
+    # subparser for update_update_checkm_db
+    parser_update_checkm_db = subparsers.add_parser('update_checkm_db', help='Update CheckM Taxon DB', parents=[common_parser])
+    parser_update_checkm_db.set_defaults(func=update_checkm_db)
 
     # subparser for update_all
     parser_prep_checkm = subparsers.add_parser('update_all', help='Update all reference data', parents=[common_parser])

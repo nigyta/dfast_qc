@@ -23,6 +23,7 @@ class ANIreport:
     declared_type_qcoverage: str
     declared_type_scoverage: str
     best_match_type_assembly: str
+    best_match_species_taxid: str
     best_match_species_name: str
     best_match_type_category: str
     best_match_type_ANI: str
@@ -49,6 +50,7 @@ class ANIreport:
             self.declared_type_qcoverage,
             self.declared_type_scoverage,
             self.best_match_type_assembly,
+            self.best_match_species_taxid,
             self.best_match_species_name,
             self.best_match_type_category,
             self.best_match_type_ANI,
@@ -67,7 +69,10 @@ class ANIreport:
         if self.excluded_from_refseq != "na":
             return False, False  # exclude non-Refseq genomes
         if self.assembly_type_category != "na":  # case of any type
-            assert self.declared_type_assembly != "no-type"
+            if self.declared_type_assembly == "no-type":
+                logger.warning("%s may have undergone current reclassification, and metadata may have not been updated.\n%s", self.genbank_accession, str(self))  # reclassified but ANI not calculated
+                return False, False
+            # assert self.declared_type_assembly != "no-type"
             if self.best_match_status == "mismatch":
                 if self.comment == "Assembly is the type-strain, mismatch is within genus and expected":
                     return True, True

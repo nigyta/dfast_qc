@@ -45,6 +45,25 @@ def get_ascendants(taxid):
         return [0]
     return reversed(lineage)
 
+def get_name(taxid):
+    names = ncbi_taxonomy.get_taxid_translator([taxid])
+    return names[taxid]
+
+def get_valid_name(taxid):
+    """
+    Return organism name with valid taxon rank
+    e.g.
+        Lactobacillus delbrueckii subsp. jakobsenii ZN7a-9 = DSM 26046 (taxid: 1217420)
+        ==> Lactobacillus delbrueckii subsp. jakobsenii
+    """
+    for _tid in get_ascendants(taxid):
+        if get_rank(_tid) == "no rank":
+            continue
+        else:
+            return get_name(_tid)
+    else:
+        return None
+
 def get_names(taxid_list):  # only used for debugging
     if len(taxid_list) == 1 and taxid_list[0] == 0:
         return ["Prokaryote"]  # taxid 0 for Prokaryote 
