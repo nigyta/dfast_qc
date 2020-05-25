@@ -7,7 +7,7 @@ DFAST_QC evaluates taxonomic identity of the genome by querying against 13,000 r
 DFAST_QC uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
 
 - Completeness check  
-DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Alternatively, users can arbitrarily specify the marker set.
+DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. You can also arbitrarily specify the marker set using.
 
 ## Installation
 1. Source code
@@ -24,7 +24,18 @@ DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calcula
 Reference data of DFAST_QC is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_QC is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
 In general, you do not need to change this, but you can specify it in the config file or by using `-r` option.
 
-To prepare reference data, reference data must be prepared as following. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
+To prepare reference data, run the following command.
+```
+$ sh initial_setup.sh [-n int]
+```
+`-n` denotes number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended to specify 4~8 for `-n`.
+
+Once, reference data has been prepared, it can be updated by running command:
+```
+$ dqc_admin_tools.py update_all
+```
+
+Alternatively, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
   
 
 1. Download master files  
@@ -70,10 +81,7 @@ To prepare reference data, reference data must be prepared as following. Run `dq
     Will insert auxiliary data for CheckM into `DQC_REFERENCE/references.db`
 
 
-Once, reference data has been prepared, it can be updated by running command:
-```
-$ dqc_admin_tools.py update_all
-```
+
 
 ## Usage
 - Minimum  
