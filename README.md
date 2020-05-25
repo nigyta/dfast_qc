@@ -7,7 +7,7 @@ DFAST_QC evaluates taxonomic identity of the genome by querying against 13,000 r
 DFAST_QC uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
 
 - Completeness check  
-DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also arbitrarily specify the marker set to be used.
+DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also arbitrarily specify the marker set to be used.
 
 ## Installation
 1. Source code
