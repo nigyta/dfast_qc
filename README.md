@@ -3,11 +3,11 @@
 DFAST_QC conducts taxonomy and completeness check of the assembled genome.  
 
 - Taxonomy check  
-DFAST_QC evaluates taxonomic identity of the genome by querying against 13,000 reference genomes from type strains. To shorten the runtime, it first inspects  universally-conserved housekeeping genes, such as _dnaB_ and _rpsA_ in the query genome, and they are searched against refernce nucleotide databases to narrow down the number of reference genomes used in the downstream process. Then, average nucleotide identity is calculated against the selected reference genomes.  
+DFAST_QC evaluates taxonomic identity of the genome by querying against 13,000 reference genomes from type strains. To shorten the runtime, it first inspects  universally-conserved housekeeping genes, such as _dnaB_ and _rpsA_ in the query genome, and they are searched against reference nucleotide databases to narrow down the number of genomes used in the downstream process. Then, average nucleotide identity is calculated against the selected reference genomes.  
 DFAST_QC uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
 
 - Completeness check  
-DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. You can also arbitrarily specify the marker set using.
+DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate comleteness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also arbitrarily specify the marker set to be used.
 
 ## Installation
 1. Source code
@@ -24,18 +24,18 @@ DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calcula
 Reference data of DFAST_QC is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_QC is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
 In general, you do not need to change this, but you can specify it in the config file or by using `-r` option.
 
-To prepare reference data, run the following command.
+__To prepare reference data, run the following command.__
 ```
 $ sh initial_setup.sh [-n int]
 ```
 `-n` denotes number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended to specify 4~8 for `-n`.
 
-Once, reference data has been prepared, it can be updated by running command:
+__Once reference data has been prepared, it can be updated by running command__
 ```
 $ dqc_admin_tools.py update_all
 ```
 
-Alternatively, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
+Instead of running `initial_setup.sh`, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
   
 
 1. Download master files  
