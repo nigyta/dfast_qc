@@ -1,7 +1,7 @@
 import os
 from ftplib import FTP
 from ftplib import all_errors as FTP_all_errors
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from more_itertools import distribute
 from .common import get_logger, get_ref_path
 from .config import config
@@ -51,9 +51,12 @@ def download_genomes_from_assembly(accessions, out_dir=None):
 def download_genomes_parallel(accessions, out_dir=None, threads=1):
 
     list_of_accessions = distribute(threads, accessions)  # divide accession list into num of threads
+    futures = []
     with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
         for _accessions in list_of_accessions:
-            executor.submit(download_genomes_from_assembly, _accessions, out_dir)
+            f = executor.submit(download_genomes_from_assembly, _accessions, out_dir)
+            futures.append(f)
+    [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
 
 if __name__ == "__main__":
     pass

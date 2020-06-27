@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
 from urllib.request import urlretrieve
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ..common import get_logger
 from ..config import config
@@ -26,14 +26,16 @@ def download_master_files(target_files):
 
     logger.info("===== Download master files =====")
     logger.info("Files will be downloaded to %s", out_dir)
-
+    futures = []
     with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
         for target in target_files:
             if target in config.URLS:
                 target_url = config.URLS[target]
-                executor.submit(download_file, target_url, out_dir)
+                f = executor.submit(download_file, target_url, out_dir)
+                futures.append(f)
             else:
                 logger.warn("Target file '%s' not found. Skipping...")
+    [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
 
     logger.info("===== Completed downloading master files =====")
 

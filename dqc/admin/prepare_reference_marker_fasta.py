@@ -2,7 +2,10 @@ import os
 import sys
 import glob
 import shutil
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import subprocess
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from more_itertools import chunked
 
 from ..config import config
 from ..common import get_logger, run_command, get_ref_path
@@ -28,15 +31,47 @@ def get_existing_markers(marker_dir):
     return existing_markers
 
 def concat_result_files(marker_dir):
-    
+    def cat_files(file_list, out_file_name, chunk_no=None):
+        cmd = ["cat", " ".join(file_list), ">", out_file_name]
+        if chunk_no is not None:
+            logger.debug("Concatenating %d files for chunk %d [%s]", len(file_list), chunk_no, out_file_name)
+        else:
+            logger.debug("Concatenating %d tempolary files to generate final result. [%s]", len(file_list), out_file_name)
+
+        p = subprocess.run(" ".join(cmd), shell=True, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if p.returncode != 0:
+            logger.error("Command failed. Aborted. [%s]", cmd)
+            logger.error("Stdout: \n%s", p.stdout)
+            exit(1)
+
+    def cat_files_wih_multi_threads(file_list_all, out_file_name, chunk_size=1000):
+        threads = config.NUM_THREADS
+        threads = 7
+        tmp_output_files = []
+        futures = []
+        with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
+            for i, chunked_file_list in enumerate(chunked(file_list_all, chunk_size)):
+                tmp_output_file_name = out_file_name + f".chunk{i}"
+                f = executor.submit(cat_files, chunked_file_list, tmp_output_file_name, chunk_no=i)
+                tmp_output_files.append(tmp_output_file_name)
+                futures.append(f)
+        [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
+        cat_files(tmp_output_files, out_file_name)
+        rm_cmd = ["rm"] + tmp_output_files
+        subprocess.run(rm_cmd, shell=False, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)        
+
+    # concatenate reference marker FASTA
     out_fasta = get_ref_path(config.REFERENCE_MARKERS_FASTA) # reference_markers.fasta
-    out_summary = get_ref_path(config.REFERENCE_SUMMARY_TSV) # reference_summary.tsv
-    cmd1 = ["cat", f"{marker_dir}/*/markers.fasta", ">", out_fasta]
-    run_command(cmd1, "concat-fasta", shell=True)
+    fasta_file_list = glob.glob(f"{marker_dir}/*/markers.fasta")
+    cat_files_wih_multi_threads(fasta_file_list, out_fasta)
     logger.info("Reference marker FASTA was written to %s", out_fasta)
-    cmd2 = ["cat", f"{marker_dir}/*/marker.summary.tsv", ">", out_summary]
-    run_command(cmd2, "concat-summary", shell=True)
+
+    # concatenate reference summary
+    out_summary = get_ref_path(config.REFERENCE_SUMMARY_TSV) # reference_summary.tsv
+    summary_file_list = glob.glob(f"{marker_dir}/*/marker.summary.tsv")
+    cat_files_wih_multi_threads(summary_file_list, out_summary)
     logger.info("Reference marker summary was written to %s", out_summary)
+
     format_reference_fasta(out_fasta)
 
 def format_reference_fasta(reference_fasta):
@@ -79,13 +114,16 @@ def prepare_reference_marker_fasta(delete_existing=False):
         new_markers = sorted(new_markers)
         logger.info("Start preparing new markers.")
 
+        futures = []
         with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
         # with ProcessPoolExecutor(max_workers=num_parallel_workers) as executor:
             for accession in new_markers:
                 input_file_name = os.path.join(ref_genome_dir, accession + ".fna.gz")
                 marker_out_dir = os.path.join(ref_marker_dir, accession)
                 prefix = accession
-                executor.submit(prepare_marker_fasta, input_file_name, marker_out_dir, prefix)
+                f = executor.submit(prepare_marker_fasta, input_file_name, marker_out_dir, prefix)
+                futures.append(f)
+        [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
 
         logger.info("Created %d markers.", len(new_markers))
 
@@ -99,3 +137,10 @@ def prepare_reference_marker_fasta(delete_existing=False):
     concat_result_files(ref_marker_dir)
     
     logger.info("===== Completed preparing reference marker FASTA =====")
+
+if __name__ == "__main__":
+    pass
+
+    # for test run: python -m dqc.admin.prepare_reference_marker_fasta
+    # ref_marker_dir = "dqc_reference/markers"
+    # concat_result_files(ref_marker_dir)    
