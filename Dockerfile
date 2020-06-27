@@ -11,7 +11,7 @@ RUN cd / && \
 	mkdir /work && \
 	conda install -y -c bioconda fastani blast  hmmer prodigal && \
 	git clone https://github.com/nigyta/dfast_qc.git && \
-	pip install -r  /dfast_qc/requirements.txt && \
+	pip install -r /dfast_qc/requirements.txt && \
 	ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \
 	ln -s /dfast_qc/dqc_admin_tools.py /usr/local/bin/ && \
 	mkdir -p /dqc_reference/checkm_data && \

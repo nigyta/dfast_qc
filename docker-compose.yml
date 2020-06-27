@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+
+    dqc:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        image: dqc_dev
+        command: tail -f /dev/null
+        tty: true
+        volumes:
+            - .:/dfast_qc
+            # ダウンロード用データ、gmap DBの置き場所
+            - /misc_data/dqc_reference:/dqc_reference
+        working_dir: /dfast_qc         
