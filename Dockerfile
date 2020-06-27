@@ -1,6 +1,6 @@
-MAINTAINER nigyta
-
 FROM continuumio/miniconda3:4.8.2 
+
+MAINTAINER nigyta
 
 # definition of environmental variables
 ENV PYTHONDONTWRITEBYTECODE 1
