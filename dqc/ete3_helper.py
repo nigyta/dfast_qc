@@ -58,11 +58,11 @@ def get_valid_name(taxid):
     """
     for _tid in get_ascendants(taxid):
         rank = get_rank(_tid)
-        if rank == "no rank":
+        if rank in ["no rank", "strain", "isolate"] :
             continue
         else:
             if not (rank == "species" or rank == "subspecies"):
-                logger.warning("'%s' (taxid: %s) may not be a valid species or subspecies name.", get_name(_tid), str(_tid))
+                logger.warning("'%s' (taxid: %s, rank=%s) may not be a valid species or subspecies name.", get_name(_tid), str(_tid), rank)
             return _tid, get_name(_tid)
     else:
         return None, None
