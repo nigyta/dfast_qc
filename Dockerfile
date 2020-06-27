@@ -19,4 +19,4 @@ RUN cd / && \
 	conda clean --all -y
 
 WORKDIR /work
-CMD tail -f /dev/null
+CMD bash

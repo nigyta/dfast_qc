@@ -21,4 +21,4 @@ RUN cd / && \
 	conda clean --all -y
 
 WORKDIR /dfast_qc
-CMD tail -f /dev/null
+CMD bash
