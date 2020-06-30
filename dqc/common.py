@@ -12,7 +12,7 @@ def get_logger(name=None):
         log_level = INFO
     formatter = Formatter("[%(asctime)s] [%(levelname)s] %(message)s")
     logger = getLogger(name)
-    handler = StreamHandler(stream=sys.stderr)
+    handler = StreamHandler(stream=sys.stdout)
     handler.setLevel(log_level)  # INFO or DEBUG
     handler.setFormatter(formatter)
     logger.addHandler(handler)
