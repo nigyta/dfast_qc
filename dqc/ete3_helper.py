@@ -49,6 +49,8 @@ def get_name(taxid):
     names = ncbi_taxonomy.get_taxid_translator([taxid])
     return names[taxid]
 
+# import ValueError
+
 def get_valid_name(taxid):
     """
     Return organism name with valid taxon rank
@@ -56,15 +58,19 @@ def get_valid_name(taxid):
         Lactobacillus delbrueckii subsp. jakobsenii ZN7a-9 = DSM 26046 (taxid: 1217420)
         ==> Lactobacillus delbrueckii subsp. jakobsenii
     """
-    for _tid in get_ascendants(taxid):
-        rank = get_rank(_tid)
-        if rank in ["no rank", "strain", "isolate"] :
-            continue
+    try:
+        for _tid in get_ascendants(taxid):
+            rank = get_rank(_tid)
+            if rank in ["no rank", "strain", "isolate"] :
+                continue
+            else:
+                if not (rank == "species" or rank == "subspecies"):
+                    logger.warning("'%s' (taxid: %s, rank=%s) may not be a valid species or subspecies name.", get_name(_tid), str(_tid), rank)
+                return _tid, get_name(_tid)
         else:
-            if not (rank == "species" or rank == "subspecies"):
-                logger.warning("'%s' (taxid: %s, rank=%s) may not be a valid species or subspecies name.", get_name(_tid), str(_tid), rank)
-            return _tid, get_name(_tid)
-    else:
+            return None, None
+    except ValueError:
+        logger.warning("TaxID not found '%s' in taxdump.", taxid)
         return None, None
 
 def get_names(taxid_list):  # only used for debugging

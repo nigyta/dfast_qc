@@ -62,8 +62,9 @@ def prepare_sqlite_db():
             # organism_name, infraspecific_name, is_filtered, is_valid = clean_organism_name(asm_rep, ani_rep)
             valid_taxid, organism_name_org, organism_name, infraspecific_name = clean_organism_name(asm_rep)
             if organism_name is None:
-                logger.debug("Could not determine valid organism name for %s", organism_name_org)
-                organism_name = organism_name_org
+                logger.warning("Could not determine valid organism name for %s (%s, taxid=%s)", organism_name_org, asm_rep.assembly_accession, asm_rep.taxid)
+                continue
+                # organism_name = organism_name_org
             is_filtered, is_valid = ani_rep.validate()
             cnt += 1
             Reference.create(
