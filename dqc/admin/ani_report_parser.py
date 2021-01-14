@@ -112,7 +112,7 @@ def get_filtered_ANI_report(ANI_report_file):
         is_filtered, is_valid = report.validate()
         if is_filtered:
             if report.genbank_accession in D:
-                logger.warning("Reduandan ANI record [%s] %s", report.genbank_accession, report)
+                logger.warning("Redundant ANI record [%s] %s", report.genbank_accession, report)
             D[report.genbank_accession] = report
             if is_valid:
                 set_valid.add(report.genbank_accession)

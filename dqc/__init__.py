@@ -1,1 +1,1 @@
-dqc_version = "0.2.5"
+dqc_version = "0.2.6"
