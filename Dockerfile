@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DQC_ENV docker
 
 RUN cd / && \
-	mkdir /work && \
+	mkdir /work && chmod 777 /work && \
 	conda install -y -c bioconda fastani blast hmmer prodigal && \
 	git clone https://github.com/nigyta/dfast_qc.git && \
 	pip install -r /dfast_qc/requirements.txt && \
