@@ -11,5 +11,5 @@ services:
         volumes:
             - .:/dfast_qc
             # ダウンロード用データ、gmap DBの置き場所
-            - /misc_data/dqc_reference:/dqc_reference
+            - ../../../dfast_volumes/dqc_reference:/dqc_reference  # for dev.
         working_dir: /dfast_qc         

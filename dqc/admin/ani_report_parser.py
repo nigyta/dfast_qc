@@ -31,6 +31,7 @@ class ANIreport:
     best_match_type_scoverage: str
     best_match_status: str
     comment: str
+    taxonomy_check_status: str
 
     def to_tabular(self):
         return "\t".join([
@@ -57,7 +58,8 @@ class ANIreport:
             self.best_match_type_qcoverage,
             self.best_match_type_scoverage,
             self.best_match_status,
-            self.comment
+            self.comment,
+            self.taxonomy_check_status
             ])
 
     def validate(self):

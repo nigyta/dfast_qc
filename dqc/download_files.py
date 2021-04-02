@@ -1,78 +1,101 @@
 import os
-from ftplib import FTP
-from ftplib import all_errors as FTP_all_errors
+import re
+import hashlib
+from urllib.request import urlretrieve, urlopen
+from urllib.error import HTTPError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from more_itertools import distribute
 from .common import get_logger, get_ref_path
 from .config import config
 
 logger = get_logger(__name__)
-timeout = 60  # timeout for FTP connection 60s
 
 def download_genomes_from_assembly(accessions, out_dir=None):
-    def _get_ftp_directory(accession):
+    def _get_base_directory(accession):
         path1, path2, path3, path4 = accession[0:3], accession[4:7], accession[7:10], accession[10:13]
         return "/".join(["/genomes", "all", path1, path2, path3, path4])
 
-    def _download_genome(accession, ftp, max_retry=3):
+    def _get_target_path(accession):
+        base_dir = config.NCBI_FTP_SERVER + _get_base_directory(accession)
+        acceesion_escaped = accession.replace(".", "\\.")
+        pat_dir_name = re.compile(f'<a href="({acceesion_escaped}_.+?)/">')
+
+        # Get directory name
+        resp_base_dir = urlopen(base_dir).read().decode()
+        m1 = pat_dir_name.search(resp_base_dir)
+        file_prefix = None if not m1 else m1.group(1)
+
+        if file_prefix is None:
+            logger.error(f"Could not determine the download directory for {accession}.")
+            return None, None  # target_url, md5
+
+        target_file = file_prefix + "_genomic.fna.gz"
+        target_file_escaped = target_file.replace(".", "\\.")
+
+        # Get md5 for remote file
+        pat_md5 = re.compile(f"(.+?)\\s+?\\./({target_file_escaped})")
+        md5_url = os.path.join(base_dir, file_prefix, "md5checksums.txt")
+        resp_md5 = urlopen(md5_url).read().decode()
+        m2 = pat_md5.search(resp_md5)
+        md5 = None if not m2 else m2.group(1)
+
+        if file_prefix is None:
+            logger.error(f"Failed to get MD5 for {accession}.")
+            return None, None  # target_url, md5
+
+        target_url = os.path.join(base_dir, file_prefix, target_file)
+        return target_url, md5
+
+    def _check_md5(file_name, md5):
+        md5_local = hashlib.md5(open(file_name, "rb").read()).hexdigest()
+        logger.debug(f"Checking MD5: FileName={file_name} Local={md5_local}, Remote={md5}")
+        if md5 == md5_local:
+            return True
+        else:
+            logger.warning(f"MD5 does not match. ({accession} Local={md5_local}, Remote={md5})")
+            return False
+
+    def _download_genome(accession, max_retry=3):
+        logger.debug(f"Downloading genomic FASTA file for {accession}")
         n_trial = 1
         while n_trial <= max_retry:
             if n_trial > 1:
-                logger.warning(f"(Try {n_trial}/{max_retry})")
+                logger.warning(f"(Try {n_trial}/{max_retry} [{accession}])")
             try:
-                directory = _get_ftp_directory(accession)
-                ftp.cwd(directory)
-                remore_file_list = ftp.nlst()
-                remore_file_list = sorted([file_name for file_name in remore_file_list if file_name.startswith(accession)])
-                if len(remore_file_list) == 0:
-                    logger.warning("File not found. Will try again to retrieve file for %s", accession)
+                # check target file and MD5
+                target_url, md5 = _get_target_path(accession)
+                logger.debug(f"{accession}\tTargetURL={target_url} RemoteMD5={md5}")
+                if target_url and md5:
+                    output_file = os.path.join(out_dir, accession + ".fna.gz")
+                    urlretrieve(target_url, output_file)
+                    if _check_md5(output_file, md5):
+                        return "SUCCESS", output_file, target_url
+                    else:
+                        n_trial += 1
+                else:
+                    logger.warning("Target file not found for %s", accession)
                     n_trial += 1
                     continue
-                asm_name = remore_file_list[-1]
-                target_file = "/".join([directory, asm_name, asm_name + "_genomic.fna.gz"])
-                logger.debug("Downloading %s", ncbi_ftp_server + directory + "/" + asm_name + "/" + asm_name + "_genomic.fna.gz")
-                output_file = os.path.join(out_dir, "_".join(asm_name.split("_")[0:2]) + ".fna.gz")
-                with open(output_file, "wb") as f:
-                    ftp.retrbinary(f"RETR {target_file}", f.write)
-                remote_file_size = ftp.size(target_file)
-            except FTP_all_errors as e:
-                logger.error("FTP error %s", e)
+            except HTTPError as e:
+                logger.error("%s", e)
                 n_trial += 1
-            else:
-                if _check_file_size(output_file, remote_file_size, accession):
-                    return "SUCCESS", output_file, target_file
-                else:
-                    logger.warning("Will try again to retrieve file for %s", accession)
-                    n_trial += 1
+
         logger.error(f"Failed to download the genome FASTA for {accession}")
         return "FAIL", "-", "-"
 
-    def _check_file_size(local_file, remote_file_size, accession):
-        if remote_file_size is None:
-            return False
-        local_file_size = os.path.getsize(local_file)
-        logger.debug(f"Checking file sizes. Accession={accession} Remote={remote_file_size} Local={local_file_size}")
-        if local_file_size == remote_file_size:
-            return True
-        else:
-            logger.warning(f"File size does not match. Accession={accession} Remote={remote_file_size} Local={local_file_size}")
-            return False
-
-    ncbi_ftp_server = config.NCBI_FTP_SERVER
-    logger.debug("Logging in to the FTP server. [%s]", ncbi_ftp_server)
     if out_dir is None:
         out_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
-    logger.debug("Files will be downloaded to %s", out_dir)
+        logger.debug("Files will be downloaded to %s", out_dir)
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    with FTP(host=ncbi_ftp_server, timeout=timeout) as ftp:
-        ftp.login()
-        for accession in accessions:
-            status, retrieved_file, target_file = _download_genome(accession, ftp)
-            logger.info("\t".join([accession, status, retrieved_file, target_file]))
+        logger.debug("Created output directory [%s]", out_dir)
+
+    for accession in accessions:
+        status, retrieved_file, target_file = _download_genome(accession)
+        logger.info("\t".join([accession, status, retrieved_file, target_file]))
 
 def download_genomes_parallel(accessions, out_dir=None, threads=1):
-
+    logger.debug(f"Start downloading genomes using {threads} threads.")
     list_of_accessions = distribute(threads, accessions)  # divide accession list into num of threads
     futures = []
     with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
@@ -81,6 +104,7 @@ def download_genomes_parallel(accessions, out_dir=None, threads=1):
             futures.append(f)
     [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
 
+
 if __name__ == "__main__":
     pass
     # download test
@@ -88,14 +112,16 @@ if __name__ == "__main__":
     # accessions = [_.strip() for _ in accessions]
 
     # for debug
-    # accessions = ["GCA_002101575.1"]
+    accessions = ["GCA_002101575.1"]
+    download_genomes_parallel(accessions, out_dir=".", threads=4)
+    # download_genomes_parallel(["GCF_000159355.1", "GCF_001434515.1", "GCF_000185045.1","GCF_000185045.1"], out_dir=".", threads=4)
+    # accessions = ["GCA_000001405.28"]  # homo sapiens
     # download_genomes_parallel(accessions, out_dir=".", threads=4)
     
 
     # download_genomes_from_assembly(["GCF_000185045.1"], "dev_download")
     # download_genomes_from_assembly(["GCF_000185045.2", "GCF_000376825.1", "GCF_000185045.1","GCF_000185045.1"], "dev_download")
 
-    # download_genomes_from_assembly(["GCF_000159355.1", "GCF_001434515.1"])
     # download_genome_from_assembly("GCF_000181335.3", "dev_download")
 
 

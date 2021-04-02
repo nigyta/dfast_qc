@@ -1,5 +1,6 @@
 FROM continuumio/miniconda3:4.8.2 
-MAINTAINER nigyta
+
+LABEL maintainer=nigyta
 
 
 # definition of environmental variables
