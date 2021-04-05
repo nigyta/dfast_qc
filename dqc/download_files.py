@@ -2,7 +2,8 @@ import os
 import re
 import hashlib
 from urllib.request import urlretrieve, urlopen
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
+from http.client import RemoteDisconnected
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from more_itertools import distribute
 from .common import get_logger, get_ref_path
@@ -55,7 +56,13 @@ def download_genomes_from_assembly(accessions, out_dir=None):
             logger.warning(f"MD5 does not match. ({accession} Local={md5_local}, Remote={md5})")
             return False
 
+    def delete_file_if_exists(file_name):
+        if os.path.exists(file_name):
+            os.remove(file_name)
+            logger.warning(f"Removed broken file [{file_name}]")
+
     def _download_genome(accession, max_retry=3):
+        output_file = os.path.join(out_dir, accession + ".fna.gz")
         logger.debug(f"Downloading genomic FASTA file for {accession}")
         n_trial = 1
         while n_trial <= max_retry:
@@ -66,18 +73,28 @@ def download_genomes_from_assembly(accessions, out_dir=None):
                 target_url, md5 = _get_target_path(accession)
                 logger.debug(f"{accession}\tTargetURL={target_url} RemoteMD5={md5}")
                 if target_url and md5:
-                    output_file = os.path.join(out_dir, accession + ".fna.gz")
                     urlretrieve(target_url, output_file)
                     if _check_md5(output_file, md5):
                         return "SUCCESS", output_file, target_url
                     else:
+                        delete_file_if_exists(output_file)
                         n_trial += 1
                 else:
                     logger.warning("Target file not found for %s", accession)
+                    delete_file_if_exists(output_file)
                     n_trial += 1
                     continue
             except HTTPError as e:
                 logger.error("%s", e)
+                delete_file_if_exists(output_file)
+                n_trial += 1
+            except URLError as e:
+                logger.error("%s", e)
+                delete_file_if_exists(output_file)
+                n_trial += 1
+            except RemoteDisconnected as e:
+                logger.error("%s", e)
+                delete_file_if_exists(output_file)
                 n_trial += 1
 
         logger.error(f"Failed to download the genome FASTA for {accession}")
