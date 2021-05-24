@@ -13,6 +13,8 @@ class DefaultConfig:
     DISABLE_TC = False
     DISABLE_CC = False
     
+    AUTO_DOWNLOAD = True
+
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
     
     # Reference data

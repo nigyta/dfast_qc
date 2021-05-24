@@ -15,16 +15,29 @@ def check_fasta_existence(reference_list_file):
     Check if reference genomes exist. If not, missing genomes will be downloaded from AssemblyDB.
     """
     reference_files = open(reference_list_file).readlines()
-    reference_files = [_.strip() for _ in reference_files]
+    reference_files = [fn.strip() for fn in reference_files]
     missing_genomes = []
+    existing_genomes = []
     for file_name in reference_files:
         if not os.path.exists(file_name):
             base_name = os.path.basename(file_name)
             accession = base_name.replace(".fna.gz", "")
-            logger.warning("%s does not exist. Will try to download.", base_name)
+            logger.warning("%s does not exist.", base_name)
             missing_genomes.append(accession)
+        else:
+            existing_genomes.append(file_name)
     num_threads = config.NUM_THREADS
-    download_genomes_parallel(missing_genomes, threads=num_threads)
+    if not missing_genomes:
+        return
+    if config.AUTO_DOWNLOAD:
+        logger.info("Will try to download missing genomes.")
+        download_genomes_parallel(missing_genomes, threads=num_threads)
+    else:
+        # Remove missing target genomes
+        missing_genomes = ",".join(missing_genomes)
+        logger.info(f"Remove missing genomes from the reference list. [{missing_genomes}]")
+        with open(reference_list_file, "w") as f:
+            f.write("\n".join(existing_genomes))
 
 def run_fastani(input_file, reference_list_file, output_file):
     num_threads = config.NUM_THREADS
