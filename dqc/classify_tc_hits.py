@@ -14,6 +14,10 @@ logger = get_logger(__name__)
 igp_file = get_ref_path(config.INDISTINGUISHABLE_GROUPS_PROKARYOTE)
 ani_threshold = config.ANI_THRESHOLD
 
+if not os.path.exists(igp_file):
+    logger.error("INDISTINGUISHABLE_GROUPS_PROKARYOTE file does not exist. [%s]\nDownload it by 'dqc_admin_tools.py download_master_files --targets igp'", igp_file)
+    exit(1)
+
 @dataclasses.dataclass
 class IndistinguishableSpecies:
     """
@@ -50,12 +54,14 @@ def get_indistinguishable_group(taxid):
 
 def classify_tc_hits(tc_result):
     # status: conclusive, indistinguishable, inconsistent, below_threshold, 
-    accepted_hits_taxid = set([x["taxid"] for x in tc_result if x["ani"] >= ani_threshold])
+    accepted_hits_taxid = set([x["species_taxid"] for x in tc_result if x["ani"] >= ani_threshold])
     dict_indistinguishable_species = {}
     for taxid in accepted_hits_taxid:
         dict_indistinguishable_species.update(get_indistinguishable_group(taxid))
     set_indistinguishable_taxids = set(dict_indistinguishable_species.keys())
+    logger.debug("ANI hit taxids: %s", str(accepted_hits_taxid))
     if len(set_indistinguishable_taxids):
+        logger.debug("Indistinguishable taxids: %s", str(set_indistinguishable_taxids))
         indistinguishable_species_names = ", ".join([f"{name}({taxid})" for taxid, name in dict_indistinguishable_species.items()])
         logger.warning("Following organisms are indistinguishable with ANI. [%s]", indistinguishable_species_names)
     if len(accepted_hits_taxid) == 0:
