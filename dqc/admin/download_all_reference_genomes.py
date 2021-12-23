@@ -11,9 +11,11 @@ logger = get_logger(__name__)
 def delete_unwanted_genomes(accessions, genome_dir):
     for accession in accessions:
         target_file = os.path.join(genome_dir, accession + ".fna.gz")
-        assert os.path.exists(target_file)
-        os.remove(target_file)
-        logger.info("Deleted %s", target_file)
+        if not os.path.exists(target_file):
+            logger.warning("Target file does not exist. [%s]", target_file)
+        else:
+            os.remove(target_file)
+            logger.info("Deleted %s", target_file)
 
 def get_existing_genomes(genome_dir):
     # Todo: check eof, broken file

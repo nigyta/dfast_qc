@@ -28,6 +28,7 @@ class DefaultConfig:
     ASSEMBLY_REPORT_FILE = "assembly_summary_genbank.txt"
     ANI_REPORT_FILE = "ANI_report_prokaryotes.txt"
     TYPE_STRAIN_REPORT_FILE = "prokaryote_type_strain_report.txt"
+    INDISTINGUISHABLE_GROUPS_PROKARYOTE = "indistinguishable_groups_prokaryotes.txt"
     CHECKM_DATA_ROOT = "checkm_data"
     REFERENCE_MARKERS = {
         "TIGR00665": ("dnaB", "replicative DNA helicase"),
@@ -38,6 +39,7 @@ class DefaultConfig:
         "TIGR00468": ("pheS", "phenylalanine--tRNA ligase, alpha subunit"),
         "TIGR00755": ("ksgA", "ribosomal RNA small subunit methyltransferase A"),
     }
+    REFERENCE_GENOMES_TSV ="reference_genomes.tsv"
 
     # output file names and options for prepare_marker_fasta
     PRODIGAL_CDS_FASTA = "cds.fna" 
@@ -55,6 +57,7 @@ class DefaultConfig:
     # output file names and options for calc_ANI
     FASTANI_RESULT = "fastani_result.tsv"
     TC_RESULT = "tc_result.tsv"
+    ANI_THRESHOLD = 95
 
     # output file names and options for completeness check (CheckM)
     CHECKM_INPUT_DIR = "checkm_input"
@@ -71,6 +74,7 @@ class DefaultConfig:
         "asm": "https://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt",
         "ani": "https://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/ANI_report_prokaryotes.txt",
         "tsr": "https://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/prokaryote_type_strain_report.txt",
+        "igp": "https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/indistinguishable_groups_prokaryotes.txt",
         "hmm": "ftp://ftp.tigr.org//pub/data/TIGRFAMs/TIGRFAMs_15.0_HMM.LIB.gz",
         # "hmm": "https://ftp.ncbi.nlm.nih.gov/hmm/TIGRFAMs/release_15.0/TIGRFAMs_15.0_HMM.LIB.gz",
         "checkm": "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz",

@@ -3,9 +3,13 @@ import dataclasses
 from ..common import get_logger
 
 logger = get_logger(__name__)
+assemblies_allow_list = ["GCA_002950215.1", "GCA_900457155.1"]
 
 @dataclasses.dataclass
 class ANIreport:
+    """
+    See https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/README_ANI_report_prokaryotes.txt for the descriptions of each column.
+    """
 
     genbank_accession: str
     refseq_accession: str
@@ -68,36 +72,48 @@ class ANIreport:
             first return value: is_filtered
             second return value; is_valid
         """
+        if self.genbank_accession in assemblies_allow_list:
+            return True, True
         if self.excluded_from_refseq != "na":
             return False, False  # exclude non-Refseq genomes
         if self.assembly_type_category != "na":  # case of any type
-            if self.declared_type_assembly == "no-type":
-                logger.warning("%s may have undergone current reclassification, and metadata may have not been updated.\n%s", self.genbank_accession, str(self))  # reclassified but ANI not calculated
-                return False, False
-            # assert self.declared_type_assembly != "no-type"
-            if self.best_match_status == "mismatch":
-                if self.comment == "Assembly is the type-strain, mismatch is within genus and expected":
-                    return True, True
-                elif self.comment == "Assembly is type-strain, failed to match other type-strains on its species":
-                    return True, False
-                elif self.comment == "na":
-                    return False, False
+            if self.taxonomy_check_status == "OK":
+                if self.assembly_type_category == "syntype":
+                    logger.debug("Excluding synonym type [%s, %s, %s]", self.genbank_accession, self.assembly_type_category, self.organism_name)
+                    return False, True
                 else:
-                    sys.stderr.write("Assertion error: unexpected comment\n")
-                    sys.stderr.write(str(self) + "\n")
-                    raise AssertionError
-            elif self.best_match_status == "na":
-                if self.comment == "Assembly is the type-strain, no match is expected":
                     return True, True
-                else:
-                    sys.stderr.write("Assertion error: unexpected best_match_status\n")
-                    sys.stderr.write(str(self) + "\n")
-                    raise AssertionError
             else:
-                if self.comment == "Assembly is type-strain, failed to match other type-strains on its species":
-                    return True, False
-                else:
-                    return True, True
+                return False, False
+
+            # As of 2021.Dec, All entries with taxonomy_check_status=OK will 
+            # if self.declared_type_assembly == "no-type":
+            #     logger.warning("%s may have undergone current reclassification, and metadata may have not been updated.\n%s", self.genbank_accession, str(self))  # reclassified but ANI not calculated
+            #     return False, False
+            # # assert self.declared_type_assembly != "no-type"
+            # if self.best_match_status == "mismatch":
+            #     if self.comment == "Assembly is the type-strain, mismatch is within genus and expected":
+            #         return True, True
+            #     elif self.comment == "Assembly is type-strain, failed to match other type-strains on its species":
+            #         return True, False
+            #     elif self.comment == "na":
+            #         return False, False
+            #     else:
+            #         sys.stderr.write("Assertion error: unexpected comment\n")
+            #         sys.stderr.write(str(self) + "\n")
+            #         raise AssertionError
+            # elif self.best_match_status == "na":
+            #     if self.comment == "Assembly is the type-strain, no match is expected":
+            #         return True, True
+            #     else:
+            #         sys.stderr.write("Assertion error: unexpected best_match_status\n")
+            #         sys.stderr.write(str(self) + "\n")
+            #         raise AssertionError
+            # else:
+            #     if self.comment == "Assembly is type-strain, failed to match other type-strains on its species":
+            #         return True, False
+            #     else:
+            #         return True, True
         else:  # case of non type
             return False, False
 

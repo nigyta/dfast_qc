@@ -1,0 +1,79 @@
+#!/bin/env python
+
+import os
+import dataclasses
+from .common import get_logger, get_ref_path
+# from .select_target_genomes import main as select_target_genomes
+# from .prepare_marker_fasta import main as prepare_marker_fasta
+# from .calc_ani import main as calc_ani
+
+from .config import config
+
+logger = get_logger(__name__)
+
+igp_file = get_ref_path(config.INDISTINGUISHABLE_GROUPS_PROKARYOTE)
+ani_threshold = config.ANI_THRESHOLD
+
+@dataclasses.dataclass
+class IndistinguishableSpecies:
+    """
+    Species that are difficult to distinguish with ANI
+    See https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/indistinguishable_groups_prokaryotes.txt
+    """
+    group_id: str
+    taxid: int
+    name: str
+
+def parse_igp_file():
+    dict_indistinguishable_species = {}
+    for line in open(igp_file):
+        line = line.strip()
+        if line.startswith("#"):
+            continue
+        if not line:
+            continue
+        cols = line.split("\t")
+        group_id, taxid, name = int(cols[0]), int(cols[1]), cols[2]
+        indistinguishable_species = IndistinguishableSpecies(group_id, taxid, name)
+        dict_indistinguishable_species[taxid] = indistinguishable_species
+    return dict_indistinguishable_species
+
+dict_indistinguishable_species = parse_igp_file()
+
+def get_indistinguishable_group(taxid):
+    indistinguishable_species = dict_indistinguishable_species.get(taxid)
+    if indistinguishable_species:
+        indistinguishable_group = [x for x in dict_indistinguishable_species.values() if x.group_id == indistinguishable_species.group_id]
+        return {x.taxid: x.name for x in indistinguishable_group}
+    else:
+        return {} 
+
+def classify_tc_hits(tc_result):
+    # status: conclusive, indistinguishable, inconsistent, below_threshold, 
+    accepted_hits_taxid = set([x["taxid"] for x in tc_result if x["ani"] >= ani_threshold])
+    dict_indistinguishable_species = {}
+    for taxid in accepted_hits_taxid:
+        dict_indistinguishable_species.update(get_indistinguishable_group(taxid))
+    set_indistinguishable_taxids = set(dict_indistinguishable_species.keys())
+    if len(set_indistinguishable_taxids):
+        indistinguishable_species_names = ", ".join([f"{name}({taxid})" for taxid, name in dict_indistinguishable_species.items()])
+        logger.warning("Following organisms are indistinguishable with ANI. [%s]", indistinguishable_species_names)
+    if len(accepted_hits_taxid) == 0:
+        flag = None
+    elif len(accepted_hits_taxid) == 1:
+        flag = "conclusive"
+    else:
+        if accepted_hits_taxid.issubset(set_indistinguishable_taxids):
+            flag = "indistinguishable"
+        else:
+            flag = "inconsistent"
+    for result in tc_result:
+        if result["ani"] >= ani_threshold:
+            assert flag
+            result["status"] = flag
+        else:
+            result["status"] = "below_threshold"
+
+if __name__ == "__main__":
+    print(get_indistinguishable_group(622))
+    print(get_indistinguishable_group(1590))

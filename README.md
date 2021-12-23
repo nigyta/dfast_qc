@@ -19,6 +19,11 @@ DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calcula
     $ cd dfast_qc
     $ pip install -r requirements.txt
     ```
+Alternatively, DFAST_QC is available from [BioConda](https://bioconda.github.io/recipes/dfast_qc/README.html).
+```
+conda install -c bioconda dfast_qc
+```
+Reference data is not included in the conda package. Please install it following the steps below.
 
 ## Initial set up
 Reference data of DFAST_QC is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_QC is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
@@ -129,24 +134,28 @@ optional arguments:
     {
         "tc_result": [
             {
-                "organism_name": "Lactobacillus parakefiri",
-                "strain": "strain=JCM 8573",
-                "accession": "GCA_002157585.1",
-                "taxid": 152332,
-                "species_taxid": 152332,
+                "organism_name": "Lactobacillus paragasseri",
+                "strain": "strain=JCM 5343",
+                "accession": "GCA_003307275.1",
+                "taxid": 2107999,
+                "species_taxid": 2107999,
                 "relation_to_type": "type",
                 "validated": true,
-                "ani": 99.9803,
-                "matched_fragments": 770,
-                "total_fragments": 778
+                "ani": 99.8183,
+                "matched_fragments": 629,
+                "total_fragments": 667,
+                "status": "conclusive"
             },
+            ...
             {
-                "organism_name": "Lactobacillus parakefiri",
-                "strain": "strain=DSM 10551",
-                "accession": "GCA_004354625.1",
+                "organism_name": "Lactobacillus gasseri",
+                "strain": "strain=ATCC 33323",
+                "accession": "GCA_000014425.1",
                 ...
-                "matched_fragments": 172,
-                "total_fragments": 778
+                "ani": 93.5813,
+                "matched_fragments": 568,
+                "total_fragments": 667,
+                "status": "below_threshold"
             }
         ],
         "cc_result": {
@@ -157,8 +166,17 @@ optional arguments:
     }
     ```
 
+### List of status in taxonomy check result
+- __conclusive__: Effective ANI hit (>=95%) againt only 1 species, hence the species name is conclusively determined.
+- __indistinguishable__: The genome belongs to one of the species that are difficult to distinguish using ANI (e.g. E. coli and Shigella spp.) 
+- __inconsistent__: ANI hits against more than 2 differenct species. This may result from the comparison between very closely-related species or contamination of 2 different species.
+- __below_threhold__: The ANI hit is below the threshold (95%)
+
+Note that DFAST_QC cannot identify clades below species level.
+
 ## Run in Docker
 
+Docker image is available at [dockerub](https://hub.docker.com/r/nigyta/dfast_qc).  
 The example below shows how to invoke DFAST_QC with an input FASTA file (genome.fa) in the current directory.
 ```
 docker run -it --rm --name dqc -v /path/to/dqc_reference:/dqc_reference -v $PWD:$PWD nigyta/dfast_qc dfast_qc -i $PWD/genome.fa -o $PWD/dfastqc_out

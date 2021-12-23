@@ -5,10 +5,11 @@ from argparse import ArgumentError, ArgumentParser
 from .models import Reference
 from .config import config
 from .download_files import download_genomes_parallel
+from .classify_tc_hits import classify_tc_hits
 
 logger = get_logger(__name__)
 
-ani_cutoff = 95
+ani_threshold = config.ANI_THRESHOLD
 
 def check_fasta_existence(reference_list_file):
     """
@@ -47,7 +48,7 @@ def run_fastani(input_file, reference_list_file, output_file):
 def add_organism_info_to_fastani_result(fastani_result_file, output_file):
     # parse fastANI result and add organism info
     # also, result dict will be generated
-    header = ["organism_name", "strain", "accession", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "matched_fragments", "total_fragments"]
+    header = ["organism_name", "strain", "accession", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "matched_fragments", "total_fragments", "status"]
     ret = "\t".join(header) + "\n"
     hit_cnt, hit_cnt_above_cutoff = 0, 0
     tc_result = []
@@ -63,13 +64,15 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
             organism_name, strain, relation_to_type_material = accession, "-", "-"
             taxid, species_taxid, validated = "-", "-", "-"
         hit_cnt += 1
-        if ani_value > ani_cutoff:
+        if ani_value > ani_threshold:
             hit_cnt_above_cutoff += 1
-        result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, matched_frag, total_frag]
-        ret += "\t".join(map(str, result_row)) + "\n"
+        result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, matched_frag, total_frag, ""]
         ret_dict = {key: value for key, value in zip(header, result_row)}
         tc_result.append(ret_dict)
-    logger.info("Found %d fastANI hits (%d hits with ANI > %d%%)", hit_cnt, hit_cnt_above_cutoff, ani_cutoff)
+    classify_tc_hits(tc_result)
+    logger.info("Found %d fastANI hits (%d hits with ANI > %d%%)", hit_cnt, hit_cnt_above_cutoff, ani_threshold)
+    for result in tc_result:
+        ret += "\t".join([str(result[key]) for key in header]) + "\n"
     logger.info("DFAST Taxonomy check final result\n%s\n%s%s", "-"*80, ret, "-"*80)
     with open(output_file, "w") as f:
         f.write(ret)

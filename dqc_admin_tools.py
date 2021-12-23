@@ -46,6 +46,10 @@ def update_checkm_db(args):
     from dqc.admin.update_checkm_db import main as update_checkm_db
     update_checkm_db()
 
+def dump_sqlite_db(args):
+    from dqc.admin.dump_sqlite_db import dump_sqlite_db
+    dump_sqlite_db()
+
 def update_all(args):
     from dqc.admin.download_master_files import download_master_files
     download_master_files(target_files=["asm", "ani", "tsr"])
@@ -76,10 +80,10 @@ def parse_args():
     parser_master = subparsers.add_parser('download_master_files', help='Download master files.', parents=[common_parser])
     parser_master.add_argument(
         "--targets", type=str, required=False, metavar="STR", 
-        choices=['asm', 'ani', 'tsr', "hmm", "checkm", "taxdump"], nargs="*",
+        choices=['asm', 'ani', 'tsr', "igp", "hmm", "checkm", "taxdump"], nargs="*",
         help="Target(s) for downloading. " + 
-             "[asm: Assembly report, ani: ANI report, tsr: Type strain report, hmm: TIGR HMMER profile, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz] "
-             "(default: asm ani tsr)"
+             "[asm: Assembly report, ani: ANI report, tsr: Type strain report, hmm: TIGR HMMER profile, igp: indistinguishable groups prokaryotes, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz] "
+             "(default: asm ani tsr igp)"
     )
     parser_master.set_defaults(func=download_master_files)
 
@@ -117,9 +121,12 @@ def parse_args():
     parser_update_checkm_db = subparsers.add_parser('update_checkm_db', help='Update CheckM Taxon DB', parents=[common_parser])
     parser_update_checkm_db.set_defaults(func=update_checkm_db)
 
+    # subparser for dump_sqlite_db
+    parser_dump_sqlite_db = subparsers.add_parser('dump_sqlite_db', help='Dump reference genome info to file.', parents=[common_parser])
+    parser_dump_sqlite_db.set_defaults(func=dump_sqlite_db)
     # subparser for update_all
-    parser_prep_checkm = subparsers.add_parser('update_all', help='Update all reference data', parents=[common_parser])
-    parser_prep_checkm.set_defaults(func=update_all)
+    parser_update_all = subparsers.add_parser('update_all', help='Update all reference data', parents=[common_parser])
+    parser_update_all.set_defaults(func=update_all)
 
     args = parser.parse_args()
     if not hasattr(args, "func"):

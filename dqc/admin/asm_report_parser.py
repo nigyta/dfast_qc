@@ -29,6 +29,7 @@ class Assembly:
     ftp_path: str
     excluded_from_refseq: str
     relation_to_type_material: str
+    asm_not_live_date: str
 
     @staticmethod
     def parse(asm_report_file):

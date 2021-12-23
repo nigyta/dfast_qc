@@ -119,8 +119,8 @@ def download_genomes_parallel(accessions, out_dir=None, threads=1):
         for _accessions in list_of_accessions:
             f = executor.submit(download_genomes_from_assembly, _accessions, out_dir)
             futures.append(f)
-    [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
-
+    results = [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
+    print(results)
 
 if __name__ == "__main__":
     pass
