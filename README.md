@@ -45,9 +45,9 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
 
 1. Download master files  
     ```
-    $ dqc_admin_tools.py download_master_files --targets asm ani tsr hmm
+    $ dqc_admin_tools.py download_master_files --targets asm ani tsr hmm igp
     ```
-    This will download "Assembly report", "ANI report", and "Type strain report" from the NCBI FTP server and HMMer profile for TIGR.  
+    This will download "Assembly report", "ANI report", "Type strain report", and "indistinguishable_groups_prokaryotes.txt" from the NCBI FTP server and HMMer profile for TIGR.  
 
 2. Download/Update NCBI taxdump data
     ```

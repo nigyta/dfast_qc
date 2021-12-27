@@ -45,7 +45,7 @@ class DefaultConfig:
     PRODIGAL_CDS_FASTA = "cds.fna" 
     PRODIGAL_PROTEIN_FASTA = "protein.faa" 
     HMMER_RESULT = "hmmer_result.tsv"
-    HMMER_OPTIONS = "-E 1E-5"
+    HMMER_OPTIONS = "-E 1E-50"
     MARKER_SUMMARY_FILE = "marker.summary.tsv"
     QUERY_MARKERS_FASTA = "markers.fasta"
 

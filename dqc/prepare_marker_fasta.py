@@ -27,29 +27,33 @@ def run_hmmsearch(protein_fasta, hmm_result_out, profile_hmm):
     run_command(cmd, task_name="HMMsearch", shell=True)
 
 
-def parse_hmmer_result(hmm_result_file):
-    D = {key: None for key in config.REFERENCE_MARKERS.keys()}
+def parse_hmmer_result(hmm_result_file, allow_multi_hit=False):
+    D = {key: [] for key in config.REFERENCE_MARKERS.keys()}
     for line in open(hmm_result_file):
         if line.startswith("#"):
             continue
         cols = line.split()
         hmm_accession, gene_id = cols[3], cols[0]
-        if D[hmm_accession] is None:
-            D[hmm_accession] = gene_id
+        if allow_multi_hit:
+            D[hmm_accession].append(gene_id)
+        else:
+            if not D[hmm_accession]:
+                D[hmm_accession].append(gene_id)
     return D
 
 
 def write_fasta(cds_fasta, hmm_result, out_fasta, prefix=None):
     cds_dict = SeqIO.to_dict(SeqIO.parse(cds_fasta, "fasta"))
     out_buffer = ""
-    for hmm_accession, gene_id in hmm_result.items():
-        if gene_id:
+    for hmm_accession, gene_ids in hmm_result.items():
+        for i, gene_id in enumerate(gene_ids, 1):
             cds = cds_dict[gene_id]
             gene_symbol, product = config.REFERENCE_MARKERS[hmm_accession]
+            num = "-" + str(i) if len(gene_ids) > 1 else ""
             if prefix:
-                header = f">{prefix}_{gene_symbol} {product}"
+                header = f">{prefix}_{gene_symbol}{num} {product}"
             else:
-                header = f">{gene_symbol} {product}"
+                header = f">{gene_id}_{gene_symbol}{num} {product}"
             out_buffer += f"{header}\n{str(cds.seq)}\n"
     with open(out_fasta, "w") as f:
         f.write(out_buffer)
@@ -63,10 +67,12 @@ def prepare_work_dir(work_dir):
 def print_found_markers(hmm_result):
     ret = ""
     for key, (gene, product) in config.REFERENCE_MARKERS.items():
-        found_gene = hmm_result.get(key)
-        if found_gene is None:
-            found_gene = "not-found"
-        ret += "\t".join([key, found_gene, gene, product]) + "\n"
+        found_genes = hmm_result.get(key)
+        if found_genes:
+            found_genes = ",".join(found_genes)
+        else:
+            found_genes = "not-found"
+        ret += "\t".join([key, found_genes, gene, product]) + "\n"
     logger.debug("\n%s\n%s%s", "-"*80, ret, "-"*80)
 
 
@@ -95,8 +101,8 @@ def main(input_file, out_dir, prefix=None):
     prepare_work_dir(out_dir)
     run_prodigal(input_file_abs, cds_fasta, protein_fasta)
     run_hmmsearch(protein_fasta, hmm_result_file, reference_marker_hmm)
-    hmm_result = parse_hmmer_result(hmm_result_file)
-    found_markers = [hmm_accession for hmm_accession, gene_id in hmm_result.items() if gene_id]
+    hmm_result = parse_hmmer_result(hmm_result_file, allow_multi_hit=True)
+    found_markers = [hmm_accession for hmm_accession, gene_ids in hmm_result.items() if gene_ids]
     cnt_found_markers = len(found_markers)
     total_markers = len(hmm_result)
     if cnt_found_markers < total_markers:

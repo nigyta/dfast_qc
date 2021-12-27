@@ -69,8 +69,9 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
         result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, matched_frag, total_frag, ""]
         ret_dict = {key: value for key, value in zip(header, result_row)}
         tc_result.append(ret_dict)
-    classify_tc_hits(tc_result)
+    status = classify_tc_hits(tc_result)
     logger.info("Found %d fastANI hits (%d hits with ANI > %d%%)", hit_cnt, hit_cnt_above_cutoff, ani_threshold)
+    logger.info("The taxonomy check result is classified as '%s'.", status)
     for result in tc_result:
         ret += "\t".join([str(result[key]) for key in header]) + "\n"
     logger.info("DFAST Taxonomy check final result\n%s\n%s%s", "-"*80, ret, "-"*80)
