@@ -67,7 +67,7 @@ def classify_tc_hits(tc_result):
             break
         else:
             assert tmp_dict_indistinguishable_group == dict_indistinguishable_species
-    set_indistinguishable_taxids = set(dict_indistinguishable_species.keys())
+    set_indistinguishable_taxids = set(dict_indistinguishable_species.keys()) if dict_indistinguishable_species else set()
     logger.debug("ANI hit taxids: %s", str(accepted_hits_taxid))
 
     if len(set_indistinguishable_taxids) and status is None:
