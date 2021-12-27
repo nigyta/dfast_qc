@@ -6,6 +6,7 @@ LABEL maintainer=nigyta
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DQC_ENV docker
+ENV DQC_VERSION 0.4.1
 
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \

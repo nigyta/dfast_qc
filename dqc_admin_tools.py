@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 def download_master_files(args):
     from dqc.admin.download_master_files import download_master_files
     if args.targets is None:
-        target_files = ["asm", "ani", "tsr"]
+        target_files = ["asm", "ani", "tsr", "igp"]
     else:
         target_files = args.targets
     download_master_files(target_files)
@@ -52,7 +52,7 @@ def dump_sqlite_db(args):
 
 def update_all(args):
     from dqc.admin.download_master_files import download_master_files
-    download_master_files(target_files=["asm", "ani", "tsr"])
+    download_master_files(target_files=["asm", "ani", "tsr", "igp"])
     from dqc.admin.update_taxdump import main as update_taxdump
     update_taxdump()
     from dqc.admin.download_all_reference_genomes import download_all_genomes
