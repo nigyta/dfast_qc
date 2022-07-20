@@ -48,17 +48,17 @@ def download_all_genomes():
     logger.info("Parsed Assembly report. Number of target genomes: %d", len(target_genomes))
     existing_genomes = get_existing_genomes(genome_dir)
     existing_genomes = set(existing_genomes)
-    logger.info("Number of existing genomes in output direcotry: %d", len(existing_genomes))    
+    logger.info("Number of existing genomes in output direcotry: %d", len(existing_genomes))
     new_genomes = list(target_genomes - existing_genomes)
     unwanted_genomes = list(existing_genomes - target_genomes)
     logger.info("Number of new genomes to be downloaded: %d", len(new_genomes))    
-    logger.info("Number of unwanted genomes to be deleted: %d", len(unwanted_genomes))    
+    logger.info("Number of unwanted genomes to be deleted: %d", len(unwanted_genomes))
 
     if new_genomes:
         new_genomes = sorted(new_genomes)
         logger.info("Start downloading new genomes.")
-        download_genomes_parallel(new_genomes, out_dir=genome_dir, threads=threads)    
-        logger.info("Retrieved %d genomes.", len(new_genomes))
+        num_succeeded = download_genomes_parallel(new_genomes, out_dir=genome_dir, threads=threads)
+        logger.info("Retrieved %d genomes.", num_succeeded)
     if unwanted_genomes:
         logger.info("Start deleting unwanted genomes.")
         unwanted_genomes = sorted(unwanted_genomes)

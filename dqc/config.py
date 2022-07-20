@@ -28,7 +28,7 @@ class DefaultConfig:
     ASSEMBLY_REPORT_FILE = "assembly_summary_genbank.txt"
     ANI_REPORT_FILE = "ANI_report_prokaryotes.txt"
     TYPE_STRAIN_REPORT_FILE = "prokaryote_type_strain_report.txt"
-    INDISTINGUISHABLE_GROUPS_PROKARYOTE = "indistinguishable_groups_prokaryotes.txt"
+    INDISTINGUISHABLE_GROUPS_PROKARYOTE = "prokaryote_ANI_indistinguishable_groups.txt"
     CHECKM_DATA_ROOT = "checkm_data"
     REFERENCE_MARKERS = {
         "TIGR00665": ("dnaB", "replicative DNA helicase"),
@@ -74,7 +74,7 @@ class DefaultConfig:
         "asm": "https://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt",
         "ani": "https://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/ANI_report_prokaryotes.txt",
         "tsr": "https://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/prokaryote_type_strain_report.txt",
-        "igp": "https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/indistinguishable_groups_prokaryotes.txt",
+        "igp": "https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/prokaryote_ANI_indistinguishable_groups.txt",
         "hmm": "ftp://ftp.tigr.org//pub/data/TIGRFAMs/TIGRFAMs_15.0_HMM.LIB.gz",
         # "hmm": "https://ftp.ncbi.nlm.nih.gov/hmm/TIGRFAMs/release_15.0/TIGRFAMs_15.0_HMM.LIB.gz",
         "checkm": "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz",

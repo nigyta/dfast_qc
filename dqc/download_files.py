@@ -107,9 +107,13 @@ def download_genomes_from_assembly(accessions, out_dir=None):
         os.makedirs(out_dir)
         logger.debug("Created output directory [%s]", out_dir)
 
+    num_succeeded = 0
     for accession in accessions:
         status, retrieved_file, target_file = _download_genome(accession)
+        if status == "SUCCESS":
+            num_succeeded += 1
         logger.info("\t".join([accession, status, retrieved_file, target_file]))
+    return num_succeeded
 
 def download_genomes_parallel(accessions, out_dir=None, threads=1):
     logger.debug(f"Start downloading genomes using {threads} threads.")
@@ -120,7 +124,7 @@ def download_genomes_parallel(accessions, out_dir=None, threads=1):
             f = executor.submit(download_genomes_from_assembly, _accessions, out_dir)
             futures.append(f)
     results = [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
-    print(results)
+    return sum(results)   # number of genomes successfully retrieved
 
 if __name__ == "__main__":
     pass
@@ -129,8 +133,9 @@ if __name__ == "__main__":
     # accessions = [_.strip() for _ in accessions]
 
     # for debug
-    accessions = ["GCA_002101575.1"]
-    download_genomes_parallel(accessions, out_dir=".", threads=4)
+    accessions = ["GCA_002101575.1","GCA_024172185.1"]
+    num_succeeded = download_genomes_parallel(accessions, out_dir=".", threads=4)
+    print(num_succeeded)
     # download_genomes_parallel(["GCF_000159355.1", "GCF_001434515.1", "GCF_000185045.1","GCF_000185045.1"], out_dir=".", threads=4)
     # accessions = ["GCA_000001405.28"]  # homo sapiens
     # download_genomes_parallel(accessions, out_dir=".", threads=4)
