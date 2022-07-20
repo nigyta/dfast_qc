@@ -63,7 +63,7 @@ def classify_tc_hits(tc_result):
             dict_indistinguishable_species = tmp_dict_indistinguishable_group
         elif tmp_dict_indistinguishable_group != dict_indistinguishable_species:
             status = "inconsistent"
-            logger.warning(f"The ANI hits belong to more than one indistinguishable-group. The ANI hits were classified as 'insonsistent'. %s, %s", dict_indistinguishable_species, tmp_dict_indistinguishable_group)
+            logger.warning(f"The ANI hits belong to more than one indistinguishable-group. The ANI hits will be classified as 'insonsistent'. %s, %s", dict_indistinguishable_species, tmp_dict_indistinguishable_group)
             break
         else:
             assert tmp_dict_indistinguishable_group == dict_indistinguishable_species
