@@ -12,7 +12,8 @@ class DefaultConfig:
 
     DISABLE_TC = False
     DISABLE_CC = False
-    
+    ENABLE_GTDB = False
+
     AUTO_DOWNLOAD = True
 
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -39,7 +40,14 @@ class DefaultConfig:
         "TIGR00468": ("pheS", "phenylalanine--tRNA ligase, alpha subunit"),
         "TIGR00755": ("ksgA", "ribosomal RNA small subunit methyltransferase A"),
     }
-    REFERENCE_GENOMES_TSV ="reference_genomes.tsv"
+    REFERENCE_GENOMES_TSV = "reference_genomes.tsv"
+
+    # GTDB Reference data
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r207"  # Must be changed when a new GTDB release becomes available.
+    GTDB_REFERENCE_MARKER_DIR = "markers_gtdb"
+    GTDB_SPECIES_LIST = "sp_clusters.tsv"
+    GTDB_REFERENCE_MARKERS_FASTA = "reference_markers_gtdb.fasta"
+    GTDB_REFERENCE_SUMMARY_TSV = "reference_summary_gtdb.tsv"
 
     # output file names and options for prepare_marker_fasta
     PRODIGAL_CDS_FASTA = "cds.fna" 
@@ -58,6 +66,13 @@ class DefaultConfig:
     FASTANI_RESULT = "fastani_result.tsv"
     TC_RESULT = "tc_result.tsv"
     ANI_THRESHOLD = 95
+
+    # output file names for GTDB
+    GTDB_BLAST_RESULT = "blast.markers.gtdb.tsv"
+    GTDB_TARGET_GENOME_LIST = "target_genomes_gtdb.txt"
+    GTDB_FASTANI_RESULT = "fastani_result_gtdb.tsv"
+    GTDB_RESULT = "tc_result_gtdb.tsv"
+
 
     # output file names and options for completeness check (CheckM)
     CHECKM_INPUT_DIR = "checkm_input"
@@ -78,7 +93,9 @@ class DefaultConfig:
         # "hmm": "ftp://ftp.tigr.org//pub/data/TIGRFAMs/TIGRFAMs_15.0_HMM.LIB.gz",
         "hmm": "https://ftp.ncbi.nlm.nih.gov/hmm/TIGRFAMs/release_15.0/TIGRFAMs_15.0_HMM.LIB.gz",
         "checkm": "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz",
-        "taxdump": "https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz"
+        "taxdump": "https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz",
+        "gtdb": "https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv",
+        "gtdb_genomes": "https://data.gtdb.ecogenomic.org/releases/latest/genomic_files_reps/gtdb_genomes_reps.tar.gz" # not implemented
     }
     ADMIN = False
 

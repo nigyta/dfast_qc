@@ -2,7 +2,7 @@ import sys
 import os
 from .common import get_logger, run_command
 from argparse import ArgumentError, ArgumentParser
-from .models import Reference
+from .models import Reference, GTDB_Reference
 from .config import config
 from .download_files import download_genomes_parallel
 from .classify_tc_hits import classify_tc_hits
@@ -80,16 +80,69 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
     logger.info("DFAST Taxonomy check result was written to %s", output_file)
     return tc_result    
 
+def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_file):
+    # parse fastANI result and add organism info
+    # also, result dict will be generated
+    header = ["accession", "gtdb_species", "ani", "matched_fragments", "total_fragments", 
+        "gtdb_taxonomy", "ani_circumscription_radius", "mean_intra_species_ani", "min_intra_species_ani",
+        "mean_intra_species_af", "min_intra_species_af", "num_clustered_genomes"
+    ]
+    ret = "\t".join(header) + "\n"
+    hit_cnt, hit_cnt_above_cutoff = 0, 0
+    gtdb_result = []
+    for line in open(fastani_result_file):
+        cols = line.strip("\n").split("\t")
+        target_file, ani_value, matched_frag, total_frag = cols[1], float(cols[2]), int(cols[3]), int(cols[4])
+        accession = os.path.basename(target_file).replace("_genomic.fna.gz", "")
+        ref = GTDB_Reference.get_or_none(GTDB_Reference.accession==accession)
+        if ref:
+            gtdb_species, gtdb_taxonomy, ani_circumscription_radius = ref.gtdb_species, ref.gtdb_taxonomy, ref.ani_circumscription_radius
+            mean_intra_species_ani, min_intra_species_ani, mean_intra_species_af = ref.mean_intra_species_ani, ref.min_intra_species_ani, ref.mean_intra_species_af
+            min_intra_species_af, num_clustered_genomes, clustered_genomes = ref.min_intra_species_af, ref.num_clustered_genomes, ref.clustered_genomes
+        else:
+            gtdb_species, gtdb_taxonomy, ani_circumscription_radius = "-", "-", "-"
+            mean_intra_species_ani, min_intra_species_ani, mean_intra_species_af = "-", "-", "-"
+            min_intra_species_af, num_clustered_genomes, clustered_genomes = "-", "-", "-"
+        hit_cnt += 1
+        if ani_value > ani_circumscription_radius:
+            hit_cnt_above_cutoff += 1
+        result_row = [accession, gtdb_species, ani_value, matched_frag, total_frag,
+            gtdb_taxonomy, ani_circumscription_radius, mean_intra_species_ani, min_intra_species_ani,
+            mean_intra_species_af, min_intra_species_af, num_clustered_genomes]
+        ret_dict = {key: value for key, value in zip(header, result_row)}
+        gtdb_result.append(ret_dict)
+    # status = classify_tc_hits(gtdb_result)
+    logger.info("Found %d fastANI hits (%d hits with ANI > circumscription radius)", hit_cnt, hit_cnt_above_cutoff)
+    # logger.info("The taxonomy check result is classified as '%s'.", status)
+    for result in gtdb_result:
+        ret += "\t".join([str(result[key]) for key in header]) + "\n"
+    logger.info("GTDB search result\n%s\n%s%s", "-"*80, ret, "-"*80)
+    with open(output_file, "w") as f:
+        f.write(ret)
+    logger.info("GTDB search result was written to %s", output_file)
+    return gtdb_result
+
 def main(query_fasta, reference_list, out_dir):
     fastani_result_file = os.path.join(out_dir, config.FASTANI_RESULT)
-    dqc_result_file = os.path.join(out_dir, config.TC_RESULT)
+    tc_result_file = os.path.join(out_dir, config.TC_RESULT)
 
     check_fasta_existence(reference_list)
     run_fastani(query_fasta, reference_list, fastani_result_file)
-    tc_result = add_organism_info_to_fastani_result(fastani_result_file, dqc_result_file)
+    tc_result = add_organism_info_to_fastani_result(fastani_result_file, tc_result_file)
     if not config.DEBUG:
         os.remove(fastani_result_file)
     return tc_result
+
+def main_for_gtdb(query_fasta, reference_list, out_dir):
+    fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
+    gtdb_result_file = os.path.join(out_dir, config.GTDB_RESULT)
+
+    run_fastani(query_fasta, reference_list, fastani_result_file)
+    gtdb_result = add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, gtdb_result_file)
+    if not config.DEBUG:
+        os.remove(fastani_result_file)
+    return gtdb_result
+
 
 if __name__ == '__main__':
 
@@ -120,6 +173,11 @@ if __name__ == '__main__':
             metavar="PATH"
         )
         parser.add_argument(
+            '--for_gtdb',
+            action='store_true',
+            help='Search against GTDB.'
+        )
+        parser.add_argument(
             '--debug',
             action='store_true',
             help='Debug mode'
@@ -128,6 +186,10 @@ if __name__ == '__main__':
         return args
 
     args = parse_args()
-    # check_fasta_existence(args.reference_list)
-    main(args.input, args.reference_list, args.out_dir)
+    if args.debug:
+        config.DEBUG = True
+    if args.for_gtdb:
+        main_for_gtdb(args.input, args.reference_list, args.out_dir)
+    else:
+        main(args.input, args.reference_list, args.out_dir)
 

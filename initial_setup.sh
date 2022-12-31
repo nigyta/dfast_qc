@@ -17,7 +17,7 @@ do
 done
 echo "===================== DFAST_QC initial setup ====================="
 
-./dqc_admin_tools.py download_master_files --targets asm ani tsr hmm --num_threads $NUM_THREADS
+./dqc_admin_tools.py download_master_files --targets asm ani tsr hmm igp --num_threads $NUM_THREADS
 ./dqc_admin_tools.py update_taxdump
 ./dqc_admin_tools.py download_genomes --num_threads $NUM_THREADS
 ./dqc_admin_tools.py prepare_reference_hmm

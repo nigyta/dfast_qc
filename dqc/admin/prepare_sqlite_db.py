@@ -1,7 +1,7 @@
 import os
 from ..common import get_logger, get_ref_path
 from ..config import config
-from ..models import Reference, init_db, db
+from ..models import Reference, init_db, db, GTDB_Reference
 from .asm_report_parser import Assembly
 from .ani_report_parser import get_filtered_ANI_report
 from ..ete3_helper import get_valid_name
@@ -80,3 +80,49 @@ def prepare_sqlite_db():
     logger.info("Inserted %d Reference records.", cnt)
 
     logger.info("===== Completed preparing SQLite DB file =====")
+
+
+def prepare_sqlite_db_for_gtdb():
+    logger.info("===== Insert GTDB reference data into SQLite DB file (references.db) =====")
+
+    gtdb_species_list = get_ref_path(config.GTDB_SPECIES_LIST)
+
+    logger.debug("Reading GTDB species list: %s", gtdb_species_list)
+
+    # check output file (delete and regenerate)
+    output_sqlitedb_file = get_ref_path(config.SQLITE_REFERENCE_DB)
+    if os.path.exists(output_sqlitedb_file):
+        GTDB_Reference.drop_table()
+        db.create_tables([GTDB_Reference])
+        logger.warning("Dropped and re-created 'GTDB_Reference' table. [%s]", output_sqlitedb_file)
+    else:
+        # logger.error("SQLite DB file not found. Aborted. [%s]", output_sqlitedb_file)
+        # exit()
+        init_db()
+        logger.info("New SQLite DB is created. [%s]", output_sqlitedb_file)
+
+    cnt = 0
+    with open(gtdb_species_list) as f:
+        next(f)  # skip header line
+        for line in f:
+            cols = line.strip("\n").split("\t")
+            cnt += 1
+            accession = cols[0].replace("RS_", "").replace("GB_", "")
+            clustered_genomes = cols[9].replace("RS_", "").replace("GB_", "")
+            GTDB_Reference.create(
+                accession=accession,
+                gtdb_species=cols[1],
+                gtdb_taxonomy=cols[2],
+                ani_circumscription_radius=float(cols[3]),
+                mean_intra_species_ani=cols[4],
+                min_intra_species_ani = cols[5],
+                mean_intra_species_af=cols[6],
+                min_intra_species_af=cols[7],
+                num_clustered_genomes=int(cols[8]),
+                clustered_genomes=clustered_genomes
+            )
+            if cnt % 10000 == 0:
+                logger.info("\tInserted %d records.", cnt)
+    logger.info("Done. Inserted %d GTDB_Reference records.", cnt)
+
+    logger.info("===== Completed inserting GTDB reference data =====")

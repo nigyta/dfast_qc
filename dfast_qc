@@ -42,13 +42,6 @@ def parse_args():
         metavar="PATH",
         help="DQC reference directory (default: DQC_REFERENCE_DIR)")
     parser.add_argument(
-        "-p",
-        "--prefix",
-        type=str,
-        help="Prefix for output (for debugging use, default: None)",
-        metavar="STR"
-    )
-    parser.add_argument(
         "-n",
         "--num_threads",
         type=int,
@@ -56,13 +49,18 @@ def parse_args():
         help="Number of threads for parallel processing (default: 1)",
         metavar="INT"
     )
-    group_disable = parser.add_mutually_exclusive_group()
-    group_disable.add_argument(
+    parser.add_argument(
+        '--enable_gtdb',
+        action='store_true',
+        help='Enable additional search against GTDB Taxonomy'
+    )
+    # group_disable = parser.add_mutually_exclusive_group()
+    parser.add_argument(
         '--disable_tc',
         action='store_true',
         help='Disable taxonomy check using ANI'
     )
-    group_disable.add_argument(
+    parser.add_argument(
         '--disable_cc',
         action='store_true',
         help='Disable completeness check using CheckM'
@@ -81,6 +79,13 @@ def parse_args():
         '--debug',
         action='store_true',
         help='Debug mode'
+    )
+    parser.add_argument(
+        "-p",
+        "--prefix",
+        type=str,
+        help="Prefix for output (for debugging use, default: None)",
+        metavar="STR"
     )
     parser.add_argument(
         '--show_taxon',
@@ -105,7 +110,7 @@ if args.show_taxon:
     show_taxon()
     exit()
 if args.input_fasta is None:
-    sys.stderr.write("dfast_qc: error: Query FASTA is not specified. Aborted")
+    sys.stderr.write("dfast_qc: error: Query FASTA is not specified. Aborted\n")
     exit(1)
 # set input query
 if not os.path.isfile(args.input_fasta):
@@ -124,6 +129,8 @@ if args.num_threads:
     config.NUM_THREADS = args.num_threads
 if args.prefix:
     config.PREFIX = args.prefix
+if args.enable_gtdb:
+    config.ENABLE_GTDB = True
 if args.disable_tc:
     config.DISABLE_TC = True
 if args.disable_cc:
@@ -134,6 +141,11 @@ if args.debug:
     config.DEBUG = True
 if args.force:
     config.FORCE = True
+
+# check enabled processes
+if config.DISABLE_TC and config.DISABLE_CC and (not config.ENABLE_GTDB):
+    sys.stderr.write("dfast_qc: error: At least one process must be enabled: Taxonomy Check, Completeness Check, GTDB search.\n")
+    exit(1)
 
 # check invalid options
 if config.DISABLE_TC and config.CHECKM_TAXID is None:
@@ -149,7 +161,7 @@ logger.info("DFAST_QC pipeline started.")
 logger.info("DFAST_QC version: %s", dqc_version)
 logger.info("DQC Reference Directory: %s", config.DQC_REFERENCE_DIR)
 
-from dqc import taxonomy_check, completeness_check
+from dqc import taxonomy_check, completeness_check, gtdb_search
 
 
 if not config.DISABLE_TC:
@@ -171,7 +183,11 @@ if not config.DISABLE_CC:
 else:
     cc_result = {}
 
-dqc_result = {"tc_result": tc_result, "cc_result": cc_result}
+if config.ENABLE_GTDB:
+    gtdb_result = gtdb_search.run()
+else:
+    gtdb_result = []
+dqc_result = {"tc_result": tc_result, "cc_result": cc_result, "gtdb_result": gtdb_result}
 dqc_result_file_json = os.path.join(config.OUT_DIR, config.DQC_RESULT_JSON)
 logger.debug("DQC result json %s\n%s\n%s", "-"*80, json.dumps(dqc_result, indent=4), "-"*80)
 with open(dqc_result_file_json, "w") as f:

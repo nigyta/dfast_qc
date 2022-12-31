@@ -1,5 +1,7 @@
 # git ignore
 
+.DS_Store
+
 # for development
 dev/
 dev_old/

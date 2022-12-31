@@ -1,5 +1,6 @@
 import sys
 import os
+import glob
 import subprocess
 import shutil
 from logging import StreamHandler, FileHandler, Formatter, INFO, DEBUG, getLogger
@@ -103,3 +104,23 @@ def is_empty_file(file_name):
 
 def get_ref_path(base_name):
     return os.path.join(config.DQC_REFERENCE_DIR, base_name)
+
+def get_ref_genome_fasta(accession, for_gtdb=False):
+    if for_gtdb:
+        source_db, dir1, dir2, dir3 = accession[0:3], accession[4:7], accession[7:10], accession[10:13]
+        gtdb_genome_dir = get_ref_path(config.GTDB_GENOME_DIR)
+        return os.path.join(gtdb_genome_dir, source_db, dir1, dir2, dir3, accession + "_genomic.fna.gz")
+    else:
+        genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
+        return os.path.join(genome_dir, accession + ".fna.gz")
+
+def get_existing_gtdb_genomes():
+    # Todo: check eof, broken file
+    gtdb_genome_dir = get_ref_path(config.GTDB_GENOME_DIR)
+    glob_pat = os.path.join(gtdb_genome_dir, "*", "*", "*", "*", "*_genomic.fna.gz")
+    existing_genomes = []
+    for file_name in glob.glob(glob_pat):
+        if os.path.getsize(file_name) > 0:
+            accession = os.path.basename(file_name).replace("_genomic.fna.gz", "")
+            existing_genomes.append(accession)
+    return existing_genomes

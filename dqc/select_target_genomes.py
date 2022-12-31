@@ -1,6 +1,6 @@
 import sys
 import os
-from .common import get_logger, run_command, get_ref_path
+from .common import get_logger, run_command, get_ref_path, get_ref_genome_fasta
 from argparse import ArgumentError, ArgumentParser
 from logging import StreamHandler, Formatter, INFO, DEBUG, getLogger
 
@@ -19,8 +19,11 @@ def check_blast_db(db_path):
             cmd = ["makeblastdb", "-in", db_path, "-dbtype nucl", "-hash_index"]
             run_command(cmd, "makeblastdb", shell=True)
 
-def run_blastn(input_file, output_file):
-    db_file = get_ref_path(config.REFERENCE_MARKERS_FASTA)
+def run_blastn(input_file, output_file, for_gtdb=False):
+    if for_gtdb:
+        db_file = get_ref_path(config.GTDB_REFERENCE_MARKERS_FASTA)
+    else:
+        db_file = get_ref_path(config.REFERENCE_MARKERS_FASTA)
     blast_options = config.BLAST_OPTIONS
     check_blast_db(db_file)
     cmd = ["blastn", "-query", input_file, "-db", db_file, "-out", output_file, blast_options]
@@ -31,15 +34,15 @@ def print_selected_genomes(str_result):
     logger.debug("\n%s\n%s%s", "-"*80, str_result, "-"*80)
 
 
-def main(query_markers_fasta, out_dir):
+def main(query_markers_fasta, out_dir, for_gtdb=False):
     """
     Search query_markers_fasta against reference_markers_fasta to select target genomes.
     """
-    genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
+    # genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
     blast_result_file = os.path.join(out_dir, config.BLAST_RESULT)
     target_genome_list_file = os.path.join(out_dir, config.TARGET_GENOME_LIST)
 
-    run_blastn(query_markers_fasta, blast_result_file)
+    run_blastn(query_markers_fasta, blast_result_file, for_gtdb=for_gtdb)
 
     target_accessions = set()
     for line in open(blast_result_file):
@@ -48,7 +51,8 @@ def main(query_markers_fasta, out_dir):
         target_accessions.add(accession)
     ret, target_cnt = "", 0
     for accession in target_accessions:
-        target_genome_path = os.path.join(genome_dir, accession + ".fna.gz")
+        # target_genome_path = os.path.join(genome_dir, accession + ".fna.gz")
+        target_genome_path = get_ref_genome_fasta(accession, for_gtdb=for_gtdb)
         target_cnt += 1
         ret += target_genome_path + "\n"
     with open(target_genome_list_file, "w") as f:
@@ -81,6 +85,11 @@ if __name__ == '__main__':
             metavar="PATH"
         )
         parser.add_argument(
+            '--for_gtdb',
+            action='store_true',
+            help='Search against GTDB.'
+        )
+        parser.add_argument(
             '--debug',
             action='store_true',
             help='Debug mode'
@@ -92,5 +101,5 @@ if __name__ == '__main__':
     if args.debug:
         config.DEBUG = True
 
-    main(args.input, args.out_dir)  
+    main(args.input, args.out_dir, args.for_gtdb)  
 

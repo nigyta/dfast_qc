@@ -8,10 +8,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from more_itertools import chunked
 
 from ..config import config
-from ..common import get_logger, run_command, get_ref_path
+from ..common import get_logger, run_command, get_ref_path, get_ref_genome_fasta, get_existing_gtdb_genomes
 from ..prepare_marker_fasta import main as prepare_marker_fasta
 from .download_all_reference_genomes import get_existing_genomes
-
 logger = get_logger(__name__)
 
 def delete_unwanted_markers(unwanted_markers, marker_dir):
@@ -30,7 +29,7 @@ def get_existing_markers(marker_dir):
             existing_markers.append(accession)
     return existing_markers
 
-def concat_result_files(marker_dir):
+def concat_result_files(marker_dir, for_gtdb=False):
     def cat_files(file_list, out_file_name, chunk_no=None):
         cmd = ["cat", " ".join(file_list), ">", out_file_name]
         if chunk_no is not None:
@@ -46,7 +45,6 @@ def concat_result_files(marker_dir):
 
     def cat_files_wih_multi_threads(file_list_all, out_file_name, chunk_size=1000):
         threads = config.NUM_THREADS
-        threads = 7
         tmp_output_files = []
         futures = []
         with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
@@ -61,13 +59,20 @@ def concat_result_files(marker_dir):
         subprocess.run(rm_cmd, shell=False, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)        
 
     # concatenate reference marker FASTA
-    out_fasta = get_ref_path(config.REFERENCE_MARKERS_FASTA) # reference_markers.fasta
+    if for_gtdb:
+        out_fasta = get_ref_path(config.GTDB_REFERENCE_MARKERS_FASTA) # reference_markers.fasta
+    else:
+        out_fasta = get_ref_path(config.REFERENCE_MARKERS_FASTA) # reference_markers.fasta
     fasta_file_list = glob.glob(f"{marker_dir}/*/markers.fasta")
     cat_files_wih_multi_threads(fasta_file_list, out_fasta)
     logger.info("Reference marker FASTA was written to %s", out_fasta)
 
     # concatenate reference summary
-    out_summary = get_ref_path(config.REFERENCE_SUMMARY_TSV) # reference_summary.tsv
+    if for_gtdb:
+        out_summary = get_ref_path(config.GTDB_REFERENCE_SUMMARY_TSV) # reference_markers.fasta
+    else:
+        out_summary = get_ref_path(config.REFERENCE_SUMMARY_TSV) # reference_markers.fasta
+
     summary_file_list = glob.glob(f"{marker_dir}/*/marker.summary.tsv")
     cat_files_wih_multi_threads(summary_file_list, out_summary)
     logger.info("Reference marker summary was written to %s", out_summary)
@@ -79,24 +84,30 @@ def format_reference_fasta(reference_fasta):
     cmd = ["makeblastdb", "-in", reference_fasta, "-dbtype nucl", "-hash_index"]
     run_command(cmd, "makeblastdb", shell=True)
 
-def prepare_reference_marker_fasta(delete_existing=False):
+def prepare_reference_marker_fasta(delete_existing=False, for_gtdb=False):
     
     threads = config.NUM_THREADS
+    if for_gtdb:
+        ref_genome_dir = get_ref_path(config.GTDB_GENOME_DIR)
+        ref_marker_dir = get_ref_path(config.GTDB_REFERENCE_MARKER_DIR)
+        logger.info("===== Prepare reference marker FASTA for GTDB (%s) =====", config.GTDB_REFERENCE_MARKERS_FASTA)
+    else:
+        ref_genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
+        ref_marker_dir = get_ref_path(config.REFERENCE_MARKER_DIR)
+        logger.info("===== Prepare reference marker FASTA (%s) =====", config.REFERENCE_MARKERS_FASTA)
 
-    logger.info("===== Prepare reference marker FASTA (reference_markers.fasta) =====")
-
-
-    # check reference genome dir. (default: genomes)
-    ref_genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
+    # check reference genome dir.
     if not os.path.exists(ref_genome_dir):
         logger.error("Reference genome directory does not exist. [%s]", ref_genome_dir)
         exit(1)
-    existing_genomes = set(get_existing_genomes(ref_genome_dir))
+    if for_gtdb:
+        existing_genomes = set(get_existing_gtdb_genomes())
+    else:
+        existing_genomes = set(get_existing_genomes(ref_genome_dir))
     logger.info("Number of existing genomes : %d (%s)", len(existing_genomes), ref_genome_dir)
 
-    # check reference marker dir. (default: markers)
+    # check reference marker dir.
     # Deleted if 'delete_existing == True'
-    ref_marker_dir = get_ref_path(config.REFERENCE_MARKER_DIR)
     if delete_existing and os.path.exists(ref_marker_dir):
         shutil.rmtree(ref_marker_dir)
         logger.warning("Deleted existing markers: %s", ref_marker_dir)
@@ -118,7 +129,7 @@ def prepare_reference_marker_fasta(delete_existing=False):
         with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
         # with ProcessPoolExecutor(max_workers=num_parallel_workers) as executor:
             for accession in new_markers:
-                input_file_name = os.path.join(ref_genome_dir, accession + ".fna.gz")
+                input_file_name = get_ref_genome_fasta(accession, for_gtdb=for_gtdb)
                 marker_out_dir = os.path.join(ref_marker_dir, accession)
                 prefix = accession
                 f = executor.submit(prepare_marker_fasta, input_file_name, marker_out_dir, prefix)
@@ -127,20 +138,24 @@ def prepare_reference_marker_fasta(delete_existing=False):
 
         logger.info("Created %d markers.", len(new_markers))
 
-
+    # delete unwanted markers
     if unwanted_markers:
         logger.info("Start deleting unwanted markers.")
         unwanted_markers = sorted(unwanted_markers)
         delete_unwanted_markers(unwanted_markers, ref_marker_dir)
         logger.info("Deleted %d markers.", len(unwanted_markers))
 
-    concat_result_files(ref_marker_dir)
+    concat_result_files(ref_marker_dir, for_gtdb=for_gtdb)
     
     logger.info("===== Completed preparing reference marker FASTA =====")
 
+
 if __name__ == "__main__":
     pass
-
+    
     # for test run: python -m dqc.admin.prepare_reference_marker_fasta
     # ref_marker_dir = "dqc_reference/markers"
     # concat_result_files(ref_marker_dir)    
+    # prepare_reference_marker_fasta_GTDB()
+    # config.NUM_THREADS = 6
+    prepare_reference_marker_fasta(delete_existing=False, for_gtdb=True)

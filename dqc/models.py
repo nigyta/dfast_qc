@@ -1,5 +1,5 @@
 import argparse
-from peewee import Model, CharField, IntegerField, BooleanField, SqliteDatabase
+from peewee import Model, CharField, IntegerField, BooleanField, SqliteDatabase, FloatField
 from .common import get_ref_path
 from .config import config
 
@@ -39,10 +39,29 @@ class Taxon(Model):  # for checkm reference data
     def __str__(self):
         return f"<{self.taxid}: {self.rank} {self.taxon}>"
 
+class GTDB_Reference(Model):
+    # Representative genome   GTDB species    GTDB taxonomy   ANI circumscription radius      Mean intra-species ANI  Min intra-species ANI   Mean intra-species AF   Min intra-species AF    No. clustered genomes     Clustered genomes
+    accession = CharField(primary_key=True)
+    gtdb_species = CharField()
+    gtdb_taxonomy = CharField()
+    ani_circumscription_radius = FloatField()
+    mean_intra_species_ani = CharField()
+    min_intra_species_ani = CharField()    
+    mean_intra_species_af = CharField()
+    min_intra_species_af = CharField()
+    num_clustered_genomes = IntegerField()
+    clustered_genomes = CharField()
+
+    class Meta:
+        database = db
+
+    def __str__(self):
+        return f"<GTDB: {self.accession}, {self.gtdb_species}>"
+
 
 def init_db():
     db.connect()
-    db.create_tables([Reference, Taxon])
+    db.create_tables([Reference, Taxon, GTDB_Reference])
 
 
 if __name__ == '__main__':
