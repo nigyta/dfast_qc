@@ -52,7 +52,7 @@ def parse_args():
     parser.add_argument(
         '--enable_gtdb',
         action='store_true',
-        help='Enable additional search against GTDB Taxonomy'
+        help='Enable GTDB search'
     )
     # group_disable = parser.add_mutually_exclusive_group()
     parser.add_argument(
@@ -148,8 +148,8 @@ if config.DISABLE_TC and config.DISABLE_CC and (not config.ENABLE_GTDB):
     exit(1)
 
 # check invalid options
-if config.DISABLE_TC and config.CHECKM_TAXID is None:
-    sys.stderr.write("dfast_qc: error: '--taxid' is required when '--disable_tc' is specified.\n")
+if config.DISABLE_TC and config.CHECKM_TAXID is None and (not config.DISABLE_CC):
+    sys.stderr.write("dfast_qc: error: '--taxid' is required to conduct completeness check when '--disable_tc' is specified.\n")
     exit(1)
 
 from dqc.common import get_logger, prepare_output_directory

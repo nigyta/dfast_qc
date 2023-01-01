@@ -85,8 +85,7 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
     # also, result dict will be generated
     header = ["accession", "gtdb_species", "ani", "matched_fragments", "total_fragments", 
         "gtdb_taxonomy", "ani_circumscription_radius", "mean_intra_species_ani", "min_intra_species_ani",
-        "mean_intra_species_af", "min_intra_species_af", "num_clustered_genomes"
-    ]
+        "mean_intra_species_af", "min_intra_species_af", "num_clustered_genomes", "status"]
     ret = "\t".join(header) + "\n"
     hit_cnt, hit_cnt_above_cutoff = 0, 0
     gtdb_result = []
@@ -98,20 +97,31 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
         if ref:
             gtdb_species, gtdb_taxonomy, ani_circumscription_radius = ref.gtdb_species, ref.gtdb_taxonomy, ref.ani_circumscription_radius
             mean_intra_species_ani, min_intra_species_ani, mean_intra_species_af = ref.mean_intra_species_ani, ref.min_intra_species_ani, ref.mean_intra_species_af
-            min_intra_species_af, num_clustered_genomes, clustered_genomes = ref.min_intra_species_af, ref.num_clustered_genomes, ref.clustered_genomes
+            min_intra_species_af, num_clustered_genomes, status = ref.min_intra_species_af, ref.num_clustered_genomes, "-" # ref.clustered_genomes
         else:
             gtdb_species, gtdb_taxonomy, ani_circumscription_radius = "-", "-", "-"
             mean_intra_species_ani, min_intra_species_ani, mean_intra_species_af = "-", "-", "-"
-            min_intra_species_af, num_clustered_genomes, clustered_genomes = "-", "-", "-"
+            min_intra_species_af, num_clustered_genomes, status = "-", "-", "-"
         hit_cnt += 1
         if ani_value > ani_circumscription_radius:
             hit_cnt_above_cutoff += 1
         result_row = [accession, gtdb_species, ani_value, matched_frag, total_frag,
             gtdb_taxonomy, ani_circumscription_radius, mean_intra_species_ani, min_intra_species_ani,
-            mean_intra_species_af, min_intra_species_af, num_clustered_genomes]
+            mean_intra_species_af, min_intra_species_af, num_clustered_genomes, status]
         ret_dict = {key: value for key, value in zip(header, result_row)}
         gtdb_result.append(ret_dict)
-    # status = classify_tc_hits(gtdb_result)
+
+    # add status to hits
+    if hit_cnt_above_cutoff == 1:
+        status = "conclusive"
+    elif hit_cnt_above_cutoff > 1:
+        status = "inconclusive"
+    else:
+        status = "-" 
+    for ret_dict in gtdb_result:
+        if ret_dict["ani"] >= ret_dict["ani_circumscription_radius"]:
+            ret_dict["status"] = status
+
     logger.info("Found %d fastANI hits (%d hits with ANI > circumscription radius)", hit_cnt, hit_cnt_above_cutoff)
     # logger.info("The taxonomy check result is classified as '%s'.", status)
     for result in gtdb_result:
