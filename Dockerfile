@@ -12,7 +12,6 @@ RUN cd / && \
 	conda install -y -c bioconda biopython fastani blast checkm-genome
 	# conda install -y -c bioconda fastani blast hmmer prodigal
 
-ENV DQC_VERSION 0.4.2
 
 #	pip install -r /dfast_qc/requirements.txt && \
 #	pip install ete3==3.1.2 more-itertools==8.2.0 peewee==3.14.4 && \
@@ -23,6 +22,8 @@ RUN	git clone https://github.com/nigyta/dfast_qc.git && \
 	mkdir -p /dqc_reference/checkm_data && \
 	checkm data setRoot /dqc_reference/checkm_data && \
 	conda clean --all -y
+
+ENV DQC_VERSION 0.5.1
 
 
 WORKDIR /work
