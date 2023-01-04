@@ -62,6 +62,10 @@ def prepare_output_directory():
             config.TC_RESULT,
             config.CC_RESULT,
             config.DQC_RESULT_JSON,
+            config.GTDB_BLAST_RESULT,
+            config.GTDB_TARGET_GENOME_LIST,
+            config.GTDB_FASTANI_RESULT,
+            config.GTDB_RESULT,
             config.LOG_FILE,
             "checkm.log",
         ]
@@ -105,11 +109,16 @@ def is_empty_file(file_name):
 def get_ref_path(base_name):
     return os.path.join(config.DQC_REFERENCE_DIR, base_name)
 
+def get_gtdb_ref_genome_dir(accession):
+    source_db, dir1, dir2, dir3 = accession[0:3], accession[4:7], accession[7:10], accession[10:13]
+    gtdb_genome_dir = get_ref_path(config.GTDB_GENOME_DIR)
+    gtdb_ref_fasta_dir = os.path.join(gtdb_genome_dir, source_db, dir1, dir2, dir3)
+    return gtdb_ref_fasta_dir
+
 def get_ref_genome_fasta(accession, for_gtdb=False):
     if for_gtdb:
-        source_db, dir1, dir2, dir3 = accession[0:3], accession[4:7], accession[7:10], accession[10:13]
-        gtdb_genome_dir = get_ref_path(config.GTDB_GENOME_DIR)
-        return os.path.join(gtdb_genome_dir, source_db, dir1, dir2, dir3, accession + "_genomic.fna.gz")
+        gtdb_ref_fasta_dir = get_gtdb_ref_genome_dir(accession)
+        return os.path.join(gtdb_ref_fasta_dir, accession + "_genomic.fna.gz")
     else:
         genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
         return os.path.join(genome_dir, accession + ".fna.gz")

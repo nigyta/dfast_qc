@@ -94,6 +94,9 @@ def main(input_file, out_dir, prefix=None):
     out_query_marker_fasta = os.path.join(out_dir, config.QUERY_MARKERS_FASTA)
     out_summary_file = os.path.join(out_dir, config.MARKER_SUMMARY_FILE)
 
+    if os.path.exists(out_query_marker_fasta):
+        logger.info("Query marker FASTA already exists. Will reuse it. (%s)", out_query_marker_fasta)
+        return out_query_marker_fasta
     if not os.path.exists(reference_marker_hmm):
         logger.error("Reference marker HMM does not exist. (%s)", reference_marker_hmm)
         exit(1)

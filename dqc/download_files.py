@@ -6,12 +6,12 @@ from urllib.error import HTTPError, URLError
 from http.client import RemoteDisconnected
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from more_itertools import distribute
-from .common import get_logger, get_ref_path
+from .common import get_logger, get_ref_path, get_gtdb_ref_genome_dir
 from .config import config
 
 logger = get_logger(__name__)
 
-def download_genomes_from_assembly(accessions, out_dir=None):
+def download_genomes_from_assembly(accessions, out_dir=None, for_gtdb=False):
     def _get_base_directory(accession):
         path1, path2, path3, path4 = accession[0:3], accession[4:7], accession[7:10], accession[10:13]
         return "/".join(["/genomes", "all", path1, path2, path3, path4])
@@ -61,8 +61,11 @@ def download_genomes_from_assembly(accessions, out_dir=None):
             os.remove(file_name)
             logger.warning(f"Removed broken file [{file_name}]")
 
-    def _download_genome(accession, max_retry=3):
-        output_file = os.path.join(out_dir, accession + ".fna.gz")
+    def _download_genome(accession, max_retry=3, out_dir=None, for_gtdb=for_gtdb):
+        if for_gtdb:
+            output_file = os.path.join(out_dir, accession + "_genomic.fna.gz")
+        else:
+            output_file = os.path.join(out_dir, accession + ".fna.gz")            
         logger.debug(f"Downloading genomic FASTA file for {accession}")
         n_trial = 1
         while n_trial <= max_retry:
@@ -100,28 +103,33 @@ def download_genomes_from_assembly(accessions, out_dir=None):
         logger.error(f"Failed to download the genome FASTA for {accession}")
         return "FAIL", "-", "-"
 
-    if out_dir is None:
+    if out_dir is None and not for_gtdb:
         out_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
         logger.debug("Files will be downloaded to %s", out_dir)
-    if not os.path.exists(out_dir):
+    if out_dir is not None and not os.path.exists(out_dir):
         os.makedirs(out_dir)
         logger.debug("Created output directory [%s]", out_dir)
 
     num_succeeded = 0
     for accession in accessions:
-        status, retrieved_file, target_file = _download_genome(accession)
+        if out_dir is None and for_gtdb:
+            out_dir = get_gtdb_ref_genome_dir(accession)
+            logger.debug("GTDB reference genome will be downloaded to %s", out_dir)
+            os.makedirs(out_dir, exist_ok=True)
+
+        status, retrieved_file, target_file = _download_genome(accession, out_dir=out_dir, for_gtdb=for_gtdb)
         if status == "SUCCESS":
             num_succeeded += 1
         logger.info("\t".join([accession, status, retrieved_file, target_file]))
     return num_succeeded
 
-def download_genomes_parallel(accessions, out_dir=None, threads=1):
+def download_genomes_parallel(accessions, out_dir=None, threads=1, for_gtdb=False):
     logger.debug(f"Start downloading genomes using {threads} threads.")
     list_of_accessions = distribute(threads, accessions)  # divide accession list into num of threads
     futures = []
     with ThreadPoolExecutor(max_workers=threads, thread_name_prefix="thread") as executor:
         for _accessions in list_of_accessions:
-            f = executor.submit(download_genomes_from_assembly, _accessions, out_dir)
+            f = executor.submit(download_genomes_from_assembly, _accessions, out_dir, for_gtdb=for_gtdb)
             futures.append(f)
     results = [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
     return sum(results)   # number of genomes successfully retrieved
@@ -133,9 +141,16 @@ if __name__ == "__main__":
     # accessions = [_.strip() for _ in accessions]
 
     # for debug
-    accessions = ["GCA_002101575.1","GCA_024172185.1"]
-    num_succeeded = download_genomes_parallel(accessions, out_dir=".", threads=4)
+    # accessions = ["GCA_002101575.1","GCA_024172185.1"]
+    # num_succeeded = download_genomes_parallel(accessions, out_dir=".", threads=4)
+    # print(num_succeeded)
+
+    # for GTDB debug
+    accessions = ["GCA_910585095.1"]
+    num_succeeded = download_genomes_parallel(accessions, out_dir=None, threads=4, for_gtdb=True)
     print(num_succeeded)
+
+
     # download_genomes_parallel(["GCF_000159355.1", "GCF_001434515.1", "GCF_000185045.1","GCF_000185045.1"], out_dir=".", threads=4)
     # accessions = ["GCA_000001405.28"]  # homo sapiens
     # download_genomes_parallel(accessions, out_dir=".", threads=4)

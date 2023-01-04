@@ -39,8 +39,12 @@ def main(query_markers_fasta, out_dir, for_gtdb=False):
     Search query_markers_fasta against reference_markers_fasta to select target genomes.
     """
     # genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
-    blast_result_file = os.path.join(out_dir, config.BLAST_RESULT)
-    target_genome_list_file = os.path.join(out_dir, config.TARGET_GENOME_LIST)
+    if for_gtdb:
+        blast_result_file = os.path.join(out_dir, config.GTDB_BLAST_RESULT)
+        target_genome_list_file = os.path.join(out_dir, config.GTDB_TARGET_GENOME_LIST)
+    else:
+        blast_result_file = os.path.join(out_dir, config.BLAST_RESULT)
+        target_genome_list_file = os.path.join(out_dir, config.TARGET_GENOME_LIST)
 
     run_blastn(query_markers_fasta, blast_result_file, for_gtdb=for_gtdb)
 

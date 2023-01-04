@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 ani_threshold = config.ANI_THRESHOLD
 
-def check_fasta_existence(reference_list_file):
+def check_fasta_existence(reference_list_file, for_gtdb=False):
     """
     Check if reference genomes exist. If not, missing genomes will be downloaded from AssemblyDB.
     """
@@ -22,7 +22,7 @@ def check_fasta_existence(reference_list_file):
     for file_name in reference_files:
         if not os.path.exists(file_name):
             base_name = os.path.basename(file_name)
-            accession = base_name.replace(".fna.gz", "")
+            accession = base_name.replace(".fna.gz", "").replace("_genomic", "")  # Trimming "_genomic" for GTDB genomes.
             logger.warning("%s does not exist.", base_name)
             missing_genomes.append(accession)
         else:
@@ -32,7 +32,7 @@ def check_fasta_existence(reference_list_file):
         return
     if config.AUTO_DOWNLOAD:
         logger.info("Will try to download missing genomes.")
-        download_genomes_parallel(missing_genomes, threads=num_threads)
+        download_genomes_parallel(missing_genomes, threads=num_threads, for_gtdb=for_gtdb)
     else:
         # Remove missing target genomes
         missing_genomes = ",".join(missing_genomes)
@@ -147,6 +147,7 @@ def main_for_gtdb(query_fasta, reference_list, out_dir):
     fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
     gtdb_result_file = os.path.join(out_dir, config.GTDB_RESULT)
 
+    check_fasta_existence(reference_list, for_gtdb=True)
     run_fastani(query_fasta, reference_list, fastani_result_file)
     gtdb_result = add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, gtdb_result_file)
     if not config.DEBUG:

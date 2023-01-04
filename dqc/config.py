@@ -71,7 +71,7 @@ class DefaultConfig:
     GTDB_BLAST_RESULT = "blast.markers.gtdb.tsv"
     GTDB_TARGET_GENOME_LIST = "target_genomes_gtdb.txt"
     GTDB_FASTANI_RESULT = "fastani_result_gtdb.tsv"
-    GTDB_RESULT = "tc_result_gtdb.tsv"
+    GTDB_RESULT = "result_gtdb.tsv"
 
 
     # output file names and options for completeness check (CheckM)
