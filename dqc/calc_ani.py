@@ -192,8 +192,5 @@ if __name__ == '__main__':
     args = parse_args()
     if args.debug:
         config.DEBUG = True
-    if args.for_gtdb:
-        main_for_gtdb(args.input, args.reference_list, args.out_dir)
-    else:
-        main(args.input, args.reference_list, args.out_dir)
+    main(args.input, args.reference_list, args.out_dir, for_gtdb=args.for_gtdb)
 
