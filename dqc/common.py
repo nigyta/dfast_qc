@@ -133,3 +133,14 @@ def get_existing_gtdb_genomes():
             accession = os.path.basename(file_name).replace("_genomic.fna.gz", "")
             existing_genomes.append(accession)
     return existing_genomes
+
+def fasta_reader(fasta_file_name):
+    with open(fasta_file_name) as f:
+        entries = f.read().strip(">").split("\n>")
+    D = {}
+    for entry in entries:
+        lines = entry.strip().split("\n")
+        seq_id = lines[0].split()[0]  # first line of the entry
+        seq = "".join(lines[1:]).upper()  # remaining lines of the entry
+        D[seq_id] = seq
+    return D

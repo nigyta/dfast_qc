@@ -4,8 +4,8 @@ import tempfile
 import subprocess
 from argparse import ArgumentError, ArgumentParser
 from logging import StreamHandler, Formatter, INFO, DEBUG, getLogger
-from Bio import SeqIO
-from .common import get_logger, run_command, get_ref_path
+# from Bio import SeqIO
+from .common import get_logger, run_command, get_ref_path, fasta_reader
 from .config import config
 
 logger = get_logger(__name__)
@@ -43,7 +43,8 @@ def parse_hmmer_result(hmm_result_file, allow_multi_hit=False):
 
 
 def write_fasta(cds_fasta, hmm_result, out_fasta, prefix=None):
-    cds_dict = SeqIO.to_dict(SeqIO.parse(cds_fasta, "fasta"))
+    # cds_dict = SeqIO.to_dict(SeqIO.parse(cds_fasta, "fasta"))
+    cds_dict = fasta_reader(cds_fasta)
     out_buffer = ""
     for hmm_accession, gene_ids in hmm_result.items():
         for i, gene_id in enumerate(gene_ids, 1):
@@ -54,7 +55,8 @@ def write_fasta(cds_fasta, hmm_result, out_fasta, prefix=None):
                 header = f">{prefix}_{gene_symbol}{num} {product}"
             else:
                 header = f">{gene_id}_{gene_symbol}{num} {product}"
-            out_buffer += f"{header}\n{str(cds.seq)}\n"
+            # out_buffer += f"{header}\n{str(cds.seq)}\n"
+            out_buffer += f"{header}\n{cds}\n"
     with open(out_fasta, "w") as f:
         f.write(out_buffer)
 
