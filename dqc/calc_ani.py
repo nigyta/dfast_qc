@@ -142,7 +142,10 @@ def main(query_fasta, reference_list, out_dir, for_gtdb=False):
 
     check_fasta_existence(reference_list, for_gtdb=for_gtdb)
     run_fastani(query_fasta, reference_list, fastani_result_file)
-    tc_result = add_organism_info_to_fastani_result(fastani_result_file, result_file)
+    if for_gtdb:
+        tc_result = add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, result_file)
+    else:
+        tc_result = add_organism_info_to_fastani_result(fastani_result_file, result_file)
     if not config.DEBUG:
         os.remove(fastani_result_file)
     return tc_result
