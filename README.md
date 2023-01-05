@@ -3,23 +3,53 @@
 DFAST_QC conducts taxonomy and completeness check of the assembled genome.  
 
 - Taxonomy check  
-DFAST_QC evaluates taxonomic identity of the genome by querying against 13,000 reference genomes from type strains. To shorten the runtime, it first inspects  universally-conserved housekeeping genes, such as _dnaB_ and _rpsA_ in the query genome, and they are searched against reference nucleotide databases to narrow down the number of genomes used in the downstream process. Then, average nucleotide identity is calculated against the selected reference genomes.  
+DFAST_QC evaluates taxonomic identity of the genome by querying against more than 15,000 reference genomes from type strains. To shorten the runtime, it first searches for universally-conserved housekeeping genes, such as _dnaB_ and _rpsA_ in the query genome, and they are queried against reference nucleotide databases to narrow down the number of genomes used in the downstream process. Then, average nucleotide identity is calculated against the selected reference genomes.  
 DFAST_QC uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
 
 - Completeness check  
 DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also arbitrarily specify the marker set to be used.
 
-## Installation
+- GTDB search  
+As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes, thereby enabling species-level identification in the GTDB Taxonomy. Thie employs the same 2-step search as Taxonomy check
+
+## System requirements and software dependencies
+DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 16Gbyte of memory. 
+The following third party softwares/packages are required.  
+- FastANI  
+- HMMer  
+- NCBI BLAST  
+- Prodigal  
+- CheckM  
+- Python packages: peewee, more-itertools, ete3  
+
+## Installation from source code
 1. Source code
     ```
     $ git clone https://github.com/nigyta/dfast_qc.git
     ```
-2. Install dependency
+2. Install dependencies  
+    We recommend using conda to install dependencies.  
     ```
     $ cd dfast_qc
+    $ conda env create -f environment.yml
+    ```
+    This will create a conda environment named "dfast_qc" and install the above-mentioned dependencies in it.  
+
+    Alternatively, after installing required softwares by yourself, you can install Python packages with the `pip` command.
+    ```
     $ pip install -r requirements.txt
     ```
-Alternatively, DFAST_QC is available from [BioConda](https://bioconda.github.io/recipes/dfast_qc/README.html).
+
+    __[Trouble shoot]__  
+    If `fastANI` installed with the `conda` command does not work, please uninstall and re-install it with the commands below.  
+    ```
+    $ conda uninstall fastani
+    $ conda install -c bioconda -c conda-forge fastani
+    ```
+
+
+## Installation from Bioconda
+DFAST_QC is also available from [BioConda](https://bioconda.github.io/recipes/dfast_qc/README.html).
 ```
 conda install -c bioconda dfast_qc
 ```
@@ -33,7 +63,7 @@ __To prepare reference data, run the following command.__
 ```
 $ sh initial_setup.sh [-n int]
 ```
-`-n` denotes number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended to specify 4~8 for `-n`.
+`-n` denotes the number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended specifying the value 4~8 (or more) for `-n`.
 
 __Once reference data has been prepared, it can be updated by running command__
 ```
@@ -97,16 +127,22 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
     ```
     $ dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --num_threads 2
     ```
+- GTDB search (disabled by default)  
+    ```
+    $ dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --enable_gtdb [--disable_tc] [--disable_cc]
+    ```
 
 ```
-usage: dfast_qc [-h] [-i PATH] [-o PATH] [-t INT] [-r PATH] [-p STR] [-n INT]
-                [--disable_tc | --disable_cc] [--force] [--debug]
+usage: dfast_qc [-h] [--version] [-i PATH] [-o PATH] [-t INT] [-r PATH]
+                [-n INT] [--enable_gtdb] [--disable_tc] [--disable_cc]
+                [--disable_auto_download] [--force] [--debug] [-p STR]
                 [--show_taxon]
 
 DFAST_QC: Taxonomy and completeness check
 
 optional arguments:
   -h, --help            show this help message and exit
+  --version             Show program version
   -i PATH, --input_fasta PATH
                         Input FASTA file (raw or gzipped) [required]
   -o PATH, --out_dir PATH
@@ -116,13 +152,16 @@ optional arguments:
                         from taxonomy check)
   -r PATH, --ref_dir PATH
                         DQC reference directory (default: DQC_REFERENCE_DIR)
-  -p STR, --prefix STR  Prefix for output (for debugging use, default: None)
   -n INT, --num_threads INT
                         Number of threads for parallel processing (default: 1)
+  --enable_gtdb         Enable GTDB search
   --disable_tc          Disable taxonomy check using ANI
   --disable_cc          Disable completeness check using CheckM
+  --disable_auto_download
+                        Disable auto-download for missing reference genomes
   --force               Force overwriting result
   --debug               Debug mode
+  -p STR, --prefix STR  Prefix for output (for debugging use, default: None)
   --show_taxon          Show available taxa for competeness check
   ```
 
@@ -166,7 +205,35 @@ optional arguments:
     }
     ```
 
-### List of status in taxonomy check result
+## Preparation for the GTDB reference data.
+1. Download the representative genomes from GTDB and unarchive it.
+    ```
+    $ curl -LO https://data.gtdb.ecogenomic.org/releases/latest/genomic_files_reps/gtdb_genomes_reps.tar.gz
+    $ tar xfz gtdb_genomes_reps.tar.gz
+    ```
+2. Place the unarchived folder under `DQC_REFERENCE`.  
+Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` specified in [config.py](dqc/config.py).  
+    ```
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r207"
+    ```
+3. Download the species list from GTDB.  
+    ```
+    curl -LO https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv
+    ```
+    The above command will download [this file](https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv) from GTDB.
+4. Create a reference marker FASTA for GTDB representative genomes  
+    This may take time since it tries to identify marker genes for more than 60,000 representative genomes.
+    ```
+    dqc_admin_tools.py prepare_reference_fasta --for_gtdb [--delete_existing_marker] [--num_threads 6]
+    ```
+5. Prepare the SQLite DB file for GTDB  
+    ```
+    dqc_admin_tools.py prepare_sqlite_db --for_gtdb
+    ```
+
+When the newer version of the GTDB representative genomes become available, repeat these steps.
+
+## List of status in taxonomy check result
 - __conclusive__: Effective ANI hit (>=95%) againt only 1 species, hence the species name is conclusively determined.
 - __indistinguishable__: The genome belongs to one of the species that are difficult to distinguish using ANI (e.g. E. coli and Shigella spp.) 
 - __inconsistent__: ANI hits against more than 2 differenct species. This may result from the comparison between very closely-related species or contamination of 2 different species.
