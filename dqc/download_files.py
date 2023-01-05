@@ -103,20 +103,22 @@ def download_genomes_from_assembly(accessions, out_dir=None, for_gtdb=False):
         logger.error(f"Failed to download the genome FASTA for {accession}")
         return "FAIL", "-", "-"
 
-    if out_dir is None and not for_gtdb:
-        out_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
-        logger.debug("Files will be downloaded to %s", out_dir)
-    if out_dir is not None and not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-        logger.debug("Created output directory [%s]", out_dir)
+    # main part starts from here
+
+    if not for_gtdb:
+        if out_dir is None:
+            out_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
+            logger.debug("Files will be downloaded to %s", out_dir)
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+            logger.debug("Created output directory [%s]", out_dir)
 
     num_succeeded = 0
     for accession in accessions:
-        if out_dir is None and for_gtdb:
+        if for_gtdb:
             out_dir = get_gtdb_ref_genome_dir(accession)
             logger.debug("GTDB reference genome will be downloaded to %s", out_dir)
             os.makedirs(out_dir, exist_ok=True)
-
         status, retrieved_file, target_file = _download_genome(accession, out_dir=out_dir, for_gtdb=for_gtdb)
         if status == "SUCCESS":
             num_succeeded += 1

@@ -132,27 +132,20 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
     logger.info("GTDB search result was written to %s", output_file)
     return gtdb_result
 
-def main(query_fasta, reference_list, out_dir):
-    fastani_result_file = os.path.join(out_dir, config.FASTANI_RESULT)
-    tc_result_file = os.path.join(out_dir, config.TC_RESULT)
+def main(query_fasta, reference_list, out_dir, for_gtdb=False):
+    if for_gtdb:
+        fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
+        result_file = os.path.join(out_dir, config.GTDB_RESULT)
+    else:
+        fastani_result_file = os.path.join(out_dir, config.FASTANI_RESULT)
+        result_file = os.path.join(out_dir, config.TC_RESULT)
 
-    check_fasta_existence(reference_list)
+    check_fasta_existence(reference_list, for_gtdb=for_gtdb)
     run_fastani(query_fasta, reference_list, fastani_result_file)
-    tc_result = add_organism_info_to_fastani_result(fastani_result_file, tc_result_file)
+    tc_result = add_organism_info_to_fastani_result(fastani_result_file, result_file)
     if not config.DEBUG:
         os.remove(fastani_result_file)
     return tc_result
-
-def main_for_gtdb(query_fasta, reference_list, out_dir):
-    fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
-    gtdb_result_file = os.path.join(out_dir, config.GTDB_RESULT)
-
-    check_fasta_existence(reference_list, for_gtdb=True)
-    run_fastani(query_fasta, reference_list, fastani_result_file)
-    gtdb_result = add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, gtdb_result_file)
-    if not config.DEBUG:
-        os.remove(fastani_result_file)
-    return gtdb_result
 
 
 if __name__ == '__main__':

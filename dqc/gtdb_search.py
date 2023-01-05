@@ -4,7 +4,7 @@ import os
 from .common import get_logger, is_empty_file
 from .select_target_genomes import main as select_target_genomes
 from .prepare_marker_fasta import main as prepare_marker_fasta
-from .calc_ani import main_for_gtdb as calc_ani_for_gtdb
+from .calc_ani import main as calc_ani
 
 from .config import config
 
@@ -27,6 +27,6 @@ def run():
         gtdb_result = []
         return gtdb_result
 
-    gtdb_result = calc_ani_for_gtdb(input_file, target_genome_list_file, out_dir)
+    gtdb_result = calc_ani(input_file, target_genome_list_file, out_dir, for_gtdb=True)
     logger.info("===== GTDB Search completed =====")
     return gtdb_result
