@@ -3,7 +3,7 @@
 import os
 import shutil
 import gzip
-from .common import get_logger, is_empty_file, run_command
+from .common import get_logger, run_command, get_ref_path
 from .ete3_helper import get_ascendants, get_names
 from .models import Taxon
 from .config import config
@@ -67,6 +67,10 @@ def run():
     checkm_result_file = os.path.join(out_dir, config.CC_RESULT)
 
     logger.info("===== Start completeness check using CheckM =====")
+    checkm_data_path = get_ref_path(config.CHECKM_DATA_ROOT)
+    os.environ["CHECKM_DATA_PATH"] = checkm_data_path
+    logger.info("Setting CHECKM_DATA_PATH to %s", checkm_data_path)
+
     checkm_rank, checkm_taxon = get_checkm_taxon(checkm_taxid)
     prepare_checkm_genome(input_file, checkm_input_dir)
     cmd = [
