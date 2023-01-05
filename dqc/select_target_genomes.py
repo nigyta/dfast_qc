@@ -10,7 +10,7 @@ from .config import config
 
 
 def check_blast_db(db_path):
-    if not os.path.exists(db_path):
+    if not os.path.exists(db_path + ".nhi"):
         logger.error("Reference marker FASTA does not exist. (%s)", db_path)
         exit(1)
     else:
