@@ -147,7 +147,6 @@ def parse_args():
     if not hasattr(args, "func"):
         parser.print_help()
         exit()
-    check_ref_type(args)
     return args
 
 if __name__ == "__main__":
@@ -159,4 +158,5 @@ if __name__ == "__main__":
         config.DQC_REFERENCE_DIR = args.ref_dir
     if args.num_threads:
         config.NUM_THREADS = args.num_threads
+    check_ref_type(args)
     args.func(args)
