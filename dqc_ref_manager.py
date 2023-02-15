@@ -7,10 +7,15 @@ import json
 import subprocess
 from datetime import datetime
 from argparse import ArgumentParser
+from urllib.request import urlretrieve
+from urllib.error import HTTPError, URLError
 from dqc.config import config
-from dqc.common import get_logger, get_ref_inf, get_ref_path
+from dqc.common import get_logger, get_ref_inf, get_ref_path, safe_tar_extraction
 
 # logger = None
+
+# DQC_REF_URL = "http://localhost:8000/"  # for debug
+DQC_REF_URL = "https://dfast.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
 
 def dump_dqc_reference(args):
     """
@@ -85,8 +90,74 @@ def dump_dqc_reference(args):
     logger.info(f"Done.")
 
 def download_dqc_reference(args):
-    print("download. To be implemented")
 
+    # Check input string
+    if args.date:
+        if len(args.date) != 8:
+            logger.error("Invalid format. Specify date in 'YYYYMMDD'. Aborted.")
+            exit(1)
+        base_name = f"dqc_reference_compact_{args.date}.tar.gz"
+    else:
+        base_name = "dqc_reference_compact_latest.tar.gz"
+
+    # Check existing data    
+    dqc_reference_dir = config.DQC_REFERENCE_DIR
+    if os.path.exists(dqc_reference_dir):
+    
+        ref_inf = get_ref_inf()
+        ref_version = ref_inf.get("version", "n.a.")
+        ref_type = ref_inf.get("type", "n.a.")
+        if ref_type != "compact":
+            logger.info("Current version=%s, DB_Type=%s", ref_version, ref_type)
+            logger.error("You cannot update '%s' with this script! Please delete the existing directory or specify '--ref_dir' option.", dqc_reference_dir)
+            exit(1)
+        else:
+            logger.info("Try to update existing data '%s'.", dqc_reference_dir)
+            logger.info("Current version=%s, DB_Type=%s", ref_version, ref_type)
+    else:
+        logger.info("Try to download DQC_REFERENCE_COMPACT into a new directory '%s'.", dqc_reference_dir)
+
+    url = DQC_REF_URL + base_name
+    tmp_work_dir = "tmp_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+    logger.debug("Creating temporary working directory '%s'", tmp_work_dir)
+    os.makedirs(tmp_work_dir)
+    logger.info("Downloading DQC_REFERENCE_COMPACT from %s", url)
+    dest_path = os.path.join(tmp_work_dir, base_name)
+    try:
+        urlretrieve(url, dest_path)
+    except HTTPError as e:
+        logger.error("HTTPError. Failed to download resources from %s", url)
+        if args.date:
+            logger.error("Please check the database version you specified. [%s]", args.date)
+        if os.path.exists(tmp_work_dir):
+            shutil.rmtree(tmp_work_dir)
+        exit(1)
+    except URLError as e:
+        logger.error("URLError. Failed to download resources from %s", url)
+        exit(1)
+
+    logger.info(f"Downloaded {base_name}. Extracting...")
+    safe_tar_extraction(dest_path, tmp_work_dir)
+    extracted_dir = os.path.join(tmp_work_dir, "dqc_reference_compact")
+
+    if not os.path.exists(dqc_reference_dir):
+        logger.info("Creating directory %s", dqc_reference_dir)
+        os.makedirs(dqc_reference_dir)
+
+    # copy files
+    for file_name in os.listdir(extracted_dir):
+        src = os.path.join(extracted_dir, file_name)
+        dst = os.path.join(dqc_reference_dir, file_name)
+        logger.debug("Moving '%s' to '%s'", src, dst)
+        if os.path.exists(dst) and os.path.isdir(dst):
+            shutil.rmtree(dst)
+        shutil.move(src, dst)
+    shutil.rmtree(tmp_work_dir)
+    ref_inf = get_ref_inf()
+    ref_version = ref_inf.get("version", "n.a.")
+    ref_type = ref_inf.get("type", "n.a.")
+    logger.info("Data retrieved into %s, [version=%s, type=%s]", dqc_reference_dir, ref_version, ref_type)
+    logger.info("Please run this script again to update the reference.")
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC utility tools for admin.")
@@ -108,6 +179,8 @@ def parse_args():
 
     # subparser for dump reference data
     parser_download = subparsers.add_parser('download', help='Download/update reference data for DQC_REFERENCE_COMPACT (.tar.gz file).', parents=[common_parser])
+    parser_download.add_argument("-v", "--date", default=None, type=str, metavar="YYYYMMDD",
+        help="Time stamp of reference data to be downloaded. (default=latest)")
     parser_download.set_defaults(func=download_dqc_reference)
 
 

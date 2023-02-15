@@ -1,39 +1,18 @@
 import os
 import shutil
-from ..common import get_logger, run_command, get_ref_path
+from ..common import get_logger, run_command, get_ref_path, safe_tar_extraction
 from ..config import config
 from .download_master_files import download_file
 
 logger = get_logger(__name__)
 
 
-def extract_data_file(checkm_data_tarfile, data_root, delete_existing_data=False):
-    import tarfile
+def extract_data_file(target_tarfile, data_root, delete_existing_data=False):
     data_manifest = os.path.join(data_root, ".dmanifest")
     if os.path.exists(data_manifest) and not delete_existing_data:
         logger.warning("Data already exists. Data extraction is skipped.")
     else:
-        with tarfile.open(checkm_data_tarfile, "r:gz") as tar:
-            def is_within_directory(directory, target):
-                
-                abs_directory = os.path.abspath(directory)
-                abs_target = os.path.abspath(target)
-            
-                prefix = os.path.commonprefix([abs_directory, abs_target])
-                
-                return prefix == abs_directory
-            
-            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
-            
-                for member in tar.getmembers():
-                    member_path = os.path.join(path, member.name)
-                    if not is_within_directory(path, member_path):
-                        raise Exception("Attempted Path Traversal in Tar File")
-            
-                tar.extractall(path, members, numeric_owner=numeric_owner) 
-                
-            
-            safe_extract(tar, path=data_root)
+        safe_tar_extraction(target_tarfile, data_root)
         logger.info("CheckM data is extracted to %s", data_root)
 
 def download_checkm_data_if_not_exist(out_dir, delete_existing_data=False):

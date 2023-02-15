@@ -4,6 +4,7 @@ import glob
 import subprocess
 import shutil
 import json
+import tarfile
 from logging import StreamHandler, FileHandler, Formatter, INFO, DEBUG, getLogger
 from .config import config
 
@@ -153,3 +154,25 @@ def get_ref_inf():
     else:
         dqc_ref_inf = {}
     return dqc_ref_inf
+
+def safe_tar_extraction(target_tarfile, data_root):
+    with tarfile.open(target_tarfile, "r:gz") as tar:
+        def is_within_directory(directory, target):
+            
+            abs_directory = os.path.abspath(directory)
+            abs_target = os.path.abspath(target)
+        
+            prefix = os.path.commonprefix([abs_directory, abs_target])
+            
+            return prefix == abs_directory
+        
+        def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+        
+            for member in tar.getmembers():
+                member_path = os.path.join(path, member.name)
+                if not is_within_directory(path, member_path):
+                    raise Exception("Attempted Path Traversal in Tar File")
+        
+            tar.extractall(path, members, numeric_owner=numeric_owner) 
+        
+        safe_extract(tar, path=data_root)    
