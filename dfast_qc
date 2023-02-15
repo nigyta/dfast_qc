@@ -159,7 +159,12 @@ logger = get_logger(__name__)
 start_time = datetime.now()
 logger.info("DFAST_QC pipeline started.")
 logger.info("DFAST_QC version: %s", dqc_version)
-logger.info("DQC Reference Directory: %s", config.DQC_REFERENCE_DIR)
+if not os.path.exists(config.DQC_REFERENCE_DIR):
+    logger.error("DQC Reference Directory does not exist. Aborted. %s", config.DQC_REFERENCE_DIR)
+    logger.error("Please download the reference data by 'dqc_ref_manager.py download'.")
+    exit(1)
+else:
+    logger.info("DQC Reference Directory: %s", config.DQC_REFERENCE_DIR)
 
 from dqc import taxonomy_check, completeness_check, gtdb_search
 
