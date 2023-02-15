@@ -7,13 +7,23 @@ from dqc.config import config
 
 config.ADMIN = True
 
-from dqc.common import get_logger
+from dqc.common import get_logger, get_ref_inf
 logger = get_logger(__name__)
 
+def check_ref_type(args):
+    ref_inf = get_ref_inf()
+    ref_type = ref_inf.get("type")
+    if ref_type == "compact":
+        logger.error(f"You cannot update 'dqc_reference_compact' with this script!")
+        exit(1)
+    # if ref_type == "compact" and not (args.func == prepare_checkm_data or args.func == update_checkm_db):
+        # logger.error(f"'{args.func.__name__}' is not allowed for 'dqc_reference_compact'.")
+        # exit(1)
+    
 def download_master_files(args):
     from dqc.admin.download_master_files import download_master_files
     if args.targets is None:
-        target_files = ["asm", "ani", "tsr", "igp"]
+        target_files = ["asm", "ani", "tsr", "igp", "sst"]
     else:
         target_files = args.targets
     download_master_files(target_files)
@@ -55,7 +65,7 @@ def dump_sqlite_db(args):
 
 def update_all(args):
     from dqc.admin.download_master_files import download_master_files
-    download_master_files(target_files=["asm", "ani", "tsr", "igp"])
+    download_master_files(target_files=["asm", "ani", "tsr", "igp", "sst"])
     from dqc.admin.update_taxdump import main as update_taxdump
     update_taxdump()
     from dqc.admin.download_all_reference_genomes import download_all_genomes
@@ -83,9 +93,9 @@ def parse_args():
     parser_master = subparsers.add_parser('download_master_files', help='Download master files.', parents=[common_parser])
     parser_master.add_argument(
         "--targets", type=str, required=False, metavar="STR", 
-        choices=['asm', 'ani', 'tsr', "igp", "hmm", "checkm", "taxdump", "gtdb"], nargs="*",
+        choices=['asm', 'ani', 'tsr', "igp", "sst", "hmm", "checkm", "taxdump", "gtdb"], nargs="*",
         help="Target(s) for downloading. " + 
-             "[asm: Assembly report, ani: ANI report, tsr: Type strain report, hmm: TIGR HMMER profile, igp: indistinguishable groups prokaryotes, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz, gtdb: GTDB representative species list] "
+             "[asm: Assembly report, ani: ANI report, tsr: Type strain report, hmm: TIGR HMMER profile, igp: indistinguishable groups prokaryotes, sst: ANI species specific threshold, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz, gtdb: GTDB representative species list] "
              "(default: asm ani tsr igp)"
     )
     parser_master.set_defaults(func=download_master_files)
@@ -137,6 +147,7 @@ def parse_args():
     if not hasattr(args, "func"):
         parser.print_help()
         exit()
+    check_ref_type(args)
     return args
 
 if __name__ == "__main__":

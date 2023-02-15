@@ -14,7 +14,7 @@ RUN cd / && \
 
 RUN pip install ete3 more-itertools peewee
 
-ENV DQC_VERSION 0.5.3
+ENV DQC_VERSION 0.5.5_1
 
 #	pip install -r /dfast_qc/requirements.txt && \
 #	pip install ete3==3.1.2 more-itertools==8.2.0 peewee==3.14.4 && \

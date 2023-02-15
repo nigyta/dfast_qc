@@ -1,6 +1,6 @@
 import sys
 import os
-from .common import get_logger, run_command
+from .common import get_logger, run_command, get_ref_path
 from argparse import ArgumentError, ArgumentParser
 from .models import Reference, GTDB_Reference
 from .config import config
@@ -9,7 +9,7 @@ from .classify_tc_hits import classify_tc_hits
 
 logger = get_logger(__name__)
 
-ani_threshold = config.ANI_THRESHOLD
+default_ani_threshold = config.ANI_THRESHOLD
 
 def check_fasta_existence(reference_list_file, for_gtdb=False):
     """
@@ -40,15 +40,35 @@ def check_fasta_existence(reference_list_file, for_gtdb=False):
         with open(reference_list_file, "w") as f:
             f.write("\n".join(existing_genomes))
 
+def get_species_specific_threshold():
+    ani_species_specific_threshold_file = get_ref_path(config.SPECIES_SPECIFIC_THRESHOLD)
+    logger.info("Loading species specific ANI threshold from %s", ani_species_specific_threshold_file)
+    D = {}
+    if not os.path.exists(ani_species_specific_threshold_file):
+        logger.warning("Species-specific ANI threshold file not found. Will use the default threshold for all species. [%s]", ani_species_specific_threshold_file)
+        return D
+    for line in open(ani_species_specific_threshold_file):
+        if line.startswith("#"):
+            continue
+        cols = line.strip("\n").split("\t")
+        species_taxid = int(cols[0])
+        ani_threshold = float(cols[2])
+        D[species_taxid] = ani_threshold
+    return D
+
 def run_fastani(input_file, reference_list_file, output_file):
     num_threads = config.NUM_THREADS
     cmd = ["fastANI", "--query", input_file, "--refList", reference_list_file, "--output", output_file, "--threads", str(num_threads)]
     run_command(cmd, task_name="fastANI")
 
 def add_organism_info_to_fastani_result(fastani_result_file, output_file):
+    
     # parse fastANI result and add organism info
     # also, result dict will be generated
-    header = ["organism_name", "strain", "accession", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "matched_fragments", "total_fragments", "status"]
+
+    dict_species_specific_threthold = get_species_specific_threshold()
+
+    header = ["organism_name", "strain", "accession", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "matched_fragments", "total_fragments", "ani_threshold", "status"]
     ret = "\t".join(header) + "\n"
     hit_cnt, hit_cnt_above_cutoff = 0, 0
     tc_result = []
@@ -64,13 +84,14 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
             organism_name, strain, relation_to_type_material = accession, "-", "-"
             taxid, species_taxid, validated = "-", "-", "-"
         hit_cnt += 1
+        ani_threshold = dict_species_specific_threthold.get(species_taxid, default_ani_threshold)
         if ani_value > ani_threshold:
             hit_cnt_above_cutoff += 1
-        result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, matched_frag, total_frag, ""]
+        result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, matched_frag, total_frag, ani_threshold, ""]
         ret_dict = {key: value for key, value in zip(header, result_row)}
         tc_result.append(ret_dict)
     status = classify_tc_hits(tc_result)
-    logger.info("Found %d fastANI hits (%d hits with ANI > %d%%)", hit_cnt, hit_cnt_above_cutoff, ani_threshold)
+    logger.info("Found %d fastANI hits (%d hits with ANI > threshold)", hit_cnt, hit_cnt_above_cutoff)
     logger.info("The taxonomy check result is classified as '%s'.", status)
     for result in tc_result:
         ret += "\t".join([str(result[key]) for key in header]) + "\n"

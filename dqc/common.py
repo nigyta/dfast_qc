@@ -3,6 +3,7 @@ import os
 import glob
 import subprocess
 import shutil
+import json
 from logging import StreamHandler, FileHandler, Formatter, INFO, DEBUG, getLogger
 from .config import config
 
@@ -144,3 +145,11 @@ def fasta_reader(fasta_file_name):
         seq = "".join(lines[1:]).upper()  # remaining lines of the entry
         D[seq_id] = seq
     return D
+
+def get_ref_inf():
+    dqc_ref_inf_json = get_ref_path(config.REFERENCE_INF)
+    if os.path.exists(dqc_ref_inf_json):
+        dqc_ref_inf = json.load(open(dqc_ref_inf_json))
+    else:
+        dqc_ref_inf = {}
+    return dqc_ref_inf

@@ -12,7 +12,7 @@ from .config import config
 logger = get_logger(__name__)
 
 igp_file = get_ref_path(config.INDISTINGUISHABLE_GROUPS_PROKARYOTE)
-ani_threshold = config.ANI_THRESHOLD
+# default_ani_threshold = config.ANI_THRESHOLD
 
 if not os.path.exists(igp_file):
     logger.error("INDISTINGUISHABLE_GROUPS_PROKARYOTE file does not exist. [%s]\nDownload it by 'dqc_admin_tools.py download_master_files --targets igp'", igp_file)
@@ -52,8 +52,8 @@ def get_indistinguishable_group(taxid):
     else:
         return {} 
 
-def classify_tc_hits(tc_result):
-    # status: conclusive, indistinguishable, inconsistent, below_threshold, 
+def classify_tc_hits_deprecated(tc_result):
+    # status: conclusive, indistinguishable, inconsistent, below_threshold
     status = None
     accepted_hits_taxid = set([x["species_taxid"] for x in tc_result if x["ani"] >= ani_threshold])
     dict_indistinguishable_species = None
@@ -92,6 +92,54 @@ def classify_tc_hits(tc_result):
     for result in tc_result:
         if result["ani"] >= ani_threshold:
             assert status
+            result["status"] = status
+        else:
+            result["status"] = "below_threshold"
+    assert status
+    return status
+
+
+def classify_tc_hits(tc_result):
+    # status: conclusive, indistinguishable, inconsistent, below_threshold, 
+    status = None
+    accepted_hits_taxid = set([x["species_taxid"] for x in tc_result if x["ani"] >= x["ani_threshold"]])
+    logger.debug("Taxids for accepted ANI hits: %s", str(accepted_hits_taxid))
+
+    dict_indistinguishable_species = None
+    # the process below is too complex. Must be refactored
+    for taxid in accepted_hits_taxid:
+        tmp_dict_indistinguishable_group = get_indistinguishable_group(taxid)
+        if dict_indistinguishable_species is None:
+            dict_indistinguishable_species = tmp_dict_indistinguishable_group
+        elif tmp_dict_indistinguishable_group != dict_indistinguishable_species:
+            status = "inconclusive,indistinguishable"
+            logger.warning(f"The ANI hits belong to more than one indistinguishable-group. The ANI hits will be classified as 'inconclusive,indistinguishable'. %s, %s", dict_indistinguishable_species, tmp_dict_indistinguishable_group)
+            break
+        else:
+            assert tmp_dict_indistinguishable_group == dict_indistinguishable_species
+    set_indistinguishable_taxids = set(dict_indistinguishable_species.keys()) if dict_indistinguishable_species else set()
+
+    if len(set_indistinguishable_taxids) and status is None:
+        # Confirm if the ANI hits belong to a indistinguishable group.
+        logger.debug("Indistinguishable taxids: %s", str(set_indistinguishable_taxids))
+        indistinguishable_species_names = ", ".join([f"{name}({taxid})" for taxid, name in dict_indistinguishable_species.items()])
+        logger.warning("Following organisms are indistinguishable with ANI. [%s]", indistinguishable_species_names)
+
+    if len(accepted_hits_taxid) == 0:
+        if len(tc_result) > 0:
+            status = "below_threshold"
+        else:
+            status = "no_hit"
+    elif len(accepted_hits_taxid) == 1:
+        status = "conclusive"
+    else:
+        if accepted_hits_taxid.issubset(set_indistinguishable_taxids):
+            status = "indistinguishable"
+        else:
+            status = "inconclusive"
+
+    for result in tc_result:
+        if result["ani"] >= result["ani_threshold"]:
             result["status"] = status
         else:
             result["status"] = "below_threshold"
