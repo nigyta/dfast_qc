@@ -5,7 +5,7 @@ channels:
   - conda-forge
 dependencies:
   - python>=3.7
-  - fastani=1.33
+  - fastani=1.32
   - hmmer
   - prodigal
   - blast
