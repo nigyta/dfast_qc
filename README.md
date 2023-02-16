@@ -7,13 +7,15 @@ DFAST_QC evaluates taxonomic identity of the genome by querying against more tha
 DFAST_QC uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
 
 - Completeness check  
-DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also arbitrarily specify the marker set to be used.
+DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the query genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also specify the marker set to be used.
 
 - GTDB search  
 As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes, thereby enabling species-level identification in the GTDB Taxonomy. Thie employs the same 2-step search as Taxonomy check
 
+---
+
 ## System requirements and software dependencies
-DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 16Gbyte of memory. 
+DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 4Gbyte of memory. 
 The following third party softwares/packages are required.  
 - FastANI  
 - HMMer  
@@ -22,11 +24,21 @@ The following third party softwares/packages are required.
 - CheckM  
 - Python packages: peewee, more-itertools, ete3  
 
+## Installation from Bioconda
+DFAST_QC is also available from [BioConda](https://bioconda.github.io/recipes/dfast_qc/README.html).
+```
+conda install -c bioconda -c conda-forge dfast_qc
+```
+If this did not work, please try [Installation from source code](#installation-from-source-code).  
+\* FastANI installed with this might be broken. See below for trouble shooting.
+
+
 ## Installation from source code
 1. Source code
     ```
     $ git clone https://github.com/nigyta/dfast_qc.git
     ```
+
 2. Install dependencies  
     We recommend using conda to install dependencies.  
     ```
@@ -48,75 +60,20 @@ The following third party softwares/packages are required.
     ```
 
 
-## Installation from Bioconda
-DFAST_QC is also available from [BioConda](https://bioconda.github.io/recipes/dfast_qc/README.html).
-```
-conda install -c bioconda dfast_qc
-```
 Reference data is not included in the conda package. Please install it following the steps below.
 
-## Initial set up
-Reference data of DFAST_QC is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_QC is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
-In general, you do not need to change this, but you can specify it in the config file or by using `-r` option.
+## Quick set up (recommended)
+Since the full data set of DFAST_QC's reference data (`DQC_REFERENCE_FULL`) is huge (>80GB, including GTDB representative genomes), we have made the pre-built reference data (`DQC_REFERENCE_COMPACT`, <1GB) available for download using 
+the `dqc_ref_manager.py` script. 
+```
+dqc_ref_manager.py download
+```
+As `DQC_REFERENCE_COMPACT` does not contain reference genomes for ANI calculation, `dfast_qc` will attempt to download the required genomes in an on-the-fly manner during the run (internet connection is required). Therefore, it takes extra time for downloding them (~1min).  
+We will update `DQC_REFERENCE_COMPACT` periodically, please update it by running `dqc_ref_manager.py` again.
 
-__To prepare reference data, run the following command.__
-```
-$ sh initial_setup.sh [-n int]
-```
-`-n` denotes the number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended specifying the value 4~8 (or more) for `-n`.
-
-__Once reference data has been prepared, it can be updated by running command__
-```
-$ dqc_admin_tools.py update_all
-```
-
-Instead of running `initial_setup.sh`, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
+If you want to prepre `DQC_REFERENCE_FULL`, please follow the procedure [below](#for-power-users).
   
-
-1. Download master files  
-    ```
-    $ dqc_admin_tools.py download_master_files --targets asm ani tsr hmm igp
-    ```
-    This will download "Assembly report", "ANI report", "Type strain report", and "indistinguishable_groups_prokaryotes.txt" from the NCBI FTP server and HMMer profile for TIGR.  
-
-2. Download/Update NCBI taxdump data
-    ```
-    $ dqc_admin_tools.py update_taxdump
-    ```
-3. Download reference genomes
-    ```
-    $ dqc_admin_tools.py download_genomes
-    ```
-    This will download reference genomic FASTA files from the NCBI Assembly database. As it attempts to download large number of genomes, it is recommended to enable parallel downloadin option (e.g. `--num_threads 4`)
-4. Prepare reference profile HMM
-    ```
-    $ dqc_admin_tools.py prepare_reference_hmm
-    ```
-    This will generate a reference HMM file `DQC_REFERENCE/reference_markers.hmm`
-5. Prepare reference marker FASTA file
-    ```
-    $ dqc_admin_tools.py prepare_reference_fasta
-    ```
-    This will generate a reference FASTA file `DQC_REFERENCE/reference_markers.fasta`
-    it is recommended to enable parallel processing option (e.g. `--num_threads 4`)
-6. Prepare SQLite database file
-    ```
-    $ dqc_admin_tools.py prepare_sqlite_db
-    ```
-    This will generate a reference file `DQC_REFERENCE/references.db`, which contains metadata for reference genomes.
-7. Prepare CheckM data
-    ```
-    $ dqc_admin_tools.py prepare_checkm
-    ```
-    CheckM reference data will be downloaded and configured.
-8. Update database for CheckM
-    ```
-    $ dqc_admin_tools.py update_checkm_db
-    ```
-    Will insert auxiliary data for CheckM into `DQC_REFERENCE/references.db`
-
-
-
+---
 
 ## Usage
 - Minimum  
@@ -127,6 +84,7 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
     ```
     $ dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --num_threads 2
     ```
+    If you are using DQC_REFERENCE_COMPACT, missing genomes will be downloaded in parallel by specifying `--num_threads` value larger than 1. 
 - GTDB search (disabled by default)  
     ```
     $ dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --enable_gtdb [--disable_tc] [--disable_cc]
@@ -205,6 +163,88 @@ optional arguments:
     }
     ```
 
+
+
+## List of status in taxonomy check result
+- __conclusive__: Effective ANI hit (>=95%) againt only 1 species, hence the species name is conclusively determined.
+- __indistinguishable__: The genome belongs to one of the species that are difficult to distinguish using ANI (e.g. E. coli and Shigella spp.) 
+- __inconclusive__: ANI hits against more than 2 differenct species. This may result from the comparison between very closely-related species or contamination of 2 different species.
+- __below_threhold__: The ANI hit is below the threshold (95%)
+
+Note that DFAST_QC cannot identify clades below species level.
+
+## Run in Docker
+
+Docker image is available at [dockerub](https://hub.docker.com/r/nigyta/dfast_qc).  
+The example below shows how to invoke DFAST_QC with an input FASTA file (genome.fa) in the current directory.
+```
+docker run -it --rm --name dqc -v /path/to/dqc_reference:/dqc_reference -v $PWD:$PWD nigyta/dfast_qc dfast_qc -i $PWD/genome.fa -o $PWD/dfastqc_out
+```
+
+---
+# For power users
+
+## Prepare reference data 
+Reference data of DFAST_QC is stored in a directory called `DQC_REFERENCE`. By default, it is located in the directory where DFAST_QC is installed (`PATH/TO/dfast_qc/dqc_reference`), or in `/dqc_reference` when the docker version is used.  
+In general, you do not need to change this, but you can specify it in the config file or by using `-r` option.
+
+__To prepare reference data, run the following command.__
+```
+$ sh initial_setup.sh [-n int]
+```
+`-n` denotes the number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended specifying the value 4~8 (or more) for `-n`.
+
+__Once reference data has been prepared, it can be updated by running command__
+```
+$ dqc_admin_tools.py update_all
+```
+
+Instead of running `initial_setup.sh`, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
+  
+
+1. Download master files  
+    ```
+    $ dqc_admin_tools.py download_master_files --targets asm ani tsr hmm igp
+    ```
+    This will download "Assembly report", "ANI report", "Type strain report", and "indistinguishable_groups_prokaryotes.txt" from the NCBI FTP server and HMMer profile for TIGR.  
+
+2. Download/Update NCBI taxdump data
+    ```
+    $ dqc_admin_tools.py update_taxdump
+    ```
+3. Download reference genomes
+    ```
+    $ dqc_admin_tools.py download_genomes
+    ```
+    This will download reference genomic FASTA files from the NCBI Assembly database. As it attempts to download large number of genomes, it is recommended to enable parallel downloading option (e.g. `--num_threads 4`)
+4. Prepare reference profile HMM
+    ```
+    $ dqc_admin_tools.py prepare_reference_hmm
+    ```
+    This will generate a reference HMM file `DQC_REFERENCE/reference_markers.hmm`
+5. Prepare reference marker FASTA file
+    ```
+    $ dqc_admin_tools.py prepare_reference_fasta
+    ```
+    This will generate a reference FASTA file `DQC_REFERENCE/reference_markers.fasta`
+    it is recommended to enable parallel processing option (e.g. `--num_threads 4`)
+6. Prepare SQLite database file
+    ```
+    $ dqc_admin_tools.py prepare_sqlite_db
+    ```
+    This will generate a reference file `DQC_REFERENCE/references.db`, which contains metadata for reference genomes.
+7. Prepare CheckM data
+    ```
+    $ dqc_admin_tools.py prepare_checkm
+    ```
+    CheckM reference data will be downloaded and configured.
+8. Update database for CheckM
+    ```
+    $ dqc_admin_tools.py update_checkm_db
+    ```
+    Will insert auxiliary data for CheckM into `DQC_REFERENCE/references.db`
+
+
 ## Preparation for the GTDB reference data.
 1. Download the representative genomes from GTDB and unarchive it.
     ```
@@ -232,19 +272,3 @@ Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` speci
     ```
 
 When the newer version of the GTDB representative genomes become available, repeat these steps.
-
-## List of status in taxonomy check result
-- __conclusive__: Effective ANI hit (>=95%) againt only 1 species, hence the species name is conclusively determined.
-- __indistinguishable__: The genome belongs to one of the species that are difficult to distinguish using ANI (e.g. E. coli and Shigella spp.) 
-- __inconsistent__: ANI hits against more than 2 differenct species. This may result from the comparison between very closely-related species or contamination of 2 different species.
-- __below_threhold__: The ANI hit is below the threshold (95%)
-
-Note that DFAST_QC cannot identify clades below species level.
-
-## Run in Docker
-
-Docker image is available at [dockerub](https://hub.docker.com/r/nigyta/dfast_qc).  
-The example below shows how to invoke DFAST_QC with an input FASTA file (genome.fa) in the current directory.
-```
-docker run -it --rm --name dqc -v /path/to/dqc_reference:/dqc_reference -v $PWD:$PWD nigyta/dfast_qc dfast_qc -i $PWD/genome.fa -o $PWD/dfastqc_out
-```
