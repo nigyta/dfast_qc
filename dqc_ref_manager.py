@@ -13,6 +13,7 @@ from dqc.config import config
 from dqc.common import get_logger, get_ref_inf, get_ref_path, safe_tar_extraction
 
 # logger = None
+config.ADMIN = True
 
 # DQC_REF_URL = "http://localhost:8000/"  # for debug
 DQC_REF_URL = "https://dfast.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
