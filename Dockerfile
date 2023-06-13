@@ -9,7 +9,7 @@ ENV DQC_ENV docker
 
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
-	conda install -y -c bioconda biopython fastani blast checkm-genome
+	conda install -y -c bioconda hmmer==3.2.1 biopython fastani blast checkm-genome
 	# conda install -y -c bioconda fastani blast hmmer prodigal
 
 RUN pip install ete3 more-itertools peewee
