@@ -55,7 +55,7 @@ If this did not work, please try [Installation from source code](#installation-f
     __[Trouble shoot]__  
     If `fastANI` installed with the `conda` command does not work, please uninstall and re-install it with the commands below.  
     ```
-    $ conda uninstall fastani
+    $ conda remove fastani
     $ conda install -c bioconda -c conda-forge fastani
     ```
 
