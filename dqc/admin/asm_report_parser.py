@@ -39,6 +39,6 @@ class Assembly:
         assert line1.startswith("#") and line2.startswith("#")
         for line in f:
             cols = line.strip("\n").split("\t")
-            asm = Assembly(*cols)
+            asm = Assembly(*cols[:23])
             yield asm
 
