@@ -68,6 +68,8 @@ class DefaultConfig:
     FASTANI_RESULT = "fastani_result.tsv"
     TC_RESULT = "tc_result.tsv"
     ANI_THRESHOLD = 95
+    SKANI_RESULT = "skani_result.tsv"
+    SKANI_DATABASE = "database"
 
     # output file names for GTDB
     GTDB_BLAST_RESULT = "blast.markers.gtdb.tsv"
