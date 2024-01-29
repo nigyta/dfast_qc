@@ -5,7 +5,7 @@ from argparse import ArgumentError, ArgumentParser
 from .models import Reference, GTDB_Reference
 from .config import config
 from .download_files import download_genomes_parallel
-from .classify_tc_hits import classify_tc_hits
+from .classify_tc_hits import classify_tc_hits , classify_tc_hits_GTDB
 import shutil
 
 logger = get_logger(__name__)
@@ -118,6 +118,15 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
     return tc_result    
 
 def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_file):
+
+    # Read the content of the original file, skipping the first line
+    with open(fastani_result_file, 'r') as original_file:
+        lines = original_file.readlines()[1:]
+
+    # Write the modified content to the new file
+    with open(fastani_result_file, 'w') as new_file:
+        new_file.writelines(lines)
+    
     # parse fastANI result and add organism info
     # also, result dict will be generated
     header = ["accession", "gtdb_species", "ani", "Align_fraction_ref", "Align_fraction_query", 
@@ -129,7 +138,7 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
     for line in open(fastani_result_file):
         cols = line.strip("\n").split("\t")
         #target_file, ani_value, matched_frag, total_frag = cols[1], float(cols[2]), int(cols[3]), int(cols[4])
-        target_file, ani_value, Align_fraction_ref, Align_fraction_query  = cols[0], float(cols[2]), int(cols[3]), int(cols[4])
+        target_file, ani_value, Align_fraction_ref, Align_fraction_query  = cols[0], float(cols[2]), float(cols[3]), float(cols[4])
         accession = os.path.basename(target_file).replace("_genomic.fna.gz", "")
         ref = GTDB_Reference.get_or_none(GTDB_Reference.accession==accession)
         if ref:
@@ -148,18 +157,7 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
             mean_intra_species_af, min_intra_species_af, num_clustered_genomes, status]
         ret_dict = {key: value for key, value in zip(header, result_row)}
         gtdb_result.append(ret_dict)
-
-    # add status to hits
-    if hit_cnt_above_cutoff == 1:
-        status = "conclusive"
-    elif hit_cnt_above_cutoff > 1:
-        status = "inconclusive"
-    else:
-        status = "-" 
-    for ret_dict in gtdb_result:
-        if ret_dict["ani"] >= ret_dict["ani_circumscription_radius"]:
-            ret_dict["status"] = status
-
+    status = classify_tc_hits_GTDB(gtdb_result)
     logger.info("Found %d fastANI hits (%d hits with ANI > circumscription radius)", hit_cnt, hit_cnt_above_cutoff)
     # logger.info("The taxonomy check result is classified as '%s'.", status)
     for result in gtdb_result:
@@ -171,25 +169,27 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
     return gtdb_result
 
 def main(query_fasta, reference_list, out_dir, for_gtdb=False):
+    skani_database = os.path.join(out_dir, config.SKANI_DATABASE)
     if for_gtdb:
-        fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
+        #fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
+        skani_result_file = os.path.join(out_dir, config.GTDB_SKANI_RESULT)
         result_file = os.path.join(out_dir, config.GTDB_RESULT)
-        skani_database = os.path.join(out_dir, config.SKANI_DATABASE)
     else:
         #fastani_result_file = os.path.join(out_dir, config.FASTANI_RESULT)
-        fastani_result_file = os.path.join(out_dir, config.SKANI_RESULT)
+        skani_result_file = os.path.join(out_dir, config.SKANI_RESULT)
         result_file = os.path.join(out_dir, config.TC_RESULT)
-        skani_database = os.path.join(out_dir, config.SKANI_DATABASE)
 
     check_fasta_existence(reference_list, for_gtdb=for_gtdb)
     #run_fastani(query_fasta, reference_list, fastani_result_file)
-    run_skani(query_fasta, reference_list,fastani_result_file,skani_database)
+    run_skani(query_fasta, reference_list,skani_result_file,skani_database)
     if for_gtdb:
-        tc_result = add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, result_file)
+        #tc_result = add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, result_file)
+        tc_result = add_organism_info_to_fastani_result_for_gtdb(skani_result_file, result_file)
     else:
-        tc_result = add_organism_info_to_fastani_result(fastani_result_file, result_file)
+        #tc_result = add_organism_info_to_fastani_result(fastani_result_file, result_file)
+        tc_result = add_organism_info_to_fastani_result(skani_result_file, result_file)
     if not config.DEBUG:
-        os.remove(fastani_result_file)
+        os.remove(skani_result_file)
         shutil.rmtree(skani_database)
     return tc_result
 

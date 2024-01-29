@@ -33,8 +33,53 @@ def run_blastn(input_file, output_file, for_gtdb=False):
 def print_selected_genomes(str_result):
     logger.debug("\n%s\n%s%s", "-"*80, str_result, "-"*80)
 
+def run_mash(input_file, mash_sketch_file, mash_result_file):
+    cmd_mash = ["mash", "dist", mash_sketch_file,input_file,">", mash_result_file]
+    run_command(cmd_mash, task_name="mash_search")
+    return mash_result_file
 
-def main(query_markers_fasta, out_dir, for_gtdb=False):
+def main(Query, out_dir, hits = 10, for_gtdb=False):
+    mash_result = os.path.join(out_dir, config.MASH_RESULT)
+    if for_gtdb:
+        mash_sketch = config.GTDB_MASH_SKETCH_FILE
+    else:
+        mash_sketch = config.MASH_SKETCH_FILE
+    run_mash(Query,mash_sketch,mash_result)
+    L = []
+    for line in open(mash_result):
+        cols = line.strip("\n").split("\t")
+        L.append(cols)
+    L = sorted(L, key=lambda x: float(x[2]))
+    top_10 = L[: hits]
+    target_accessions = set()
+    ret, target_cnt = "", 0
+    for dat in top_10:
+        accession = dat[0].split("/")[-1]
+        if for_gtdb:
+            accession = accession.replace("_genomic.fna.gz","")
+            target_accessions.add(accession)
+        else: 
+            accession = accession.replace(".fna.gz","")
+            target_accessions.add(accession)
+    for accession in target_accessions:
+        target_genome_path = get_ref_genome_fasta(accession, for_gtdb=for_gtdb)
+        target_cnt += 1
+        ret += target_genome_path + "\n"
+    if for_gtdb:
+        target_genome_list_file = os.path.join(out_dir, config.GTDB_TARGET_GENOME_LIST)
+    else:
+        target_genome_list_file = os.path.join(out_dir, config.TARGET_GENOME_LIST)
+
+    with open(target_genome_list_file, "w") as f:
+        f.write(ret)
+    if not config.DEBUG:
+        os.remove(mash_result)
+    logger.info("Selected %d target genomes.", target_cnt)
+    logger.info("Target genome list was writen to %s", target_genome_list_file)
+    print_selected_genomes(ret)
+    return target_genome_list_file 
+
+def old(query_markers_fasta, out_dir,for_gtdb=False):
     """
     Search query_markers_fasta against reference_markers_fasta to select target genomes.
     """
@@ -46,7 +91,7 @@ def main(query_markers_fasta, out_dir, for_gtdb=False):
         blast_result_file = os.path.join(out_dir, config.BLAST_RESULT)
         target_genome_list_file = os.path.join(out_dir, config.TARGET_GENOME_LIST)
 
-    run_blastn(query_markers_fasta, blast_result_file, for_gtdb=for_gtdb)
+    run_blastn(query_markers_fasta, blast_result_file, for_gtdb=for_gtdb)   
 
     target_accessions = set()
     for line in open(blast_result_file):
@@ -69,7 +114,6 @@ def main(query_markers_fasta, out_dir, for_gtdb=False):
     return target_genome_list_file
 
 if __name__ == '__main__':
-
     def parse_args():
         parser = ArgumentParser()
         parser.add_argument(
@@ -78,6 +122,14 @@ if __name__ == '__main__':
             type=str,
             required=True,
             help="Query marker FASTA file [required]",
+            metavar="PATH"
+        )
+        parser.add_argument(
+            "-hits",
+            "--num_hits",
+            default="10",
+            type=int,
+            help="Number of top hits by MASH(default: 10)",
             metavar="PATH"
         )
         parser.add_argument(
@@ -105,5 +157,5 @@ if __name__ == '__main__':
     if args.debug:
         config.DEBUG = True
 
-    main(args.input, args.out_dir, args.for_gtdb)  
+    main(args.input, args.out_dir, args.num_hits,args.for_gtdb)  
 

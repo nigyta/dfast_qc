@@ -105,6 +105,8 @@ optional arguments:
                         Input FASTA file (raw or gzipped) [required]
   -o PATH, --out_dir PATH
                         Output directory (default: OUT)
+  -hits INT, --num_hits INT
+                        Number of top hits by MASH (default: 10)
   -t INT, --taxid INT   NCBI taxid for completeness check. Use '--show_taxon'
                         for available taxids. (Default: Automatically inferred
                         from taxonomy check)
@@ -217,6 +219,12 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
     $ dqc_admin_tools.py download_genomes
     ```
     This will download reference genomic FASTA files from the NCBI Assembly database. As it attempts to download large number of genomes, it is recommended to enable parallel downloading option (e.g. `--num_threads 4`)
+
+4. Sketch reference genomes using MASH
+    ```
+    $ dqc_admin_tools.py mash_ref_sketch
+    ```
+    
 4. Prepare reference profile HMM
     ```
     $ dqc_admin_tools.py prepare_reference_hmm
@@ -254,13 +262,19 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
 2. Place the unarchived folder under `DQC_REFERENCE`.  
 Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` specified in [config.py](dqc/config.py).  
     ```
-    GTDB_GENOME_DIR = "gtdb_genomes_reps_r207"
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r214"
     ```
 3. Download the species list from GTDB.  
     ```
     curl -LO https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv
     ```
     The above command will download [this file](https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv) from GTDB.
+
+4. Sketch representative genomes from GTDB using MASH
+    ```
+    $ dqc_admin_tools.py mash_gtdb_sketch
+    ```
+    
 4. Create a reference marker FASTA for GTDB representative genomes  
     This may take time since it tries to identify marker genes for more than 60,000 representative genomes.
     ```

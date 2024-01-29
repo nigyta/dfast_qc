@@ -20,6 +20,7 @@ class DefaultConfig:
     
     # Reference data
     DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference")
+    MASH_SKETCH_FILE = os.path.join(DQC_REFERENCE_DIR,"ref_genomes_sketch.msh")
     REFERENCE_INF = "dqc_ref_inf.json"
     REFERENCE_GENOME_DIR = "genomes"
     REFERENCE_MARKER_DIR = "markers"
@@ -45,7 +46,8 @@ class DefaultConfig:
     REFERENCE_GENOMES_TSV = "reference_genomes.tsv"
 
     # GTDB Reference data
-    GTDB_GENOME_DIR = "gtdb_genomes_reps_r207"  # Must be changed when a new GTDB release becomes available.
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r214"  # Must be changed when a new GTDB release becomes available.
+    GTDB_MASH_SKETCH_FILE = os.path.join(DQC_REFERENCE_DIR,"gtdb_genomes_sketch.msh")
     GTDB_REFERENCE_MARKER_DIR = "markers_gtdb"
     GTDB_SPECIES_LIST = "sp_clusters.tsv"
     GTDB_REFERENCE_MARKERS_FASTA = "reference_markers_gtdb.fasta"
@@ -64,6 +66,10 @@ class DefaultConfig:
     TARGET_GENOME_LIST = "target_genomes.txt"
     BLAST_OPTIONS = "-outfmt 6 -max_hsps 1 -num_alignments 5"
 
+    # output file names for MASH & options
+    MASH_RESULT = "mash_result.tab"
+    MASH_HITS_NUM_OPTION = 10
+
     # output file names and options for calc_ANI
     FASTANI_RESULT = "fastani_result.tsv"
     TC_RESULT = "tc_result.tsv"
@@ -75,6 +81,7 @@ class DefaultConfig:
     GTDB_BLAST_RESULT = "blast.markers.gtdb.tsv"
     GTDB_TARGET_GENOME_LIST = "target_genomes_gtdb.txt"
     GTDB_FASTANI_RESULT = "fastani_result_gtdb.tsv"
+    GTDB_SKANI_RESULT = "skani_result_gtdb.tsv"
     GTDB_RESULT = "result_gtdb.tsv"
 
 

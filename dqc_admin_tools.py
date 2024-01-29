@@ -36,6 +36,14 @@ def download_genomes(args):
     from dqc.admin.download_all_reference_genomes import download_all_genomes
     download_all_genomes()
 
+def mash_ref_sketch(args):
+    from dqc.admin.mash_sketching import sketching
+    sketching()
+
+def mash_gtdb_sketch(args):
+    from dqc.admin.mash_gtdb_sketching import gtdb_sketching
+    gtdb_sketching()
+
 def prepare_reference_hmm(args):
     from dqc.admin.prepare_reference_hmm import prepare_reference_hmm
     prepare_reference_hmm()
@@ -108,6 +116,14 @@ def parse_args():
     parser_genome = subparsers.add_parser('download_genomes', help='Download reference genomes from Assembly DB.', parents=[common_parser])
     parser_genome.set_defaults(func=download_genomes)
 
+    # subparser for MASH sketching reference genomes
+    parser_sketch_ref = subparsers.add_parser('mash_ref_sketch', help='Sketch the reference genomes.', parents=[common_parser])
+    parser_sketch_ref.set_defaults(func=mash_ref_sketch)
+
+    # subparser for MASH sketching GTDB genomes
+    parser_sketch_gtdb = subparsers.add_parser('mash_gtdb_sketch', help='Sketch the GTDB genomes.', parents=[common_parser])
+    parser_sketch_gtdb.set_defaults(func=mash_gtdb_sketch)
+    
     # subparser for prepare_reference_hmm
     parser_prep_ref_hmm = subparsers.add_parser('prepare_reference_hmm', help='Prepare reference profile HMM file　(reference_markers.hmm).', parents=[common_parser])
     # parser_prep_ref_hmm.add_argument(
