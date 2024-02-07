@@ -20,7 +20,7 @@ class DefaultConfig:
     
     # Reference data
     DQC_REFERENCE_DIR = os.path.join(DQC_ROOT_DIR, "dqc_reference")
-    MASH_SKETCH_FILE = os.path.join(DQC_REFERENCE_DIR,"ref_genomes_sketch.msh")
+    MASH_SKETCH_FILE = "ref_genomes_sketch.msh"
     REFERENCE_INF = "dqc_ref_inf.json"
     REFERENCE_GENOME_DIR = "genomes"
     REFERENCE_MARKER_DIR = "markers"
