@@ -1,14 +1,13 @@
-name: dfast_qc
+name: test
 channels:
   - defaults
   - bioconda
   - conda-forge
 dependencies:
   - python>=3.7
-  - fastani=1.32
-  - hmmer
-  - prodigal
-  - blast
+  - mash
+  - skani
+  - gsl==2.5
   - pip:
     - checkm-genome==1.2.2
     - ete3
