@@ -47,7 +47,7 @@ class DefaultConfig:
 
     # GTDB Reference data
     GTDB_GENOME_DIR = "gtdb_genomes_reps_r214"  # Must be changed when a new GTDB release becomes available.
-    GTDB_MASH_SKETCH_FILE = os.path.join(DQC_REFERENCE_DIR,"gtdb_genomes_sketch.msh")
+    GTDB_MASH_SKETCH_FILE = "gtdb_genomes_sketch.msh"
     GTDB_REFERENCE_MARKER_DIR = "markers_gtdb"
     GTDB_SPECIES_LIST = "sp_clusters.tsv"
     GTDB_REFERENCE_MARKERS_FASTA = "reference_markers_gtdb.fasta"
