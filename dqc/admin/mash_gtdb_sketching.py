@@ -8,19 +8,21 @@ logger = getLogger(__name__)
 
 def gtdb_sketching():
     logger.info("===== Starting the sketch for GTDB genomes  =====") 
-    # Setting the paths for refereance genome dir & MASH sketch file.
-    gtdb_dir = os.path.join(config.DQC_REFERENCE_DIR,config.GTDB_GENOME_DIR)
+    # Setting the paths for GTDB genome dir & MASH sketch file.
     gtdb_paths_file = os.path.join(config.DQC_REFERENCE_DIR, "gtdb_genome_files_paths.txt")
+    gtdb_genome_dir = get_ref_path(config.GTDB_GENOME_DIR)
 
     # Use glob to find files matching the pattern
-    gtdb_genome_paths = glob.glob(os.path.join(gtdb_dir, '**', f'*.fna.gz'), recursive = True)
-    
+    gtdb_genome_paths = glob.glob(os.path.join(gtdb_genome_dir, '**', f'*.fna.gz'), recursive = True)
+    logger.info(f"Found {len(gtdb_genome_paths)} genomes in {gtdb_genome_dir}")
+
     # Write the list of genome file paths to a file
     with open(gtdb_paths_file, "w") as file:
         file.write("\n".join(gtdb_genome_paths))
 
     # Define the command for running mash sketch with the specified parameters
-    cmd_gtdb_sketch = ["mash", "sketch", "-l", gtdb_genome_paths, "-o", config.GTDB_MASH_SKETCH_FILE]
+    gtdb_mash_sketch_file = get_ref_path(config.GTDB_MASH_SKETCH_FILE)
+    cmd_gtdb_sketch = ["mash", "sketch", "-l", gtdb_genome_paths, "-o", gtdb_mash_sketch_file]
     run_command(cmd_gtdb_sketch, task_name="mash sketching GTDB genomes")
     
     logger.info("===== Sketching GTDB genomes is done =====") 
