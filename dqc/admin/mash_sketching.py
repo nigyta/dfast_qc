@@ -1,10 +1,9 @@
 import os
 import glob
-from ..common import run_command, get_ref_path 
+from ..common import run_command, get_ref_path, get_logger
 from ..config import config
-from logging import getLogger
 
-logger = getLogger(__name__)
+logger = get_logger(__name__)
 
 def sketching():
     logger.info("===== Starting the sketch for referance genomes  =====") 
@@ -13,17 +12,19 @@ def sketching():
 
     #test = os.path.join(config.DQC_ROOT_DIR,"test_genomes")
     # Use glob to find files matching the pattern
-    genome_files_paths = glob.glob(os.path.join(config.REFERENCE_GENOME_DIR,"*.fna.gz"))
-    
+    reference_genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
+    genome_files_paths = glob.glob(os.path.join(reference_genome_dir, "*.fna.gz"))
+    logger.info(f"Found {len(genome_files_paths)} genomes in {reference_genome_dir}")
     # Write the list of genome file paths to a file
     with open(paths_file, "w") as file:
         file.write("\n".join(genome_files_paths))
 
     # Define the command for running mash sketch with the specified parameters
-    cmd_sketch = ["mash", "sketch", "-l", paths_file, "-o", config.MASH_SKETCH_FILE]
+    mash_sketch_file = get_ref_path(config.MASH_SKETCH_FILE)
+    cmd_sketch = ["mash", "sketch", "-l", paths_file, "-o", mash_sketch_file, "-p", str(config.NUM_THREADS)]
     run_command(cmd_sketch, task_name="mash sketching reference genomes")
     
-    logger.info("===== Sketching referance genomes is done =====") 
+    logger.info("===== Sketching reference genomes is done =====")
     os.remove(paths_file)  # Remove the temporary file used to store genome file paths
 
 if __name__ == "__main__":
