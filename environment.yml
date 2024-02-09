@@ -8,8 +8,10 @@ dependencies:
   - mash
   - skani
   - gsl==2.5
+  - hmmer
+  - prodigal
   - pip:
-    - checkm-genome==1.2.2
+    - checkm-genome
     - ete3
     - more-itertools
     - peewee
