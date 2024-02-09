@@ -9,12 +9,12 @@ def sketching():
     logger.info("===== Starting the sketch for referance genomes  =====") 
     # Setting the paths for refereance genome dir & MASH sketch file.
     paths_file = os.path.join(config.DQC_REFERENCE_DIR, "genome_files_paths.txt")
-
-    #test = os.path.join(config.DQC_ROOT_DIR,"test_genomes")
-    # Use glob to find files matching the pattern
     reference_genome_dir = get_ref_path(config.REFERENCE_GENOME_DIR)
+
+    # Use glob to find files matching the pattern
     genome_files_paths = glob.glob(os.path.join(reference_genome_dir, "*.fna.gz"))
     logger.info(f"Found {len(genome_files_paths)} genomes in {reference_genome_dir}")
+    
     # Write the list of genome file paths to a file
     with open(paths_file, "w") as file:
         file.write("\n".join(genome_files_paths))
