@@ -22,7 +22,7 @@ def gtdb_sketching():
 
     # Define the command for running mash sketch with the specified parameters
     gtdb_mash_sketch_file = get_ref_path(config.GTDB_MASH_SKETCH_FILE)
-    cmd_gtdb_sketch = ["mash", "sketch", "-l", gtdb_genome_paths, "-o", gtdb_mash_sketch_file]
+    cmd_gtdb_sketch = ["mash", "sketch", "-l", gtdb_paths_file, "-o", gtdb_mash_sketch_file, "-p", str(config.NUM_THREADS)]
     run_command(cmd_gtdb_sketch, task_name="mash sketching GTDB genomes")
     
     logger.info("===== Sketching GTDB genomes is done =====") 
