@@ -7,7 +7,7 @@ dependencies:
   - python>=3.7
   - mash
   - skani
-  - gsl==2.5
+  - gsl==2.6
   - hmmer
   - prodigal
   - pip:
