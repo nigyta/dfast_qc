@@ -1,4 +1,4 @@
-name: test
+name: dfast_qc
 channels:
   - defaults
   - bioconda
