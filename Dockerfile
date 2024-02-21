@@ -10,7 +10,7 @@ ENV DQC_ENV docker
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
 	pip install checkm-genome && \
-	conda install -y -c bioconda -c conda-forge biopython mash skani gsl==2.6 hmmer prodigal
+	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal
 
 RUN pip install ete3 more-itertools peewee
 
