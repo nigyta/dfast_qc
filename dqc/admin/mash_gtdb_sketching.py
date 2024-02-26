@@ -26,7 +26,7 @@ def gtdb_sketching():
     run_command(cmd_gtdb_sketch, task_name="mash sketching GTDB genomes")
     
     logger.info("===== Sketching GTDB genomes is done =====") 
-    os.remove(gtdb_genome_paths)  # Remove the temporary file used to store genome file paths
+    os.remove(gtdb_paths_file)  # Remove the temporary file used to store genome file paths
 
 if __name__ == "__main__":
     gtdb_sketching()
