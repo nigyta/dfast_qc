@@ -84,8 +84,6 @@ def update_all(args):
     update_checkm_db()
     from dqc.admin.mash_sketching import sketching
     sketching()
-    from dqc.admin.mash_gtdb_sketching import gtdb_sketching
-    gtdb_sketching()
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC utility tools for admin.")
