@@ -78,12 +78,14 @@ def update_all(args):
     update_taxdump()
     from dqc.admin.download_all_reference_genomes import download_all_genomes
     download_all_genomes()
-    from dqc.admin.prepare_reference_marker_fasta import prepare_reference_marker_fasta
-    prepare_reference_marker_fasta()
     from dqc.admin.prepare_sqlite_db import prepare_sqlite_db
     prepare_sqlite_db()
     from dqc.admin.update_checkm_db import main as update_checkm_db
     update_checkm_db()
+    from dqc.admin.mash_sketching import sketching
+    sketching()
+    from dqc.admin.mash_gtdb_sketching import gtdb_sketching
+    gtdb_sketching()
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC utility tools for admin.")
