@@ -169,15 +169,16 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
     return gtdb_result
 
 def main(query_fasta, reference_list, out_dir, for_gtdb=False):
-    skani_database = os.path.join(out_dir, config.SKANI_DATABASE)
     if for_gtdb:
         #fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
         skani_result_file = os.path.join(out_dir, config.GTDB_SKANI_RESULT)
         result_file = os.path.join(out_dir, config.GTDB_RESULT)
+        skani_database = os.path.join(out_dir, config.SKANI_DATABASE_GTDB)
     else:
         #fastani_result_file = os.path.join(out_dir, config.FASTANI_RESULT)
         skani_result_file = os.path.join(out_dir, config.SKANI_RESULT)
         result_file = os.path.join(out_dir, config.TC_RESULT)
+        skani_database = os.path.join(out_dir, config.SKANI_DATABASE_REF)
 
     check_fasta_existence(reference_list, for_gtdb=for_gtdb)
     #run_fastani(query_fasta, reference_list, fastani_result_file)

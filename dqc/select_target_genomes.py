@@ -39,11 +39,12 @@ def run_mash(input_file, mash_sketch_file, mash_result_file):
     return mash_result_file
 
 def main(Query, out_dir, hits = 10, for_gtdb=False):
-    mash_result = os.path.join(out_dir, config.MASH_RESULT)
     if for_gtdb:
         mash_sketch = get_ref_path(config.GTDB_MASH_SKETCH_FILE)
+        mash_result = os.path.join(out_dir, config.MASH_RESULT_GTDB)
     else:
         mash_sketch = get_ref_path(config.MASH_SKETCH_FILE)
+        mash_result = os.path.join(out_dir, config.MASH_RESULT_REF)
     run_mash(Query,mash_sketch,mash_result)
     L = []
     for line in open(mash_result):

@@ -67,7 +67,8 @@ class DefaultConfig:
     BLAST_OPTIONS = "-outfmt 6 -max_hsps 1 -num_alignments 5"
 
     # output file names for MASH & options
-    MASH_RESULT = "mash_result.tab"
+    MASH_RESULT_REF = "mash_result_ref.tab"
+    MASH_RESULT_GTDB = "mash_result_gtdb.tab"
     MASH_HITS_NUM_OPTION = 10
 
     # output file names and options for calc_ANI
@@ -75,7 +76,8 @@ class DefaultConfig:
     TC_RESULT = "tc_result.tsv"
     ANI_THRESHOLD = 95
     SKANI_RESULT = "skani_result.tsv"
-    SKANI_DATABASE = "database"
+    SKANI_DATABASE_REF = "skani_database_ref"
+    SKANI_DATABASE_GTDB = "skani_database_gtdb"
 
     # output file names for GTDB
     GTDB_BLAST_RESULT = "blast.markers.gtdb.tsv"
