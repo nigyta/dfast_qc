@@ -50,20 +50,12 @@ def dump_dqc_reference(args):
 
     logger.info("Dumping reference files.")
     ref_file_list = ["INDISTINGUISHABLE_GROUPS_PROKARYOTE", "SPECIES_SPECIFIC_THRESHOLD", 
-    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "REFERENCE_MARKERS_HMM", "GTDB_SPECIES_LIST"]
+    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "GTDB_SPECIES_LIST","GTDB_MASH_SKETCH_FILE","MASH_SKETCH_FILE"]
     # Reference files
     for name in ref_file_list:
         ref_file = get_ref_path(getattr(config, name))
         logger.debug("Copying %s into %s", ref_file, tmp_out_dir)
         shutil.copy(ref_file, tmp_out_dir)
-
-    # Blast DB files
-    logger.info("Dumping Blast database files.")
-    blast_db_list = ["REFERENCE_MARKERS_FASTA", "GTDB_REFERENCE_MARKERS_FASTA"]
-    for name in blast_db_list:
-        for db_file_name in glob.glob(get_ref_path(getattr(config, name)) + ".n*"):  # append .n?? for BLAST-DB
-            logger.debug("Copying %s into %s", db_file_name, tmp_out_dir)
-            shutil.copy(db_file_name, tmp_out_dir)
 
     # CheckM files
     logger.info("Dumping CheckM reference data.")
