@@ -53,20 +53,13 @@ def run_command(cmd, task_name=None, shell=True):
 def prepare_output_directory():
     def _cleanup_results():
         result_file_names = [
-            config.PRODIGAL_PROTEIN_FASTA,
-            config.PRODIGAL_CDS_FASTA,
-            config.HMMER_RESULT,
-            config.MARKER_SUMMARY_FILE,
-            config.QUERY_MARKERS_FASTA,
-            config.BLAST_RESULT,
-            config.TARGET_GENOME_LIST,
-            config.FASTANI_RESULT,
+            config.MASH_RESULT_REF,
+            config.MASH_RESULT_GTDB,
             config.TC_RESULT,
             config.CC_RESULT,
             config.DQC_RESULT_JSON,
-            config.GTDB_BLAST_RESULT,
             config.GTDB_TARGET_GENOME_LIST,
-            config.GTDB_FASTANI_RESULT,
+            config.GTDB_SKANI_RESULT,
             config.GTDB_RESULT,
             config.LOG_FILE,
             "checkm.log",
@@ -77,7 +70,9 @@ def prepare_output_directory():
                 os.remove(file_path)
         result_dir_names = [
             config.CHECKM_INPUT_DIR,
-            config.CHECKM_RESULT_DIR
+            config.CHECKM_RESULT_DIR,
+            config.SKANI_DATABASE_REF,
+            config.SKANI_DATABASE_GTDB,
         ]
         for dir_name in result_dir_names:
             dir_path = os.path.join(config.OUT_DIR, dir_name)
