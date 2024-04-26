@@ -57,28 +57,24 @@ def get_species_specific_threshold():
         D[species_taxid] = ani_threshold
     return D
 
-def run_fastani(input_file, reference_list_file, output_file):
-    num_threads = config.NUM_THREADS
-    cmd = ["fastANI", "--query", input_file, "--refList", reference_list_file, "--output", output_file, "--threads", str(num_threads)]
-    run_command(cmd, task_name="fastANI")
-
 def run_skani(input_file, reference_list_file,skani_result_file,skani_database):
-    cmd_sketch = ["skani", "sketch", "-l",reference_list_file,"-o",skani_database]
-    cmd_skani = ["skani", "search", input_file, "-d",skani_database,"-o",skani_result_file]
+    num_threads = config.NUM_THREADS
+    cmd_sketch = ["skani", "sketch", "-l",reference_list_file,"-o",skani_database,"-t",str(num_threads)]
+    cmd_skani = ["skani", "search", input_file, "-d",skani_database,"-o",skani_result_file,"-t",str(num_threads)]
     run_command(cmd_sketch, task_name="skani_sketch")
     run_command(cmd_skani, task_name="skani_search")
 
-def add_organism_info_to_fastani_result(fastani_result_file, output_file):
+def add_organism_info_to_skani_result(skani_result_file, output_file):
 
     # Read the content of the original file, skipping the first line
-    with open(fastani_result_file, 'r') as original_file:
+    with open(skani_result_file, 'r') as original_file:
         lines = original_file.readlines()[1:]
 
     # Write the modified content to the new file
-    with open(fastani_result_file, 'w') as new_file:
+    with open(skani_result_file, 'w') as new_file:
         new_file.writelines(lines)
     
-    # parse fastANI result and add organism info
+    # parse Skani result and add organism info
     # also, result dict will be generated
 
     dict_species_specific_threthold = get_species_specific_threshold()
@@ -87,9 +83,8 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
     ret = "\t".join(header) + "\n"
     hit_cnt, hit_cnt_above_cutoff = 0, 0
     tc_result = []
-    for line in open(fastani_result_file):
+    for line in open(skani_result_file):
         cols = line.strip("\n").split("\t")
-        #target_file, ani_value, matched_frag, total_frag = cols[1], float(cols[2]), int(cols[3]), int(cols[4])
         target_file, ani_value, Align_fraction_ref, Align_fraction_query  = cols[0], float(cols[2]), float(cols[3]), float(cols[4])
         accession = os.path.basename(target_file).replace(".fna.gz", "")
         ref = Reference.get_or_none(Reference.accession==accession)
@@ -107,7 +102,7 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
         ret_dict = {key: value for key, value in zip(header, result_row)}
         tc_result.append(ret_dict)
     status = classify_tc_hits(tc_result)
-    logger.info("Found %d fastANI hits (%d hits with ANI > threshold)", hit_cnt, hit_cnt_above_cutoff)
+    logger.info("Found %d ANI hits (%d hits with ANI > threshold)", hit_cnt, hit_cnt_above_cutoff)
     logger.info("The taxonomy check result is classified as '%s'.", status)
     for result in tc_result:
         ret += "\t".join([str(result[key]) for key in header]) + "\n"
@@ -117,17 +112,17 @@ def add_organism_info_to_fastani_result(fastani_result_file, output_file):
     logger.info("DFAST Taxonomy check result was written to %s", output_file)
     return tc_result    
 
-def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_file):
+def add_organism_info_to_skani_result_for_gtdb(skani_result_file, output_file):
 
     # Read the content of the original file, skipping the first line
-    with open(fastani_result_file, 'r') as original_file:
+    with open(skani_result_file, 'r') as original_file:
         lines = original_file.readlines()[1:]
 
     # Write the modified content to the new file
-    with open(fastani_result_file, 'w') as new_file:
+    with open(skani_result_file, 'w') as new_file:
         new_file.writelines(lines)
     
-    # parse fastANI result and add organism info
+    # parse Skani result and add organism info
     # also, result dict will be generated
     header = ["accession", "gtdb_species", "ani", "Align_fraction_ref", "Align_fraction_query", 
         "gtdb_taxonomy", "ani_circumscription_radius", "mean_intra_species_ani", "min_intra_species_ani",
@@ -135,9 +130,8 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
     ret = "\t".join(header) + "\n"
     hit_cnt, hit_cnt_above_cutoff = 0, 0
     gtdb_result = []
-    for line in open(fastani_result_file):
+    for line in open(skani_result_file):
         cols = line.strip("\n").split("\t")
-        #target_file, ani_value, matched_frag, total_frag = cols[1], float(cols[2]), int(cols[3]), int(cols[4])
         target_file, ani_value, Align_fraction_ref, Align_fraction_query  = cols[0], float(cols[2]), float(cols[3]), float(cols[4])
         accession = os.path.basename(target_file).replace("_genomic.fna.gz", "")
         ref = GTDB_Reference.get_or_none(GTDB_Reference.accession==accession)
@@ -170,25 +164,20 @@ def add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, output_fil
 
 def main(query_fasta, reference_list, out_dir, for_gtdb=False):
     if for_gtdb:
-        #fastani_result_file = os.path.join(out_dir, config.GTDB_FASTANI_RESULT)
         skani_result_file = os.path.join(out_dir, config.GTDB_SKANI_RESULT)
         result_file = os.path.join(out_dir, config.GTDB_RESULT)
         skani_database = os.path.join(out_dir, config.SKANI_DATABASE_GTDB)
     else:
-        #fastani_result_file = os.path.join(out_dir, config.FASTANI_RESULT)
         skani_result_file = os.path.join(out_dir, config.SKANI_RESULT)
         result_file = os.path.join(out_dir, config.TC_RESULT)
         skani_database = os.path.join(out_dir, config.SKANI_DATABASE_REF)
 
     check_fasta_existence(reference_list, for_gtdb=for_gtdb)
-    #run_fastani(query_fasta, reference_list, fastani_result_file)
     run_skani(query_fasta, reference_list,skani_result_file,skani_database)
     if for_gtdb:
-        #tc_result = add_organism_info_to_fastani_result_for_gtdb(fastani_result_file, result_file)
-        tc_result = add_organism_info_to_fastani_result_for_gtdb(skani_result_file, result_file)
+        tc_result = add_organism_info_to_skani_result_for_gtdb(skani_result_file, result_file)
     else:
-        #tc_result = add_organism_info_to_fastani_result(fastani_result_file, result_file)
-        tc_result = add_organism_info_to_fastani_result(skani_result_file, result_file)
+        tc_result = add_organism_info_to_skani_result(skani_result_file, result_file)
     if not config.DEBUG:
         os.remove(skani_result_file)
         shutil.rmtree(skani_database)
