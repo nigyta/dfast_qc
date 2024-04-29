@@ -39,7 +39,7 @@ def parse_args():
         "--ani",
         default="95",
         type=int,
-        help="ANI threshold (default: 95%))",
+        help="ANI threshold (default: 95%%)",
         metavar="INT"
     )
     parser.add_argument(
