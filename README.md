@@ -3,8 +3,8 @@
 DFAST_QC conducts taxonomy and completeness check of the assembled genome.  
 
 - Taxonomy check  
-DFAST_QC evaluates taxonomic identity of the genome by querying against more than 15,000 reference genomes from type strains. To shorten the runtime, it first searches for universally-conserved housekeeping genes, such as _dnaB_ and _rpsA_ in the query genome, and they are queried against reference nucleotide databases to narrow down the number of genomes used in the downstream process. Then, average nucleotide identity is calculated against the selected reference genomes.  
-DFAST_QC uses HMMer and NCBI Blast for the former process and [FastANI](https://doi.org/10.1038/s41467-018-07641-9) for the latter process.
+DFAST_QC evaluates taxonomic identity of the genome by querying against more than 20,000 reference genomes from type strains. To shorten the runtime , it first run MASH on the query against reference nucleotide databases to narrow down the number of genomes used in the downstream process based on the number of shred hashes. Then, pass it on to Skani against the selected reference genomes to calculate the ANI value.  
+DFAST_QC uses [MASH](https://doi.org/10.1186/s13059-016-0997-x) for the former process and [Skani](https://doi.org/10.1038/s41592-023-02018-3) for the latter process.
 
 - Completeness check  
 DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the query genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also specify the marker set to be used.
@@ -17,9 +17,9 @@ As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes
 ## System requirements and software dependencies
 DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 4Gbyte of memory. 
 The following third party softwares/packages are required.  
-- FastANI  
+- Skani
+- Mash  
 - HMMer  
-- NCBI BLAST  
 - Prodigal  
 - CheckM  
 - Python packages: peewee, more-itertools, ete3  
@@ -91,14 +91,15 @@ If you want to prepre `DQC_REFERENCE_FULL`, please follow the procedure [below](
     ```
 
 ```
-usage: dfast_qc [-h] [--version] [-i PATH] [-o PATH] [-t INT] [-r PATH]
-                [-n INT] [--enable_gtdb] [--disable_tc] [--disable_cc]
-                [--disable_auto_download] [--force] [--debug] [-p STR]
-                [--show_taxon]
+usage: dfast_qc [-h] [--version] [-i PATH] [-o PATH] [-hits INT] [-a INT]
+                [-t INT] [-r PATH] [-n INT] [--enable_gtdb] [--disable_tc] 
+                [--disable_cc] [--disable_auto_download] [--force] 
+                [--debug] [-p STR] [--show_taxon]
 
 DFAST_QC: Taxonomy and completeness check
 
 optional arguments:
+options:
   -h, --help            show this help message and exit
   --version             Show program version
   -i PATH, --input_fasta PATH
@@ -107,9 +108,8 @@ optional arguments:
                         Output directory (default: OUT)
   -hits INT, --num_hits INT
                         Number of top hits by MASH (default: 10)
-  -t INT, --taxid INT   NCBI taxid for completeness check. Use '--show_taxon'
-                        for available taxids. (Default: Automatically inferred
-                        from taxonomy check)
+  -a INT, --ani INT     ANI threshold (default: 95%)
+  -t INT, --taxid INT   NCBI taxid for completeness check. Use '--show_taxon' for available taxids. (Default: Automatically inferred from taxonomy check)
   -r PATH, --ref_dir PATH
                         DQC reference directory (default: DQC_REFERENCE_DIR)
   -n INT, --num_threads INT
@@ -123,6 +123,7 @@ optional arguments:
   --debug               Debug mode
   -p STR, --prefix STR  Prefix for output (for debugging use, default: None)
   --show_taxon          Show available taxa for competeness check
+
   ```
 
 ## Example of Result
@@ -224,29 +225,17 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
     ```
     $ dqc_admin_tools.py mash_ref_sketch
     ```
-    
-4. Prepare reference profile HMM
-    ```
-    $ dqc_admin_tools.py prepare_reference_hmm
-    ```
-    This will generate a reference HMM file `DQC_REFERENCE/reference_markers.hmm`
-5. Prepare reference marker FASTA file
-    ```
-    $ dqc_admin_tools.py prepare_reference_fasta
-    ```
-    This will generate a reference FASTA file `DQC_REFERENCE/reference_markers.fasta`
-    it is recommended to enable parallel processing option (e.g. `--num_threads 4`)
-6. Prepare SQLite database file
+5. Prepare SQLite database file
     ```
     $ dqc_admin_tools.py prepare_sqlite_db
     ```
     This will generate a reference file `DQC_REFERENCE/references.db`, which contains metadata for reference genomes.
-7. Prepare CheckM data
+6. Prepare CheckM data
     ```
     $ dqc_admin_tools.py prepare_checkm
     ```
     CheckM reference data will be downloaded and configured.
-8. Update database for CheckM
+7. Update database for CheckM
     ```
     $ dqc_admin_tools.py update_checkm_db
     ```
@@ -275,11 +264,6 @@ Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` speci
     $ dqc_admin_tools.py mash_gtdb_sketch
     ```
     
-4. Create a reference marker FASTA for GTDB representative genomes  
-    This may take time since it tries to identify marker genes for more than 60,000 representative genomes.
-    ```
-    dqc_admin_tools.py prepare_reference_fasta --for_gtdb [--delete_existing_marker] [--num_threads 6]
-    ```
 5. Prepare the SQLite DB file for GTDB  
     ```
     dqc_admin_tools.py prepare_sqlite_db --for_gtdb
