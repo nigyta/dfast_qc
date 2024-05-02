@@ -251,7 +251,7 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
 2. Place the unarchived folder under `DQC_REFERENCE`.  
 Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` specified in [config.py](dqc/config.py).  
     ```
-    GTDB_GENOME_DIR = "gtdb_genomes_reps_r214"
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r220"
     ```
 3. Download the species list from GTDB.  
     ```

@@ -33,7 +33,7 @@ class DefaultConfig:
     REFERENCE_GENOMES_TSV = "reference_genomes.tsv"
 
     # GTDB Reference data
-    GTDB_GENOME_DIR = "gtdb_genomes_reps_r214"  # Must be changed when a new GTDB release becomes available.
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r220"  # Must be changed when a new GTDB release becomes available.
     GTDB_MASH_SKETCH_FILE = "gtdb_genomes_sketch.msh"
     GTDB_SPECIES_LIST = "sp_clusters.tsv"
     GTDB_REFERENCE_SUMMARY_TSV = "reference_summary_gtdb.tsv"
