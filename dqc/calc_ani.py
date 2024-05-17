@@ -152,7 +152,7 @@ def add_organism_info_to_skani_result_for_gtdb(skani_result_file, output_file):
         ret_dict = {key: value for key, value in zip(header, result_row)}
         gtdb_result.append(ret_dict)
     status = classify_tc_hits_GTDB(gtdb_result)
-    logger.info("Found %d fastANI hits (%d hits with ANI > circumscription radius)", hit_cnt, hit_cnt_above_cutoff)
+    logger.info("Found %d ANI hits (%d hits with ANI > circumscription radius)", hit_cnt, hit_cnt_above_cutoff)
     # logger.info("The taxonomy check result is classified as '%s'.", status)
     for result in gtdb_result:
         ret += "\t".join([str(result[key]) for key in header]) + "\n"
