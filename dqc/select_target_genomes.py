@@ -13,7 +13,7 @@ def print_selected_genomes(str_result):
 
 def run_mash(input_file, mash_sketch_file, mash_result_file):
     num_threads = config.NUM_THREADS
-    cmd_mash = ["mash", "dist", mash_sketch_file,input_file,">", mash_result_file,"-p",str(num_threads)]
+    cmd_mash = ["mash", "dist", mash_sketch_file,input_file, "-p" , str(num_threads), ">", mash_result_file]
     run_command(cmd_mash, task_name="mash_search")
     return mash_result_file
 

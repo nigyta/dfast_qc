@@ -19,9 +19,9 @@ DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requi
 The following third party softwares/packages are required.  
 - Skani
 - Mash  
-- HMMer  
-- Prodigal  
 - CheckM  
+- HMMer (required for CheckM)  
+- Prodigal (required for CheckM)  
 - Python packages: peewee, more-itertools, ete3  
 
 ## Installation from Bioconda
@@ -36,34 +36,34 @@ If this did not work, please try [Installation from source code](#installation-f
 ## Installation from source code
 1. Source code
     ```
-    $ git clone https://github.com/nigyta/dfast_qc.git
+    git clone https://github.com/nigyta/dfast_qc.git
     ```
 
 2. Install dependencies  
     We recommend using conda to install dependencies.  
     ```
-    $ cd dfast_qc
-    $ conda env create -f environment.yml
+    cd dfast_qc
+    conda env create -f environment.yml
     ```
     This will create a conda environment named "dfast_qc" and install the above-mentioned dependencies in it.  
 
     Alternatively, after installing required softwares by yourself, you can install Python packages with the `pip` command.
     ```
-    $ pip install -r requirements.txt
+    pip install -r requirements.txt
     ```
 
     __[Trouble shoot]__  
     If `fastANI` installed with the `conda` command does not work, please uninstall and re-install it with the commands below.  
     ```
-    $ conda remove fastani
-    $ conda install -c bioconda -c conda-forge fastani
+    conda remove fastani
+    conda install -c bioconda -c conda-forge fastani
     ```
 
 
 Reference data is not included in the conda package. Please install it following the steps below.
 
 ## Quick set up (recommended)
-Since the full data set of DFAST_QC's reference data (`DQC_REFERENCE_FULL`) is huge (>80GB, including GTDB representative genomes), we have made the pre-built reference data (`DQC_REFERENCE_COMPACT`, <1GB) available for download using 
+Since the full data set of DFAST_QC's reference data (`DQC_REFERENCE_FULL`) is huge (>100GB, including GTDB representative genomes), we have made the pre-built reference data (`DQC_REFERENCE_COMPACT`, <1.5GB) available for download using 
 the `dqc_ref_manager.py` script. 
 ```
 dqc_ref_manager.py download
@@ -78,16 +78,16 @@ If you want to prepre `DQC_REFERENCE_FULL`, please follow the procedure [below](
 ## Usage
 - Minimum  
     ```
-    $ dfast_qc -i /path/to/input_genome.fasta
+    dfast_qc -i /path/to/input_genome.fasta
     ```
 - Basic  
     ```
-    $ dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --num_threads 2
+    dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --num_threads 2
     ```
     If you are using DQC_REFERENCE_COMPACT, missing genomes will be downloaded in parallel by specifying `--num_threads` value larger than 1. 
 - GTDB search (disabled by default)  
     ```
-    $ dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --enable_gtdb [--disable_tc] [--disable_cc]
+    dfast_qc -i /path/to/input_genome.fasta -o /path/to/output --enable_gtdb [--disable_tc] [--disable_cc]
     ```
 
 ```
@@ -193,13 +193,18 @@ In general, you do not need to change this, but you can specify it in the config
 
 __To prepare reference data, run the following command.__
 ```
-$ sh initial_setup.sh [-n int]
+sh initial_setup.sh [-n int]
 ```
 `-n` denotes the number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended specifying the value 4~8 (or more) for `-n`.
 
 __Once reference data has been prepared, it can be updated by running command__
 ```
-$ dqc_admin_tools.py update_all
+dqc_admin_tools.py update_all
+```
+
+To generate a list of the reference genomes (`reference_genomes.tsv`), run the following command
+```
+dqc_admin_tools.py dump_sqlite_db
 ```
 
 Instead of running `initial_setup.sh`, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
@@ -207,37 +212,37 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
 
 1. Download master files  
     ```
-    $ dqc_admin_tools.py download_master_files --targets asm ani tsr hmm igp
+    dqc_admin_tools.py download_master_files --targets asm ani tsr igp
     ```
     This will download "Assembly report", "ANI report", "Type strain report", and "indistinguishable_groups_prokaryotes.txt" from the NCBI FTP server and HMMer profile for TIGR.  
 
 2. Download/Update NCBI taxdump data
     ```
-    $ dqc_admin_tools.py update_taxdump
+    dqc_admin_tools.py update_taxdump
     ```
 3. Download reference genomes
     ```
-    $ dqc_admin_tools.py download_genomes
+    dqc_admin_tools.py download_genomes
     ```
     This will download reference genomic FASTA files from the NCBI Assembly database. As it attempts to download large number of genomes, it is recommended to enable parallel downloading option (e.g. `--num_threads 4`)
 
 4. Sketch reference genomes using MASH
     ```
-    $ dqc_admin_tools.py mash_ref_sketch
+    dqc_admin_tools.py mash_ref_sketch
     ```
 5. Prepare SQLite database file
     ```
-    $ dqc_admin_tools.py prepare_sqlite_db
+    dqc_admin_tools.py prepare_sqlite_db
     ```
     This will generate a reference file `DQC_REFERENCE/references.db`, which contains metadata for reference genomes.
 6. Prepare CheckM data
     ```
-    $ dqc_admin_tools.py prepare_checkm
+    dqc_admin_tools.py prepare_checkm
     ```
     CheckM reference data will be downloaded and configured.
 7. Update database for CheckM
     ```
-    $ dqc_admin_tools.py update_checkm_db
+    dqc_admin_tools.py update_checkm_db
     ```
     Will insert auxiliary data for CheckM into `DQC_REFERENCE/references.db`
 
@@ -245,23 +250,31 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
 ## Preparation for the GTDB reference data.
 1. Download the representative genomes from GTDB and unarchive it.
     ```
-    $ curl -LO https://data.gtdb.ecogenomic.org/releases/latest/genomic_files_reps/gtdb_genomes_reps.tar.gz
-    $ tar xfz gtdb_genomes_reps.tar.gz
+    curl -LO https://data.gtdb.ecogenomic.org/releases/latest/genomic_files_reps/gtdb_genomes_reps.tar.gz
+    tar xfz gtdb_genomes_reps.tar.gz
     ```
+
+    If the downloading is slow from the above link, try downloading it from the mirror site,
+    ```
+    curl -LO https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/gtdb_genomes_reps_r220.tar.gz
+    tar xfz gtdb_genomes_reps_r220.tar.gz
+    ```
+
 2. Place the unarchived folder under `DQC_REFERENCE`.  
 Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` specified in [config.py](dqc/config.py).  
     ```
-    GTDB_GENOME_DIR = "gtdb_genomes_reps_r220"
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r220/database"
     ```
 3. Download the species list from GTDB.  
     ```
     curl -LO https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv
     ```
-    The above command will download [this file](https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv) from GTDB.
+    The above command will download [this file](https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv) from GTDB.  
+    Place the file in `DQC_REFERENCE` directory.
 
 4. Sketch representative genomes from GTDB using MASH
     ```
-    $ dqc_admin_tools.py mash_gtdb_sketch
+    dqc_admin_tools.py mash_gtdb_sketch
     ```
     
 5. Prepare the SQLite DB file for GTDB  

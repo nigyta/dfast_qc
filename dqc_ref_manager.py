@@ -15,8 +15,9 @@ from dqc.common import get_logger, get_ref_inf, get_ref_path, safe_tar_extractio
 # logger = None
 config.ADMIN = True
 
-# DQC_REF_URL = "http://localhost:8000/"  # for debug
-DQC_REF_URL = "https://dfast.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
+# DQC_REF_URL = "http://localhost:10000/"  # for debug
+DQC_REF_URL = "http://host:10000/"  # for debug
+# DQC_REF_URL = "https://dfast.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
 
 def dump_dqc_reference(args):
     """
@@ -50,7 +51,7 @@ def dump_dqc_reference(args):
 
     logger.info("Dumping reference files.")
     ref_file_list = ["INDISTINGUISHABLE_GROUPS_PROKARYOTE", "SPECIES_SPECIFIC_THRESHOLD", 
-    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "GTDB_SPECIES_LIST","GTDB_MASH_SKETCH_FILE","MASH_SKETCH_FILE"]
+    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "GTDB_SPECIES_LIST", "GTDB_MASH_SKETCH_FILE", "MASH_SKETCH_FILE"]
     # Reference files
     for name in ref_file_list:
         ref_file = get_ref_path(getattr(config, name))
@@ -97,10 +98,14 @@ def download_dqc_reference(args):
     dqc_reference_dir = config.DQC_REFERENCE_DIR
     if os.path.exists(dqc_reference_dir):
     
+            
+
         ref_inf = get_ref_inf()
         ref_version = ref_inf.get("version", "n.a.")
         ref_type = ref_inf.get("type", "n.a.")
-        if ref_type != "compact":
+        if len(os.listdir(dqc_reference_dir)) == 0:
+            logger.info("Try to download DQC_REFERENCE_COMPACT into an existing empty directory '%s'.", dqc_reference_dir)
+        elif ref_type != "compact":
             logger.info("Current version=%s, DB_Type=%s", ref_version, ref_type)
             logger.error("You cannot update '%s' with this script! Please delete the existing directory or specify '--ref_dir' option.", dqc_reference_dir)
             exit(1)

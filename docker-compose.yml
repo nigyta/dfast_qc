@@ -6,10 +6,13 @@ services:
             context: .
             dockerfile: Dockerfile.dev
         image: dqc_dev
+        image: nigyta/dfast_qc:1.0rc1
         command: tail -f /dev/null
         tty: true
         volumes:
             - .:/dfast_qc
-            # ダウンロード用データ、gmap DBの置き場所
-            - ../../../dfast_volumes/dqc_reference:/dqc_reference  # for dev.
+            # - ../../../dfast_volumes/dqc_reference:/dqc_reference  # for dev.
+            - ./dqc_reference:/dqc_reference  # for dev.
         working_dir: /dfast_qc         
+        extra_hosts:
+            - "host:host-gateway"
