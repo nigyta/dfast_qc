@@ -17,7 +17,7 @@ config.ADMIN = True
 
 # DQC_REF_URL = "http://localhost:10000/"  # for debug
 # DQC_REF_URL = "http://host:10000/"  # for debug within container
-DQC_REF_URL = "https://dfast-staging.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
+DQC_REF_URL = "https://ddbj.nig.ac.jp/public/software/dfast/" #  dqc_reference_compact_latest.tar.gz"
 
 def dump_dqc_reference(args):
     """

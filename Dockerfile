@@ -15,7 +15,7 @@ RUN cd / && \
 
 RUN pip install ete3 more-itertools peewee
 
-ENV DQC_VERSION 1.0RC2-1
+ENV DQC_VERSION 1.0RC2-4
 
 RUN	git clone -b skani https://github.com/nigyta/dfast_qc.git && \
     ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \
