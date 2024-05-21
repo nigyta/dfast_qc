@@ -6,6 +6,7 @@ LABEL maintainer=nigyta
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DQC_ENV docker
+ENV CHECKM_DATA_PATH /dqc_reference/checkm_data
 
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
@@ -14,7 +15,7 @@ RUN cd / && \
 
 RUN pip install ete3 more-itertools peewee
 
-ENV DQC_VERSION 0.6.0
+ENV DQC_VERSION 1.0RC2
 
 RUN	git clone -b skani https://github.com/nigyta/dfast_qc.git && \
     ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \

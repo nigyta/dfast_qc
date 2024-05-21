@@ -16,8 +16,8 @@ from dqc.common import get_logger, get_ref_inf, get_ref_path, safe_tar_extractio
 config.ADMIN = True
 
 # DQC_REF_URL = "http://localhost:10000/"  # for debug
-DQC_REF_URL = "http://host:10000/"  # for debug
-# DQC_REF_URL = "https://dfast.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
+# DQC_REF_URL = "http://host:10000/"  # for debug within container
+DQC_REF_URL = "https://dfast-staging.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
 
 def dump_dqc_reference(args):
     """
@@ -97,8 +97,6 @@ def download_dqc_reference(args):
     # Check existing data    
     dqc_reference_dir = config.DQC_REFERENCE_DIR
     if os.path.exists(dqc_reference_dir):
-    
-            
 
         ref_inf = get_ref_inf()
         ref_version = ref_inf.get("version", "n.a.")
