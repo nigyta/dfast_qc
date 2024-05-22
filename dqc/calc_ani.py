@@ -79,13 +79,13 @@ def add_organism_info_to_skani_result(skani_result_file, output_file):
 
     dict_species_specific_threthold = get_species_specific_threshold()
 
-    header = ["organism_name", "strain", "accession", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "Align_fraction_ref", "Align_fraction_query", "ani_threshold", "status"]
+    header = ["organism_name", "strain", "accession", "taxid", "species_taxid", "relation_to_type", "validated", "ani", "align_fraction_ref", "align_fraction_query", "ani_threshold", "status"]
     ret = "\t".join(header) + "\n"
     hit_cnt, hit_cnt_above_cutoff = 0, 0
     tc_result = []
     for line in open(skani_result_file):
         cols = line.strip("\n").split("\t")
-        target_file, ani_value, Align_fraction_ref, Align_fraction_query  = cols[0], float(cols[2]), float(cols[3]), float(cols[4])
+        target_file, ani_value, align_fraction_ref, align_fraction_query  = cols[0], float(cols[2]), float(cols[3]), float(cols[4])
         accession = os.path.basename(target_file).replace(".fna.gz", "")
         ref = Reference.get_or_none(Reference.accession==accession)
         if ref:
@@ -98,7 +98,7 @@ def add_organism_info_to_skani_result(skani_result_file, output_file):
         ani_threshold = dict_species_specific_threthold.get(species_taxid, default_ani_threshold)
         if ani_value > ani_threshold:
             hit_cnt_above_cutoff += 1
-        result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, Align_fraction_ref, Align_fraction_query, ani_threshold, ""]
+        result_row = [organism_name, strain, accession, taxid, species_taxid, relation_to_type_material, validated, ani_value, align_fraction_ref, align_fraction_query, ani_threshold, ""]
         ret_dict = {key: value for key, value in zip(header, result_row)}
         tc_result.append(ret_dict)
     status = classify_tc_hits(tc_result)
@@ -124,7 +124,7 @@ def add_organism_info_to_skani_result_for_gtdb(skani_result_file, output_file):
     
     # parse Skani result and add organism info
     # also, result dict will be generated
-    header = ["accession", "gtdb_species", "ani", "Align_fraction_ref", "Align_fraction_query", 
+    header = ["accession", "gtdb_species", "ani", "align_fraction_ref", "align_fraction_query", 
         "gtdb_taxonomy", "ani_circumscription_radius", "mean_intra_species_ani", "min_intra_species_ani",
         "mean_intra_species_af", "min_intra_species_af", "num_clustered_genomes", "status"]
     ret = "\t".join(header) + "\n"
@@ -132,7 +132,7 @@ def add_organism_info_to_skani_result_for_gtdb(skani_result_file, output_file):
     gtdb_result = []
     for line in open(skani_result_file):
         cols = line.strip("\n").split("\t")
-        target_file, ani_value, Align_fraction_ref, Align_fraction_query  = cols[0], float(cols[2]), float(cols[3]), float(cols[4])
+        target_file, ani_value, align_fraction_ref, align_fraction_query  = cols[0], float(cols[2]), float(cols[3]), float(cols[4])
         accession = os.path.basename(target_file).replace("_genomic.fna.gz", "")
         ref = GTDB_Reference.get_or_none(GTDB_Reference.accession==accession)
         if ref:
@@ -146,7 +146,7 @@ def add_organism_info_to_skani_result_for_gtdb(skani_result_file, output_file):
         hit_cnt += 1
         if ani_value > ani_circumscription_radius:
             hit_cnt_above_cutoff += 1
-        result_row = [accession, gtdb_species, ani_value, Align_fraction_ref, Align_fraction_query,
+        result_row = [accession, gtdb_species, ani_value, align_fraction_ref, align_fraction_query,
             gtdb_taxonomy, ani_circumscription_radius, mean_intra_species_ani, min_intra_species_ani,
             mean_intra_species_af, min_intra_species_af, num_clustered_genomes, status]
         ret_dict = {key: value for key, value in zip(header, result_row)}
