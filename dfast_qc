@@ -27,6 +27,22 @@ def parse_args():
         metavar="PATH"
     )
     parser.add_argument(
+        "-hits",
+        "--num_hits",
+        default="10",
+        type=int,
+        help="Number of top hits by MASH (default: 10)",
+        metavar="INT"
+    )
+    parser.add_argument(
+        "-a",
+        "--ani",
+        default="95",
+        type=int,
+        help="ANI threshold (default: 95%%)",
+        metavar="INT"
+    )
+    parser.add_argument(
         "-t",
         "--taxid",
         type=int,
@@ -122,6 +138,10 @@ else:
 # set other options
 if args.out_dir:
     config.OUT_DIR = args.out_dir
+if args.num_hits:
+    config.MASH_OPTION = args.num_hits
+if args.ani:
+    config.ANI_THRESHOLD = args.ani
 if args.taxid is not None:
     config.CHECKM_TAXID = args.taxid
 if args.num_threads:

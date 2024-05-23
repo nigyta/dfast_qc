@@ -15,8 +15,9 @@ from dqc.common import get_logger, get_ref_inf, get_ref_path, safe_tar_extractio
 # logger = None
 config.ADMIN = True
 
-# DQC_REF_URL = "http://localhost:8000/"  # for debug
-DQC_REF_URL = "https://dfast.ddbj.nig.ac.jp/static/" #  dqc_reference_compact_latest.tar.gz"
+# DQC_REF_URL = "http://localhost:10000/"  # for debug
+# DQC_REF_URL = "http://host:10000/"  # for debug within container
+DQC_REF_URL = "https://ddbj.nig.ac.jp/public/software/dfast/" #  dqc_reference_compact_latest.tar.gz"
 
 def dump_dqc_reference(args):
     """
@@ -50,20 +51,12 @@ def dump_dqc_reference(args):
 
     logger.info("Dumping reference files.")
     ref_file_list = ["INDISTINGUISHABLE_GROUPS_PROKARYOTE", "SPECIES_SPECIFIC_THRESHOLD", 
-    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "REFERENCE_MARKERS_HMM", "GTDB_SPECIES_LIST"]
+    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "GTDB_SPECIES_LIST", "GTDB_MASH_SKETCH_FILE", "MASH_SKETCH_FILE"]
     # Reference files
     for name in ref_file_list:
         ref_file = get_ref_path(getattr(config, name))
         logger.debug("Copying %s into %s", ref_file, tmp_out_dir)
         shutil.copy(ref_file, tmp_out_dir)
-
-    # Blast DB files
-    logger.info("Dumping Blast database files.")
-    blast_db_list = ["REFERENCE_MARKERS_FASTA", "GTDB_REFERENCE_MARKERS_FASTA"]
-    for name in blast_db_list:
-        for db_file_name in glob.glob(get_ref_path(getattr(config, name)) + ".n*"):  # append .n?? for BLAST-DB
-            logger.debug("Copying %s into %s", db_file_name, tmp_out_dir)
-            shutil.copy(db_file_name, tmp_out_dir)
 
     # CheckM files
     logger.info("Dumping CheckM reference data.")
@@ -104,11 +97,13 @@ def download_dqc_reference(args):
     # Check existing data    
     dqc_reference_dir = config.DQC_REFERENCE_DIR
     if os.path.exists(dqc_reference_dir):
-    
+
         ref_inf = get_ref_inf()
         ref_version = ref_inf.get("version", "n.a.")
         ref_type = ref_inf.get("type", "n.a.")
-        if ref_type != "compact":
+        if len(os.listdir(dqc_reference_dir)) == 0:
+            logger.info("Try to download DQC_REFERENCE_COMPACT into an existing empty directory '%s'.", dqc_reference_dir)
+        elif ref_type != "compact":
             logger.info("Current version=%s, DB_Type=%s", ref_version, ref_type)
             logger.error("You cannot update '%s' with this script! Please delete the existing directory or specify '--ref_dir' option.", dqc_reference_dir)
             exit(1)

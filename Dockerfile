@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.8.2 
+FROM --platform=linux/amd64 continuumio/miniconda3:23.10.0-1
 
 LABEL maintainer=nigyta
 
@@ -6,26 +6,25 @@ LABEL maintainer=nigyta
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DQC_ENV docker
+ENV CHECKM_DATA_PATH /dqc_reference/checkm_data
 
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
-	conda install -y -c bioconda hmmer==3.2.1 biopython fastani blast checkm-genome
-	# conda install -y -c bioconda fastani blast hmmer prodigal
+	pip install checkm-genome && \
+	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal
 
 RUN pip install ete3 more-itertools peewee
 
-ENV DQC_VERSION 0.5.7
+ENV DQC_VERSION 1.0RC2-4
 
-#	pip install -r /dfast_qc/requirements.txt && \
-#	pip install ete3==3.1.2 more-itertools==8.2.0 peewee==3.14.4 && \
-RUN	git clone https://github.com/nigyta/dfast_qc.git && \
-	ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \
+RUN	git clone -b skani https://github.com/nigyta/dfast_qc.git && \
+    ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \
 	ln -s /dfast_qc/dqc_admin_tools.py /usr/local/bin/ && \
+	ln -s /dfast_qc/initial_setup.sh /usr/local/bin/ && \
+	ln -s /dfast_qc/dqc_ref_manager.py  /usr/local/bin/ && \
 	mkdir -p /dqc_reference/checkm_data && \
 	checkm data setRoot /dqc_reference/checkm_data && \
 	conda clean --all -y
-
-
 
 WORKDIR /work
 CMD bash

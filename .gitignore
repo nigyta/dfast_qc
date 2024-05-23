@@ -15,7 +15,7 @@ setenv.sh
 # DQC reference dir.
 dqc_reference
 dqc_reference_dev
-
+dqc_reference*
 
 # python
 __pycache__/
