@@ -2,12 +2,6 @@ FROM --platform=linux/amd64 continuumio/miniconda3:23.10.0-1 AS build
 
 LABEL maintainer=nigyta
 
-# definition of environmental variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV DQC_ENV docker
-ENV CHECKM_DATA_PATH /dqc_reference/checkm_data
-
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
 	pip install checkm-genome --no-cache-dir && \
@@ -15,14 +9,21 @@ RUN cd / && \
 	conda clean --all -y
 
 RUN pip install ete3 more-itertools peewee --no-cache-dir
+
+ARG VERSION=1.0.0-2  # Increment this when the source code is updated (to disable cache)
 RUN	git clone https://github.com/nigyta/dfast_qc.git
 
 FROM debian:bookworm-slim
-ENV DQC_VERSION 1.0.0-1
 
 COPY --from=build /opt/conda/. /opt/conda/
 COPY --from=build /dfast_qc /dfast_qc
+
+# definition of environmental variables
 ENV PATH /opt/conda/bin:$PATH
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV DQC_ENV docker
+ENV CHECKM_DATA_PATH /dqc_reference/checkm_data
 
 RUN ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \
 	ln -s /dfast_qc/dqc_admin_tools.py /usr/local/bin/ && \
