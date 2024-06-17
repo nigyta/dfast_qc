@@ -3,7 +3,9 @@ import dataclasses
 from ..common import get_logger
 
 logger = get_logger(__name__)
-assemblies_allow_list = ["GCA_002950215.1", "GCA_900457155.1"]
+# To include specific genomes in the reference data regardless of the check results, specify them in the list below
+# assemblies_allow_list = ["GCA_002950215.1", "GCA_900457155.1"]
+assemblies_allow_list = []
 
 @dataclasses.dataclass
 class ANIreport:
