@@ -1,4 +1,4 @@
-# DFAST_QC: DFAST Qauality Control
+# DFAST_QC: DFAST Quality Control
 
 DFAST_QC conducts taxonomy and completeness check of the assembled genome.  
 
