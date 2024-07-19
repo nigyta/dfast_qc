@@ -51,7 +51,7 @@ def dump_dqc_reference(args):
 
     logger.info("Dumping reference files.")
     ref_file_list = ["INDISTINGUISHABLE_GROUPS_PROKARYOTE", "SPECIES_SPECIFIC_THRESHOLD", 
-    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "GTDB_SPECIES_LIST", "GTDB_MASH_SKETCH_FILE", "MASH_SKETCH_FILE"]
+    "SQLITE_REFERENCE_DB", "ETE3_SQLITE_DB", "GTDB_MASH_SKETCH_FILE", "MASH_SKETCH_FILE"]
     # Reference files
     for name in ref_file_list:
         ref_file = get_ref_path(getattr(config, name))
