@@ -63,6 +63,10 @@ def dump_sqlite_db(args):
     from dqc.admin.dump_sqlite_db import dump_sqlite_db
     dump_sqlite_db()
 
+def prepare_genome_size_data(args):
+    from dqc.admin.prepare_genome_size_data import prepare_genome_size_data
+    prepare_genome_size_data()
+
 def update_all(args):
     from dqc.admin.download_master_files import download_master_files
     download_master_files(target_files=["asm", "ani", "tsr", "igp", "sst"])
@@ -76,6 +80,8 @@ def update_all(args):
     update_checkm_db()
     from dqc.admin.mash_sketching import sketching
     sketching()
+    from dqc.admin.prepare_genome_size_data import prepare_genome_size_data
+    prepare_genome_size_data()
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC utility tools for admin.")
@@ -93,9 +99,9 @@ def parse_args():
     parser_master = subparsers.add_parser('download_master_files', help='Download master files.', parents=[common_parser])
     parser_master.add_argument(
         "--targets", type=str, required=False, metavar="STR", 
-        choices=['asm', 'ani', 'tsr', "igp", "sst", "checkm", "taxdump", "gtdb"], nargs="*",
+        choices=['asm', 'ani', 'tsr', "igp", "sst", "egs", "checkm", "taxdump", "gtdb"], nargs="*",
         help="Target(s) for downloading. " + 
-             "[asm: Assembly report, ani: ANI report, tsr: Type strain report,igp: indistinguishable groups prokaryotes, sst: ANI species specific threshold, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz, gtdb: GTDB representative species list] "
+             "[asm: Assembly report, ani: ANI report, tsr: Type strain report,igp: indistinguishable groups prokaryotes, sst: ANI species specific threshold, egs: expected genome size, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz, gtdb: GTDB representative species list] "
              "(default: asm ani tsr igp)"
     )
     parser_master.set_defaults(func=download_master_files)
@@ -130,9 +136,14 @@ def parse_args():
     parser_update_checkm_db = subparsers.add_parser('update_checkm_db', help='Update CheckM Taxon DB', parents=[common_parser])
     parser_update_checkm_db.set_defaults(func=update_checkm_db)
 
+    # subparser for prepare_genome_size_data
+    parser_genome_size = subparsers.add_parser('prepare_genome_size_data', help='Prepare genome size data', parents=[common_parser])
+    parser_genome_size.set_defaults(func=prepare_genome_size_data)
+
     # subparser for dump_sqlite_db
     parser_dump_sqlite_db = subparsers.add_parser('dump_sqlite_db', help='Dump reference genome info to file.', parents=[common_parser])
     parser_dump_sqlite_db.set_defaults(func=dump_sqlite_db)
+
     # subparser for update_all
     parser_update_all = subparsers.add_parser('update_all', help='Update all reference data', parents=[common_parser])
     parser_update_all.set_defaults(func=update_all)

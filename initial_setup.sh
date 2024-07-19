@@ -30,3 +30,4 @@ $SCRIPT_DIR/dqc_admin_tools.py mash_ref_sketch --num_threads $NUM_THREADS ${REF_
 $SCRIPT_DIR/dqc_admin_tools.py prepare_sqlite_db ${REF_DIR}
 $SCRIPT_DIR/dqc_admin_tools.py prepare_checkm ${REF_DIR}
 $SCRIPT_DIR/dqc_admin_tools.py update_checkm_db ${REF_DIR}
+$SCRIPT_DIR/dqc_admin_tools.py prepare_genome_size_data ${REF_DIR}

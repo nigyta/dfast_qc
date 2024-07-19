@@ -29,6 +29,7 @@ class DefaultConfig:
     TYPE_STRAIN_REPORT_FILE = "prokaryote_type_strain_report.txt"
     INDISTINGUISHABLE_GROUPS_PROKARYOTE = "prokaryote_ANI_indistinguishable_groups.txt"
     SPECIES_SPECIFIC_THRESHOLD = "prokaryote_ANI_species_specific_threshold.txt"
+    EXPECTED_GENOME_SIZE_FILE = "species_genome_size.txt"
     CHECKM_DATA_ROOT = "checkm_data"
     REFERENCE_GENOMES_TSV = "reference_genomes.tsv"
 
@@ -85,6 +86,7 @@ class DefaultConfig:
         "tsr": "https://ftp.ncbi.nlm.nih.gov//genomes/ASSEMBLY_REPORTS/prokaryote_type_strain_report.txt",
         "igp": "https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/prokaryote_ANI_indistinguishable_groups.txt",
         "sst": "https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/prokaryote_ANI_species_specific_threshold.txt",
+        "egs": "https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/species_genome_size.txt.gz",
         "checkm": "https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz",
         "taxdump": "https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz",
         "gtdb": "https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv",

@@ -188,9 +188,15 @@ else:
 
 from dqc import taxonomy_check, completeness_check, gtdb_search
 
+best_hit_species_taxid = None  # for genome size check
 
+# completeness check
 if not config.DISABLE_TC:
-    tc_result = taxonomy_check.run() # tc_result is a list containing dictionaries of fastANI result
+    tc_result = taxonomy_check.run() # tc_result is a list containing dictionaries of ANI result
+
+    if len(tc_result) > 0:
+        first_hit = tc_result[0]
+        best_hit_species_taxid = first_hit["species_taxid"]
 
     if config.CHECKM_TAXID is None:  # taxid is automatically inferred from taxonomy check
         if len(tc_result) > 0:
@@ -208,6 +214,13 @@ if not config.DISABLE_CC:
 else:
     cc_result = {}
 
+# Genome size check
+from dqc.genome_size_check import genome_size_check
+logger.info("Checking expected genome size for taxid %s", best_hit_species_taxid)
+genome_size_check_result = genome_size_check(config.QUERY_GENOME, best_hit_species_taxid)
+cc_result.update(genome_size_check_result)
+
+# GTDB search
 if config.ENABLE_GTDB:
     gtdb_result = gtdb_search.run()
 else:

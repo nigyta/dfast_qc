@@ -7,7 +7,8 @@ DFAST_QC evaluates taxonomic identity of the genome by querying against more tha
 DFAST_QC uses [MASH](https://doi.org/10.1186/s13059-016-0997-x) for the former process and [Skani](https://doi.org/10.1038/s41592-023-02018-3) for the latter process.
 
 - Completeness check  
-DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the query genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also specify the marker set to be used.
+DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the query genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also specify the marker set to be used.  
+The genome size is also checked to ensure it falls within the expected range.
 
 - GTDB search  
 As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes, thereby enabling species-level identification in the GTDB Taxonomy. Thie employs the same 2-step search as Taxonomy check
@@ -15,7 +16,7 @@ As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes
 ---
 
 ## System requirements and software dependencies
-DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 4Gbyte of memory. 
+DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 2Gbyte of memory. 
 The following third party softwares/packages are required.  
 - Skani
 - Mash  
@@ -30,7 +31,6 @@ DFAST_QC is also available from [BioConda](https://bioconda.github.io/recipes/df
 conda install -c bioconda -c conda-forge dfast_qc
 ```
 If this did not work, please try [Installation from source code](#installation-from-source-code).  
-\* FastANI installed with this might be broken. See below for trouble shooting.
 
 
 ## Installation from source code
@@ -50,13 +50,6 @@ If this did not work, please try [Installation from source code](#installation-f
     Alternatively, after installing required softwares by yourself, you can install Python packages with the `pip` command.
     ```
     pip install -r requirements.txt
-    ```
-
-    __[Trouble shoot]__  
-    If `fastANI` installed with the `conda` command does not work, please uninstall and re-install it with the commands below.  
-    ```
-    conda remove fastani
-    conda install -c bioconda -c conda-forge fastani
     ```
 
 
@@ -159,9 +152,14 @@ options:
             }
         ],
         "cc_result": {
-            "completeness": 98.71,
-            "contamination": 0.81,
-            "strain_heterogeneity": 0.0
+            "completeness": 99.35,
+            "contamination": 0.16,
+            "strain_heterogeneity": 0.0,
+            "ungapped_genome_size": 2027485,
+            "expected_size": 1978554,
+            "expected_size_min": 1584000,
+            "expected_size_max": 2378000,
+            "status": "OK"
         }
     }
     ```
@@ -245,6 +243,10 @@ Instead of running `initial_setup.sh`, you can prepare reference data by manuall
     dqc_admin_tools.py update_checkm_db
     ```
     Will insert auxiliary data for CheckM into `DQC_REFERENCE/references.db`
+8. Prepare reference data for genome size check
+    ```
+    dqc_admin_tools.py prepare_genome_size_data
+    ```
 
 
 ## Preparation for the GTDB reference data.

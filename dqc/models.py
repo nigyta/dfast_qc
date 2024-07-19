@@ -59,6 +59,21 @@ class GTDB_Reference(Model):
         return f"<GTDB: {self.accession}, {self.gtdb_species}>"
 
 
+class Genome_Size(Model):
+    #species_taxid  min_ungapped_length     max_ungapped_length     expected_ungapped_length        number_of_genomes       method_determined
+    species_taxid = IntegerField(primary_key=True)
+    min_ungapped_length = IntegerField()
+    max_ungapped_length = IntegerField()
+    expected_ungapped_length = IntegerField()
+    number_of_genomes = IntegerField()
+    method_determined = CharField()
+
+    class Meta:
+        database = db
+
+    def __str__(self):
+        return f"<GenomeSize: {self.species_taxid}, {self.min_ungapped_length}-{self.max_ungapped_length}>"    
+
 def init_db():
     db.connect()
     db.create_tables([Reference, Taxon, GTDB_Reference])

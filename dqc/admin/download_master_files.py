@@ -1,4 +1,5 @@
 import os
+import gzip
 from argparse import ArgumentParser
 from urllib.request import urlretrieve
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,6 +18,18 @@ def download_file(url, out_dir):
     logger.debug("Source URL: %s", url)
     urlretrieve(url, out_file)
     logger.info("Downloaded %s", base_name)
+    if base_name.endswith(".txt.gz"):
+        decompress_gzip(out_file, out_dir)
+
+def decompress_gzip(gzip_file, out_dir):
+    base_name = os.path.basename(gzip_file)
+    base_name = base_name.replace(".gz", "")
+    out_file = os.path.join(out_dir, base_name)
+    logger.info("Decompressing %s to %s", gzip_file, base_name)
+    with gzip.open(gzip_file, "rb") as f_in:
+        with open(out_file, "wb") as f_out:
+            f_out.write(f_in.read())
+    os.remove(gzip_file)
 
 
 def download_master_files(target_files):
