@@ -117,13 +117,19 @@ options:
   -p STR, --prefix STR  Prefix for output (for debugging use, default: None)
   --show_taxon          Show available taxa for competeness check
 
-  ```
+```
+
+### Example  
+Test data can be found in `example`. To test the software, run this after preparing the reference data.  
+```
+dfast_qc -i examples/GCA_000829395.1_Paucilactobacillus_hokkaidonensis.fna.gz --force
+```
 
 ## Example of Result
 - `tc_result.tsv`: Taxonomy check result
 - `cc_result.tsv`: Completeness check result
 - `dqc_result.json`: DFAST_QC result in a json format as show below:
-    ```
+```
     {
         "tc_result": [
             {
@@ -162,8 +168,7 @@ options:
             "status": "OK"
         }
     }
-    ```
-
+```
 
 
 ## List of status in taxonomy check result
