@@ -18,8 +18,16 @@ def get_genome_size(input_fasta):
     data = data.upper().replace("N", "").replace("/", "").replace(" ", "").replace("\n", "")
     return len(data)
 
+def table_exists():
+    cursor = db.execute_sql(f"SELECT name FROM sqlite_master WHERE type='table' AND name='genome_size';")
+    return bool(cursor.fetchone())
+
 def get_expected_size(taxid):
-    return Genome_Size.get_or_none(Genome_Size.species_taxid==taxid)
+    if table_exists():
+        return Genome_Size.get_or_none(Genome_Size.species_taxid==taxid)
+    else:
+        logger.warning("Genome_Size table does not exist. Genome size check will be skipped.")
+        return None
 
 def genome_size_check(input_fasta, taxid):
     genome_size = get_genome_size(input_fasta)
