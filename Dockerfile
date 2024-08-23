@@ -10,7 +10,7 @@ RUN cd / && \
 
 RUN pip install ete3 more-itertools peewee --no-cache-dir
 
-ARG VERSION=1.0.3-1  # Increment this when the source code is updated (to disable cache)
+ARG VERSION=1.0.4-1  # Increment this when the source code is updated (to disable cache)
 RUN	git clone https://github.com/nigyta/dfast_qc.git
 
 FROM debian:bookworm-slim
