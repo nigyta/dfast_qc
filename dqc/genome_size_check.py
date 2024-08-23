@@ -34,7 +34,7 @@ def genome_size_check(input_fasta, taxid):
     expected_size = get_expected_size(taxid)
     if expected_size is None:
         logger.warning(f"Expected genome size data is not available for taxid={taxid}")
-        ret = {"ungapped_genome_size": genome_size, "expected_size": None, "genome_size_check": "expected_size_not_available"}
+        ret = {"ungapped_genome_size": genome_size, "expected_size": None, "expected_size_min": None, "expected_size_max": None, "genome_size_check": "expected_size_not_available"}
     else:
         if expected_size.min_ungapped_length <= genome_size <= expected_size.max_ungapped_length:
             status = "OK"

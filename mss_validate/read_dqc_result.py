@@ -47,6 +47,8 @@ class CCResult:
     contamination: float
     strain_heterogeneity: float
     ungapped_genome_size: int
+    expected_size_min: int
+    expected_size_max: int
     expected_size: str
     genome_size_check: str
 
