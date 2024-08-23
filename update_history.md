@@ -11,3 +11,14 @@
 
 ### v. 0.5.7
 - Minor bug fix for `dqc_ref_manager.py`
+
+### v. 0.5.8
+- Final version based on homology search and fastANI
+
+### v. 1.0.0
+- Mash and skani pipeline
+
+### v. 1.0.3
+- dqc_multi added for batch execution
+
+

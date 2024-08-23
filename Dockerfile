@@ -29,6 +29,7 @@ RUN ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \
 	ln -s /dfast_qc/dqc_admin_tools.py /usr/local/bin/ && \
 	ln -s /dfast_qc/initial_setup.sh /usr/local/bin/ && \
 	ln -s /dfast_qc/dqc_ref_manager.py  /usr/local/bin/ && \
+	ln -s /dfast_qc/dqc_multi  /usr/local/bin/ && \
 	mkdir -p /dqc_reference/checkm_data && \
 	checkm data setRoot /dqc_reference/checkm_data
 

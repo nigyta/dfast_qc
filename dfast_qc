@@ -211,14 +211,16 @@ else:
 
 if not config.DISABLE_CC:
     cc_result = completeness_check.run()
+
+    # Genome size check
+    from dqc.genome_size_check import genome_size_check
+    logger.info("Checking expected genome size for taxid %s", best_hit_species_taxid)
+    genome_size_check_result = genome_size_check(config.QUERY_GENOME, best_hit_species_taxid)
+    cc_result.update(genome_size_check_result)
+
 else:
     cc_result = {}
 
-# Genome size check
-from dqc.genome_size_check import genome_size_check
-logger.info("Checking expected genome size for taxid %s", best_hit_species_taxid)
-genome_size_check_result = genome_size_check(config.QUERY_GENOME, best_hit_species_taxid)
-cc_result.update(genome_size_check_result)
 
 # GTDB search
 if config.ENABLE_GTDB:

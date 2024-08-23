@@ -122,7 +122,7 @@ options:
 ### Example  
 Test data can be found in `example`. To test the software, run this after preparing the reference data.  
 ```
-dfast_qc -i examples/GCA_000829395.1_Paucilactobacillus_hokkaidonensis.fna.gz --force
+dfast_qc -i examples/GCA_000829395.1.fna.gz --force
 ```
 
 ## Example of Result
@@ -170,6 +170,37 @@ dfast_qc -i examples/GCA_000829395.1_Paucilactobacillus_hokkaidonensis.fna.gz --
     }
 ```
 
+## Batch execution for multiple genomes
+A wrapper script is available for batch execution for multiple genomes in a given directory. Please make sure `dfast_qc` executable is placed in your `$PATH`.
+```
+dqc_multi -t 3 examples/
+```
+This will invoke 3 DFAST_QC processes in parallel against FASTA files in `example` directory and generate a report file `dqc_report.tsv`.  
+By default, FASTA files with extensions fa(.gz),fna(.gz),fasta(.gz) will be processed. See help, `dqc_multi -h` for more details. 
+
+### Help
+```
+usage: dqc_multi [-h] [--fasta FASTA] [--out_dir OUT_DIR] [--output OUTPUT] [--taxid TAXID] [--disable_tc] [--disable_cc] [--enable_gtdb] [--thread THREAD] input_dir
+
+Run DFAST_QC in parallel for batch execution of multiple genomes
+
+positional arguments:
+  input_dir             The directory containing the FASTA files
+
+options:
+  -h, --help            show this help message and exit
+  --fasta FASTA         Acceptable file extension for the fasta files. Default: fa,fasta,fna,fa.gz,fasta.gz,fna.gz
+  --out_dir OUT_DIR, -O OUT_DIR
+                        Name of output directory. Intermediate files will be saved here.
+  --output OUTPUT, -o OUTPUT
+                        Output file name
+  --taxid TAXID         taxid for taxnomy check (-1: auto, 0:prokaryote)
+  --disable_tc          Disable taxonomy check using ANI
+  --disable_cc          Disable completeness check using CheckM
+  --enable_gtdb         Enable GTDB search
+  --thread THREAD, -t THREAD
+                        Number of threads to use
+```                        
 
 ## List of status in taxonomy check result
 - __conclusive__: Effective ANI hit (>=95%) againt only 1 species, hence the species name is conclusively determined.
