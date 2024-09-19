@@ -227,7 +227,7 @@ In general, you do not need to change this, but you can specify it in the config
 
 __To prepare reference data, run the following command.__
 ```
-sh initial_setup.sh [-n int]
+sh dqc_initial_setup.sh [-n int]
 ```
 `-n` denotes the number of threads for parallel processing (default: 1). As data preparation may take time, it is recommended specifying the value 4~8 (or more) for `-n`.
 
@@ -241,7 +241,7 @@ To generate a list of the reference genomes (`reference_genomes.tsv`), run the f
 dqc_admin_tools.py dump_sqlite_db
 ```
 
-Instead of running `initial_setup.sh`, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
+Instead of running `dqc_initial_setup.sh`, you can prepare reference data by manually executing the following commands. Run `dqc_admin_tools.py -h` or `dqc_admin_tools.py subcommand -h` to show help.
   
 
 1. Download master files  
