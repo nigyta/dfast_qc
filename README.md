@@ -56,8 +56,8 @@ If this did not work, please try [Installation from source code](#installation-f
 Reference data is not included in the conda package. Please install it following the steps below.
 
 ## Quick set up (recommended)
-Since the full data set of DFAST_QC's reference data (`DQC_REFERENCE_FULL`) is huge (>100GB, including GTDB representative genomes), we have made the pre-built reference data (`DQC_REFERENCE_COMPACT`, <1.5GB) available for download using 
-the `dqc_ref_manager.py` script. 
+Since the full data set of DFAST_QC's reference data (`DQC_REFERENCE_FULL`) is huge (>100GB, including GTDB representative genomes), we have made the pre-built reference data (`DQC_REFERENCE_COMPACT`, <1.5GB) available for download using the `dqc_ref_manager.py` script. 　
+This script attempts to retrieve data from the DFAST web service hosted on the NIG Supercomputer. If the web service is unavailable, downloading will not be successful. Please refer to https://www.ddbj.nig.ac.jp/.  
 ```
 dqc_ref_manager.py download
 ```
