@@ -321,3 +321,11 @@ Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` speci
     ```
 
 When the newer version of the GTDB representative genomes become available, repeat these steps.
+
+## Citation
+If you use DFAST-QC, please cite:
+
+Mohamed Elmanzalawi, Takatomo Fujisawa, Hiroshi Mori, Yasukazu Nakamura & Yasuhiro Tanizawa  
+DFAST_QC: quality assessment and taxonomic identification tool for prokaryotic genomes.  
+_BMC Bioinformatics_ 26:3, 2025. https://doi.org/10.1186/s12859-024-06030-y
+
