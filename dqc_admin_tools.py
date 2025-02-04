@@ -23,7 +23,7 @@ def check_ref_type(args):
 def download_master_files(args):
     from dqc.admin.download_master_files import download_master_files
     if args.targets is None:
-        target_files = ["asm", "ani", "tsr", "igp", "sst"]
+        target_files = ["asm", "ani", "tsr", "igp", "sst", "egs"]
     else:
         target_files = args.targets
     download_master_files(target_files)
@@ -69,7 +69,7 @@ def prepare_genome_size_data(args):
 
 def update_all(args):
     from dqc.admin.download_master_files import download_master_files
-    download_master_files(target_files=["asm", "ani", "tsr", "igp", "sst"])
+    download_master_files(target_files=["asm", "ani", "tsr", "igp", "sst", "egs"])
     from dqc.admin.update_taxdump import main as update_taxdump
     update_taxdump()
     from dqc.admin.download_all_reference_genomes import download_all_genomes
@@ -102,7 +102,7 @@ def parse_args():
         choices=['asm', 'ani', 'tsr', "igp", "sst", "egs", "checkm", "taxdump", "gtdb"], nargs="*",
         help="Target(s) for downloading. " + 
              "[asm: Assembly report, ani: ANI report, tsr: Type strain report,igp: indistinguishable groups prokaryotes, sst: ANI species specific threshold, egs: expected genome size, checkm: CheckM reference data, taxdump: NCBI taxdump.tar.gz, gtdb: GTDB representative species list] "
-             "(default: asm ani tsr igp)"
+             "(default: asm ani tsr igp, sst, egs)"
     )
     parser_master.set_defaults(func=download_master_files)
 

@@ -246,7 +246,7 @@ Instead of running `dqc_initial_setup.sh`, you can prepare reference data by man
 
 1. Download master files  
     ```
-    dqc_admin_tools.py download_master_files --targets asm ani tsr igp
+    dqc_admin_tools.py download_master_files --targets asm ani tsr igp 
     ```
     This will download "Assembly report", "ANI report", "Type strain report", and "indistinguishable_groups_prokaryotes.txt" from the NCBI FTP server and HMMer profile for TIGR.  
 
