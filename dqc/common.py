@@ -142,13 +142,18 @@ def fasta_reader(fasta_file_name):
         D[seq_id] = seq
     return D
 
-def get_ref_inf():
+def get_ref_inf(as_str=False):
     dqc_ref_inf_json = get_ref_path(config.REFERENCE_INF)
     if os.path.exists(dqc_ref_inf_json):
         dqc_ref_inf = json.load(open(dqc_ref_inf_json))
     else:
         dqc_ref_inf = {}
-    return dqc_ref_inf
+    if as_str:
+        ref_version = dqc_ref_inf.get("version", "n.a.")
+        ref_type = dqc_ref_inf.get("type", "n.a.")
+        return f"DFAST_QC Reference data: [version={ref_version}, type={ref_type}]"
+    else:
+        return dqc_ref_inf
 
 def safe_tar_extraction(target_tarfile, data_root):
     with tarfile.open(target_tarfile, "r:gz") as tar:

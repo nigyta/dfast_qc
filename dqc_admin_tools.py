@@ -2,8 +2,10 @@
 
 import os
 import sys
+import json
 from argparse import ArgumentParser
 from dqc.config import config
+from datetime import datetime
 
 config.ADMIN = True
 
@@ -19,7 +21,20 @@ def check_ref_type(args):
     # if ref_type == "compact" and not (args.func == prepare_checkm_data or args.func == update_checkm_db):
         # logger.error(f"'{args.func.__name__}' is not allowed for 'dqc_reference_compact'.")
         # exit(1)
-    
+
+def add_ref_info(args):
+    dt = datetime.now()
+    time_stamp = dt.strftime("%Y-%m-%d") 
+    ref_type = "full"
+    ref_inf = {"version": time_stamp, "type": ref_type}    
+
+    # Writing inf.json file
+    out_json_file = os.path.join(config.DQC_REFERENCE_DIR, config.REFERENCE_INF)
+    logger.info("Writing reference info. [version=%s, type=%s]", ref_inf["version"], ref_inf["type"])
+    with open(out_json_file, "w") as f:
+        json.dump(ref_inf, f)
+
+
 def download_master_files(args):
     from dqc.admin.download_master_files import download_master_files
     if args.targets is None:
@@ -82,6 +97,7 @@ def update_all(args):
     sketching()
     from dqc.admin.prepare_genome_size_data import prepare_genome_size_data
     prepare_genome_size_data()
+    add_ref_info()
 
 def parse_args():
     parser = ArgumentParser(description="DFAST_QC utility tools for admin.")
@@ -143,6 +159,10 @@ def parse_args():
     # subparser for dump_sqlite_db
     parser_dump_sqlite_db = subparsers.add_parser('dump_sqlite_db', help='Dump reference genome info to file.', parents=[common_parser])
     parser_dump_sqlite_db.set_defaults(func=dump_sqlite_db)
+
+    # subparser for add_ref_info
+    parser_add_ref_info = subparsers.add_parser('add_ref_info', help='Add reference info to the reference data', parents=[common_parser])
+    parser_add_ref_info.set_defaults(func=add_ref_info)
 
     # subparser for update_all
     parser_update_all = subparsers.add_parser('update_all', help='Update all reference data', parents=[common_parser])

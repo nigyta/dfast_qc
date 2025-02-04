@@ -284,6 +284,11 @@ Instead of running `dqc_initial_setup.sh`, you can prepare reference data by man
     dqc_admin_tools.py prepare_genome_size_data
     ```
 
+9. Add timestamp to the reference data
+    ```
+    dqc_admin_tools.py add_ref_info
+    ```
+
 
 ## Preparation for the GTDB reference data.
 1. Download the representative genomes from GTDB and unarchive it.

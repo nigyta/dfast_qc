@@ -172,7 +172,7 @@ if config.DISABLE_TC and config.CHECKM_TAXID is None and (not config.DISABLE_CC)
     sys.stderr.write("dfast_qc: error: '--taxid' is required to conduct completeness check when '--disable_tc' is specified.\n")
     exit(1)
 
-from dqc.common import get_logger, prepare_output_directory
+from dqc.common import get_logger, prepare_output_directory, get_ref_inf
 
 prepare_output_directory()
 logger = get_logger(__name__)
@@ -185,6 +185,7 @@ if not os.path.exists(config.DQC_REFERENCE_DIR):
     exit(1)
 else:
     logger.info("DQC Reference Directory: %s", config.DQC_REFERENCE_DIR)
+    logger.info(get_ref_inf(as_str=True))
 
 from dqc import taxonomy_check, completeness_check, gtdb_search
 
