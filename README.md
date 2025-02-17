@@ -13,6 +13,9 @@ The genome size is also checked to ensure it falls within the expected range.
 - GTDB search  
 As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes, thereby enabling species-level identification in the GTDB Taxonomy. Thie employs the same 2-step search as Taxonomy check
 
+## Important Notice 2025 Feb
+The reference data for DFAST_QC is normally available from our web service (https://dfast.ddbj.nig.ac.jp). However, due to a system replacement on our institute’s supercomputer, the web service will be unavailable from mid-February to early March 2025. During this period, the `dqc_ref_manager.py` script will not work. Instead, please manually download the data (`dqc_reference_compact.tar.gz`) from https://dfast.annotation.jp and follow the instructions in the README file available at the site.
+
 ---
 
 ## System requirements and software dependencies
@@ -62,7 +65,9 @@ This script attempts to retrieve data from the DFAST web service hosted on the N
 dqc_ref_manager.py download
 ```
 As `DQC_REFERENCE_COMPACT` does not contain reference genomes for ANI calculation, `dfast_qc` will attempt to download the required genomes in an on-the-fly manner during the run (internet connection is required). Therefore, it takes extra time for downloding them (~1min).  
-We will update `DQC_REFERENCE_COMPACT` periodically, please update it by running `dqc_ref_manager.py` again.
+We will update `DQC_REFERENCE_COMPACT` periodically, please update it by running `dqc_ref_manager.py` again.  
+
+The `dqc_ref_manager.py` script downloads the reference data from our web service (https://dfast.ddbj.nig.ac.jp). If file downloads fail due to server maintenance or other issues, please manually obtain the reference data from [this site](https://dfast.annotation.jp).
 
 If you want to prepre `DQC_REFERENCE_FULL`, please follow the procedure [below](#for-power-users).
   
