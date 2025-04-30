@@ -1,3 +1,6 @@
+### v. 1.0.7 (2025.04.30)
+- Minor change. Updated to use GTDB_r226
+
 ### v. 1.0.6 (2025.02.04)
 - Minor change. Scripts for managing reference data updated.
 
