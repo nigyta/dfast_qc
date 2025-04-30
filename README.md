@@ -13,9 +13,6 @@ The genome size is also checked to ensure it falls within the expected range.
 - GTDB search  
 As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes, thereby enabling species-level identification in the GTDB Taxonomy. Thie employs the same 2-step search as Taxonomy check
 
-## Important Notice 2025 Feb
-The reference data for DFAST_QC is normally available from our web service (https://dfast.ddbj.nig.ac.jp). However, due to a system replacement on our institute’s supercomputer, the web service will be unavailable from mid-February to early March 2025. During this period, the `dqc_ref_manager.py` script will not work. Instead, please manually download the data (`dqc_reference_compact.tar.gz`) from https://dfast.annotation.jp and follow the instructions in the README file available at the site.
-
 ---
 
 ## System requirements and software dependencies
@@ -303,14 +300,18 @@ Instead of running `dqc_initial_setup.sh`, you can prepare reference data by man
 
     If the downloading is slow from the above link, try downloading it from the mirror site,
     ```
-    curl -LO https://data.ace.uq.edu.au/public/gtdb/data/releases/release220/220.0/genomic_files_reps/gtdb_genomes_reps_r220.tar.gz
-    tar xfz gtdb_genomes_reps_r220.tar.gz
+    curl -LO https://data.ace.uq.edu.au/public/gtdb/data/releases/release226/226.0/genomic_files_reps/gtdb_genomes_reps_r226.tar.gz
+    tar xfz gtdb_genomes_reps_r226.tar.gz
     ```
 
-2. Place the unarchived folder under `DQC_REFERENCE`.  
-Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` specified in [config.py](dqc/config.py).  
+2. Create a link under `DQC_REFERENCE` 
     ```
-    GTDB_GENOME_DIR = "gtdb_genomes_reps_r220/database"
+    ln -s gtdb_genomes_reps_r226 gtdb_genomes_reps
+    ```
+ 
+    Alternatively, place the unarchived folder under `DQC_REFERENCE`, and modify the value `GTDB_GENOME_DIR` specified in [config.py](dqc/config.py).  
+    ```
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r226/database"
     ```
 3. Download the species list from GTDB.  
     ```
@@ -330,6 +331,11 @@ Make sure that the folder name is identical to the value `GTDB_GENOME_DIR` speci
     ```
 
 When the newer version of the GTDB representative genomes become available, repeat these steps.
+
+<!-- 
+## Troubleshooting
+The reference data for DFAST_QC is normally available from our web service (https://dfast.ddbj.nig.ac.jp). However, due to a system replacement on our institute’s supercomputer, the web service will be unavailable from mid-February to early March 2025. During this period, the `dqc_ref_manager.py` script will not work. Instead, please manually download the data (`dqc_reference_compact.tar.gz`) from https://dfast.annotation.jp and follow the instructions in the README file available at the site.)
+ -->
 
 ## Citation
 If you use DFAST-QC, please cite:
