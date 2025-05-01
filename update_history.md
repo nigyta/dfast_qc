@@ -1,5 +1,11 @@
 ### v. 1.0.7 (2025.04.30)
-- Minor change. Updated to use GTDB_r226
+- Minor change. Updated to use GTDB_r226  
+- The reference data for GTDB has been changed (config.py)  
+  `GTDB_GENOME_DIR = "gtdb_genomes_reps_r226/database"`
+  to
+  `GTDB_GENOME_DIR = "gtdb_genomes_reps/database"`  
+  Creating a sym link is recommended:  
+  `ln -s gtdb_genomes_reps_r226 gtdb_genomes_reps`
 
 ### v. 1.0.6 (2025.02.04)
 - Minor change. Scripts for managing reference data updated.
