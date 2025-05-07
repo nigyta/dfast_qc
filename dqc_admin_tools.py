@@ -26,7 +26,14 @@ def add_ref_info(args):
     dt = datetime.now()
     time_stamp = dt.strftime("%Y-%m-%d") 
     ref_type = "full"
-    ref_inf = {"version": time_stamp, "type": ref_type}    
+
+    # Collecting reference info
+    from dqc.admin.dump_sqlite_db import collect_db_info
+    num_ref_genomes, num_species, num_gtdb_reference, gtdb_version = collect_db_info()
+    ref_inf = {"version": time_stamp, "type": ref_type,
+               "genomes": num_ref_genomes, "species": num_species, "gtdb_genomes": num_gtdb_reference}    
+    if gtdb_version:
+        ref_inf["gtdb_version"] = gtdb_version
 
     # Writing inf.json file
     out_json_file = os.path.join(config.DQC_REFERENCE_DIR, config.REFERENCE_INF)

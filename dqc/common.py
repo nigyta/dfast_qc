@@ -151,7 +151,13 @@ def get_ref_inf(as_str=False):
     if as_str:
         ref_version = dqc_ref_inf.get("version", "n.a.")
         ref_type = dqc_ref_inf.get("type", "n.a.")
-        return f"DFAST_QC Reference data: [version={ref_version}, type={ref_type}]"
+        ret = f"DFAST_QC Reference data: [version={ref_version}, type={ref_type}"
+        num_genomes = dqc_ref_inf.get("genomes", "n.a.")
+        num_species = dqc_ref_inf.get("species", "n.a.")
+        gtdb_genomes = dqc_ref_inf.get("gtdb_genomes", "n.a.")
+        gtdb_version = dqc_ref_inf.get("gtdb_version", "n.a.")
+        ret += f", genomes={num_genomes}, species={num_species}, gtdb_genomes={gtdb_genomes}, gtdb_version={gtdb_version}]"
+        return ret
     else:
         return dqc_ref_inf
 

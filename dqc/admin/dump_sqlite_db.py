@@ -1,7 +1,8 @@
 import os
+import re
 from ..common import get_logger, get_ref_path
 from ..config import config
-from ..models import Reference, init_db, db
+from ..models import Reference, GTDB_Reference, init_db, db
 from .asm_report_parser import Assembly
 from .ani_report_parser import get_filtered_ANI_report
 from ..ete3_helper import get_valid_name, get_rank
@@ -44,6 +45,42 @@ def dump_sqlite_db():
                 f.write("\t".join(reference.to_table() + [rank]) + "\n")
 
     logger.info("===== Completed dumping SQLite DB file =====")
+
+
+def collect_db_info():
+    logger.info("===== Collecting Reference Info. =====")
+
+
+    sqlitedb_file = get_ref_path(config.SQLITE_REFERENCE_DB)
+    if not os.path.exists(sqlitedb_file):
+        logger.error("SQLiteDB file does not exist. [%s]", sqlitedb_file)
+        exit(1)
+
+    # Number of reference genomes and species
+    references = Reference.select()
+    dict_species = {}
+    for reference in references:
+        dict_species.setdefault(reference.species_taxid, []).append(reference)
+    logger.info("Number of reference genomes: %s (%s species)", len(references), len(dict_species))
+
+    # Number of GTDB reference genomes
+    gtdb_references = GTDB_Reference.select()
+    logger.info("Number of GTDB reference genomes: %s", len(gtdb_references))
+
+    # GTDB version
+    pattern = re.compile(r"^gtdb_genomes_reps_r(\d+)")
+    max_ver = -1
+    for entry in os.listdir(config.DQC_REFERENCE_DIR):
+        m = pattern.match(entry)
+        if m:
+            ver = int(m.group(1))
+            if ver > max_ver:
+                max_ver = ver
+    gtdb_version = None if max_ver == -1 else f"R{max_ver}"
+    logger.info("GTDB version: %s", gtdb_version)
+
+    return len(references), len(dict_species), len(gtdb_references), gtdb_version
+
 
 if __name__ == "__main__":
     dump_sqlite_db()
