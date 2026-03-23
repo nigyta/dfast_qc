@@ -13,6 +13,15 @@ class DefaultConfig:
     DISABLE_CC = False
     ENABLE_GTDB = False
 
+    # ShigaPass settings
+    ENABLE_SHIGAPASS = False       # Auto-set to True when Shigella/E. coli detected
+    DISABLE_SHIGAPASS = False      # User override to skip ShigaPass
+    SHIGAPASS_SCRIPT = os.path.join(os.path.dirname(__file__), "shigapass", "ShigaPass.sh")
+    SHIGAPASS_DB_DIR = os.path.join(os.path.dirname(__file__), "shigapass", "ShigaPass_DataBases")
+    SHIGAPASS_OUTPUT_DIR = "shigapass_output"
+    SHIGAPASS_SUMMARY = "ShigaPass_summary.csv"
+    SHIGAPASS_FLEX_SUMMARY = "ShigaPass_Flex_summary.csv"
+
     AUTO_DOWNLOAD = True
 
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))

@@ -6,6 +6,7 @@
 dev/
 dev_old/
 OUT/
+OUT_shigella/
 bin/
 
 # environment
@@ -16,6 +17,10 @@ setenv.sh
 dqc_reference
 dqc_reference_dev
 dqc_reference*
+
+# ShigaPass (installed separately by users)
+dqc/shigapass/ShigaPass.sh
+dqc/shigapass/ShigaPass_DataBases/
 
 # python
 __pycache__/

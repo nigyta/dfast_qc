@@ -10,20 +10,24 @@ DFAST_QC uses [MASH](https://doi.org/10.1186/s13059-016-0997-x) for the former p
 DFAST_QC employs [CheckM](https://genome.cshlp.org/content/25/7/1043) to calculate completeness and contamination values of the query genome. DFAST_QC automatically determines the reference marker set for CheckM based on the result of taxonomy check. Users can also specify the marker set to be used.  
 The genome size is also checked to ensure it falls within the expected range.
 
-- GTDB search  
+- GTDB search
 As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes, thereby enabling species-level identification in the GTDB Taxonomy. Thie employs the same 2-step search as Taxonomy check
+
+- ShigaPass
+When the taxonomy check identifies the query genome as *Escherichia*/*Shigella* (with an "indistinguishable" status), DFAST_QC automatically runs [ShigaPass](https://github.com/imanyass/ShigaPass) to predict the *Shigella* serotype. ShigaPass can be disabled with `--disable_shigapass`.
 
 ---
 
 ## System requirements and software dependencies
-DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 2Gbyte of memory. 
-The following third party softwares/packages are required.  
+DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 2Gbyte of memory.
+The following third party softwares/packages are required.
 - Skani
-- Mash  
-- CheckM  
-- HMMer (required for CheckM)  
-- Prodigal (required for CheckM)  
-- Python packages: peewee, more-itertools, ete3  
+- Mash
+- CheckM
+- HMMer (required for CheckM)
+- Prodigal (required for CheckM)
+- BLAST+ (required for ShigaPass)
+- Python packages: peewee, more-itertools, ete3
 
 ## Installation from Bioconda
 DFAST_QC is also available from [BioConda](https://bioconda.github.io/recipes/dfast_qc/README.html).
@@ -54,6 +58,18 @@ If this did not work, please try [Installation from source code](#installation-f
 
 
 Reference data is not included in the conda package. Please install it following the steps below.
+
+## Install ShigaPass
+ShigaPass is required for *Shigella* serotype prediction. Clone the ShigaPass repository and copy the script and databases into the DFAST_QC source tree:
+```
+git clone https://github.com/imanyass/ShigaPass.git
+cp ShigaPass/SCRIPT/ShigaPass.sh dqc/shigapass/
+cp -r ShigaPass/SCRIPT/ShigaPass_DataBases dqc/shigapass/
+```
+BLAST+ must also be installed and available on your `$PATH` (e.g. `sudo apt-get install ncbi-blast+` or `conda install -c bioconda blast`).
+The ShigaPass databases will be automatically initialized (via `makeblastdb`) on the first run.
+
+If you do not need ShigaPass, you can skip this step and use `--disable_shigapass` when running DFAST_QC.
 
 ## Quick set up (recommended)
 Since the full data set of DFAST_QC's reference data (`DQC_REFERENCE_FULL`) is huge (>100GB, including GTDB representative genomes), we have made the pre-built reference data (`DQC_REFERENCE_COMPACT`, <1.5GB) available for download using the `dqc_ref_manager.py` script. 　
@@ -112,6 +128,7 @@ options:
   --enable_gtdb         Enable GTDB search
   --disable_tc          Disable taxonomy check using ANI
   --disable_cc          Disable completeness check using CheckM
+  --disable_shigapass   Disable ShigaPass analysis even when Shigella/E. coli is detected
   --disable_auto_download
                         Disable auto-download for missing reference genomes
   --force               Force overwriting result
