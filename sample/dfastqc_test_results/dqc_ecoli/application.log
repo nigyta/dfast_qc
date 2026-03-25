@@ -1,0 +1,40 @@
+[2026-03-18 08:04:27,714] [INFO] DFAST_QC pipeline started.
+[2026-03-18 08:04:27,714] [INFO] DFAST_QC version: 1.0.7
+[2026-03-18 08:04:27,714] [INFO] DQC Reference Directory: /home/dfast/project/dfast_qc/dqc_reference
+[2026-03-18 08:04:27,714] [INFO] DFAST_QC Reference data: [version=2025-04-30, type=compact]
+[2026-03-18 08:04:28,443] [INFO] ===== Start taxonomy check using ANI =====
+[2026-03-18 08:04:28,443] [INFO] Task started: mash_search
+[2026-03-18 08:04:28,443] [INFO] Running command: mash dist /home/dfast/project/dfast_qc/dqc_reference/ref_genomes_sketch.msh sample/dfastqc_test_data/GCA_000005845.2.ecoli.fna -p 1 > sample/dfastqc_test_results/dqc_ecoli/mash_result_ref.tab
+[2026-03-18 08:04:29,130] [INFO] Task succeeded: mash_search
+[2026-03-18 08:04:29,146] [INFO] Selected 10 target genomes.
+[2026-03-18 08:04:29,146] [INFO] Target genome list was writen to sample/dfastqc_test_results/dqc_ecoli/target_genomes.txt
+[2026-03-18 08:04:29,148] [INFO] Task started: skani_sketch
+[2026-03-18 08:04:29,148] [INFO] Running command: skani sketch -l sample/dfastqc_test_results/dqc_ecoli/target_genomes.txt -o sample/dfastqc_test_results/dqc_ecoli/skani_database_ref -t 1
+[2026-03-18 08:04:29,487] [INFO] Task succeeded: skani_sketch
+[2026-03-18 08:04:29,487] [INFO] Task started: skani_search
+[2026-03-18 08:04:29,487] [INFO] Running command: skani search sample/dfastqc_test_data/GCA_000005845.2.ecoli.fna -d sample/dfastqc_test_results/dqc_ecoli/skani_database_ref -o sample/dfastqc_test_results/dqc_ecoli/skani_result.tsv -t 1
+[2026-03-18 08:04:29,617] [INFO] Task succeeded: skani_search
+[2026-03-18 08:04:29,617] [INFO] Loading species specific ANI threshold from /home/dfast/project/dfast_qc/dqc_reference/prokaryote_ANI_species_specific_threshold.txt
+[2026-03-18 08:04:29,621] [WARNING] Following organisms are indistinguishable with ANI. [Escherichia coli(562), Shigella boydii(621), Shigella dysenteriae(622), Shigella flexneri(623), Shigella sonnei(624)]
+[2026-03-18 08:04:29,621] [INFO] Found 10 ANI hits (5 hits with ANI > threshold)
+[2026-03-18 08:04:29,621] [INFO] The taxonomy check result is classified as 'conclusive'.
+[2026-03-18 08:04:29,621] [INFO] DFAST Taxonomy check final result
+--------------------------------------------------------------------------------
+organism_name	strain	accession	taxid	species_taxid	relation_to_type	validated	ani	align_fraction_ref	align_fraction_query	ani_threshold	status
+Escherichia coli	strain=ETEC H10407	GCA_000210475.1	562	562	claderef	True	99.28	81.86	93.92	95	conclusive
+Escherichia coli	strain=HVH 200 (4-4449924)	GCA_000459055.1	562	562	claderef	True	98.54	80.82	92.05	95	conclusive
+Escherichia coli	strain=SE11	GCA_000010385.1	562	562	claderef	True	98.52	82.84	92.01	95	conclusive
+Shigella boydii	strain=type strain: CIP82.50	GCA_965139055.1	621	621	type	True	98.47	86.63	77.29	99.2	below_threshold
+Shigella boydii	strain=FDAARGOS_1139	GCA_016726285.1	621	621	type	True	98.46	79.75	78.15	99.2	below_threshold
+Shigella boydii	strain=DMB SH130	GCA_003572535.1	621	621	type	True	98.46	87.35	76.73	99.2	below_threshold
+Escherichia coli O103:H25	strain=CVM9340	GCA_000263895.1	991913	562	claderef	True	98.38	79.52	89.83	95	conclusive
+Shigella sonnei	strain=ATCC 29930	GCA_002950395.1	624	624	type	True	98.28	78.61	84.58	99.2	below_threshold
+Shigella sonnei	strain=NCTC12984	GCA_900457155.1	624	624	type	True	98.26	77.4	84.84	99.2	below_threshold
+Escherichia coli	strain=ECOR31	GCA_001865905.1	562	562	claderef	True	98.17	77.05	90.35	95	conclusive
+--------------------------------------------------------------------------------
+[2026-03-18 08:04:29,621] [INFO] DFAST Taxonomy check result was written to sample/dfastqc_test_results/dqc_ecoli/tc_result.tsv
+[2026-03-18 08:04:29,622] [INFO] ===== Taxonomy check completed =====
+[2026-03-18 08:04:29,622] [INFO] Taxid for CheckM is set to 562.
+[2026-03-18 08:04:29,622] [INFO] DFAST_QC result json was written to sample/dfastqc_test_results/dqc_ecoli/dqc_result.json
+[2026-03-18 08:04:29,622] [INFO] DFAST_QC completed!
+[2026-03-18 08:04:29,622] [INFO] Total running time: 0h0m2s

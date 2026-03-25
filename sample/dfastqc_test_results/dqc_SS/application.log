@@ -1,0 +1,46 @@
+[2026-03-18 08:05:13,676] [INFO] DFAST_QC pipeline started.
+[2026-03-18 08:05:13,676] [INFO] DFAST_QC version: 1.0.7
+[2026-03-18 08:05:13,676] [INFO] DQC Reference Directory: /home/dfast/project/dfast_qc/dqc_reference
+[2026-03-18 08:05:13,676] [INFO] DFAST_QC Reference data: [version=2025-04-30, type=compact]
+[2026-03-18 08:05:14,401] [INFO] ===== Start taxonomy check using ANI =====
+[2026-03-18 08:05:14,401] [INFO] Task started: mash_search
+[2026-03-18 08:05:14,401] [INFO] Running command: mash dist /home/dfast/project/dfast_qc/dqc_reference/ref_genomes_sketch.msh sample/dfastqc_test_data/GCA_000092525.1.SS.fna -p 1 > sample/dfastqc_test_results/dqc_SS/mash_result_ref.tab
+[2026-03-18 08:05:15,098] [INFO] Task succeeded: mash_search
+[2026-03-18 08:05:15,114] [INFO] Selected 10 target genomes.
+[2026-03-18 08:05:15,114] [INFO] Target genome list was writen to sample/dfastqc_test_results/dqc_SS/target_genomes.txt
+[2026-03-18 08:05:15,116] [INFO] Task started: skani_sketch
+[2026-03-18 08:05:15,116] [INFO] Running command: skani sketch -l sample/dfastqc_test_results/dqc_SS/target_genomes.txt -o sample/dfastqc_test_results/dqc_SS/skani_database_ref -t 1
+[2026-03-18 08:05:15,450] [INFO] Task succeeded: skani_sketch
+[2026-03-18 08:05:15,450] [INFO] Task started: skani_search
+[2026-03-18 08:05:15,450] [INFO] Running command: skani search sample/dfastqc_test_data/GCA_000092525.1.SS.fna -d sample/dfastqc_test_results/dqc_SS/skani_database_ref -o sample/dfastqc_test_results/dqc_SS/skani_result.tsv -t 1
+[2026-03-18 08:05:15,585] [INFO] Task succeeded: skani_search
+[2026-03-18 08:05:15,585] [INFO] Loading species specific ANI threshold from /home/dfast/project/dfast_qc/dqc_reference/prokaryote_ANI_species_specific_threshold.txt
+[2026-03-18 08:05:15,588] [WARNING] Following organisms are indistinguishable with ANI. [Escherichia coli(562), Shigella boydii(621), Shigella dysenteriae(622), Shigella flexneri(623), Shigella sonnei(624)]
+[2026-03-18 08:05:15,588] [INFO] Found 10 ANI hits (5 hits with ANI > threshold)
+[2026-03-18 08:05:15,588] [INFO] The taxonomy check result is classified as 'indistinguishable'.
+[2026-03-18 08:05:15,588] [INFO] DFAST Taxonomy check final result
+--------------------------------------------------------------------------------
+organism_name	strain	accession	taxid	species_taxid	relation_to_type	validated	ani	align_fraction_ref	align_fraction_query	ani_threshold	status
+Shigella sonnei	strain=NCTC12984	GCA_900457155.1	624	624	type	True	99.86	90.27	90.86	99.2	indistinguishable
+Shigella sonnei	strain=ATCC 29930	GCA_002950395.1	624	624	type	True	99.86	91.94	90.82	99.2	indistinguishable
+Shigella boydii	strain=type strain: CIP82.50	GCA_965139055.1	621	621	type	True	98.83	87.69	71.84	99.2	below_threshold
+Shigella boydii	strain=FDAARGOS_1139	GCA_016726285.1	621	621	type	True	98.78	82.18	73.95	99.2	below_threshold
+Shigella boydii	strain=DMB SH130	GCA_003572535.1	621	621	type	True	98.77	88.32	71.23	99.2	below_threshold
+Shigella boydii	strain=NCTC12985	GCA_900457095.1	621	621	suspected-type	True	98.59	74.99	74.46	99.2	below_threshold
+Escherichia coli	strain=SE11	GCA_000010385.1	562	562	claderef	True	98.59	78.04	79.59	95	indistinguishable
+Escherichia coli	strain=HVH 200 (4-4449924)	GCA_000459055.1	562	562	claderef	True	98.53	76.6	80.1	95	indistinguishable
+Escherichia coli O103:H25	strain=CVM9340	GCA_000263895.1	991913	562	claderef	True	98.46	76.24	79.08	95	indistinguishable
+Shigella flexneri 2a	strain=24570	GCA_001078805.1	42897	623	type	True	98.36	80.85	75.36	99.2	below_threshold
+--------------------------------------------------------------------------------
+[2026-03-18 08:05:15,589] [INFO] DFAST Taxonomy check result was written to sample/dfastqc_test_results/dqc_SS/tc_result.tsv
+[2026-03-18 08:05:15,589] [INFO] ===== Taxonomy check completed =====
+[2026-03-18 08:05:15,589] [INFO] Taxid for CheckM is set to 624.
+[2026-03-18 08:05:15,589] [INFO] Shigella/E. coli detected. Running ShigaPass.
+[2026-03-18 08:05:15,590] [INFO] ===== Start ShigaPass serotype prediction =====
+[2026-03-18 08:05:15,590] [INFO] Task started: ShigaPass
+[2026-03-18 08:05:15,590] [INFO] Running command: bash /home/dfast/project/dfast_qc/dqc/shigapass/ShigaPass.sh -l sample/dfastqc_test_results/dqc_SS/shigapass_input_list.txt -o sample/dfastqc_test_results/dqc_SS/shigapass_output -p /home/dfast/project/dfast_qc/dqc/shigapass/ShigaPass_DataBases -t 1
+[2026-03-18 08:05:26,718] [INFO] Task succeeded: ShigaPass
+[2026-03-18 08:05:26,718] [INFO] ===== ShigaPass serotype prediction completed =====
+[2026-03-18 08:05:26,719] [INFO] DFAST_QC result json was written to sample/dfastqc_test_results/dqc_SS/dqc_result.json
+[2026-03-18 08:05:26,719] [INFO] DFAST_QC completed!
+[2026-03-18 08:05:26,719] [INFO] Total running time: 0h0m13s

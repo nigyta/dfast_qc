@@ -42,7 +42,7 @@ def parse_args():
     return args
 
 
-def run_dqc(input_fasta, out_dir, taxid=None, ref_dir=None, disable_tc=False, disable_cc=False, enable_gtdb=False):
+def run_dqc(input_fasta, out_dir, taxid=None, ref_dir=None, disable_tc=False, disable_cc=False, disable_shigapass=False, enable_gtdb=False):
     dqc_command = DQC_BASE_COMMAND.format(input_fasta=input_fasta, out_dir=out_dir)
     if ref_dir:
         dqc_command += f" --ref_dir {ref_dir}"
@@ -52,6 +52,8 @@ def run_dqc(input_fasta, out_dir, taxid=None, ref_dir=None, disable_tc=False, di
         dqc_command += " --disable_cc"
     if disable_tc:
         dqc_command += " --disable_tc"
+    if disable_shigapass:
+        dqc_command += " --disable_shigapass"
     if enable_gtdb:
         dqc_command += " --enable_gtdb"
     logger.warning(f"Running DFAST_QC: {dqc_command}")
@@ -77,7 +79,7 @@ def get_fasta_files(input_dir, fasta_ext="fa,fasta,fna,fa.gz,fasta.gz,fna.gz"):
     fasta_files = list(set(fasta_files))  # remove redundant
     return fasta_files
 
-def run_dqc_parallel(fasta_files, out_dir, taxid=None, ref_dir=None, threads=1, disable_tc=False, disable_cc=False, enable_gtdb=False):
+def run_dqc_parallel(fasta_files, out_dir, taxid=None, ref_dir=None, threads=1, disable_tc=False, disable_cc=False, disable_shigapass=False, enable_gtdb=False):
     logger.warning(f"Start running DFAST_QC using {threads} threads.")
     # list_of_fasta_files = distribute(threads, fasta_files)  # divide fasta files into num of threads
     futures = []
@@ -87,7 +89,7 @@ def run_dqc_parallel(fasta_files, out_dir, taxid=None, ref_dir=None, threads=1, 
             # prefix, _ext = os.path.splitext(base_name)
             
             dqc_out_dir = os.path.join(out_dir, base_name)
-            f = executor.submit(run_dqc, fasta_file, dqc_out_dir, taxid=taxid, ref_dir=ref_dir, disable_tc=disable_tc, disable_cc=disable_cc, enable_gtdb=enable_gtdb)
+            f = executor.submit(run_dqc, fasta_file, dqc_out_dir, taxid=taxid, ref_dir=ref_dir, disable_tc=disable_tc, disable_cc=disable_cc, disable_shigapass=disable_shigapass, enable_gtdb=enable_gtdb)
             futures.append(f)
     results = [f.result() for f in as_completed(futures)]  # wait until all the jobs finish
     return results

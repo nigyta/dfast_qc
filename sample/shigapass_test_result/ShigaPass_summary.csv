@@ -1,0 +1,6 @@
+Name;rfb;rfb_hits,(%);MLST;fliC;CRISPR;ipaH;Predicted_Serotype;Predicted_FlexSerotype;Comments
+GCA_000005845;ND;ND,(0.0%);ND;ND;ND;ipaH-;Not Shigella/EIEC;;
+GCA_000006925;B1-5;147,(98.7%);ST245;ShH2(ShH2cplx);A-var3,x,16;ipaH+;SF1-5;2a;
+GCA_000012025;C4;130,(100.0%);ST1130;ShH15(ShH3cplx);A-var2;ipaH+;SB4;;
+GCA_000092525;D;266,(93.0%);ST152;ShH25(ShH1cplx);A-var0,27;ipaH+;SS;;
+GCA_900457215;A1;101,(100.0%);ST260;ShH12;A-var1,6,24,21;ipaH+;SD1;;

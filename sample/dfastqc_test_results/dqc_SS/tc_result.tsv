@@ -1,0 +1,11 @@
+organism_name	strain	accession	taxid	species_taxid	relation_to_type	validated	ani	align_fraction_ref	align_fraction_query	ani_threshold	status
+Shigella sonnei	strain=NCTC12984	GCA_900457155.1	624	624	type	True	99.86	90.27	90.86	99.2	indistinguishable
+Shigella sonnei	strain=ATCC 29930	GCA_002950395.1	624	624	type	True	99.86	91.94	90.82	99.2	indistinguishable
+Shigella boydii	strain=type strain: CIP82.50	GCA_965139055.1	621	621	type	True	98.83	87.69	71.84	99.2	below_threshold
+Shigella boydii	strain=FDAARGOS_1139	GCA_016726285.1	621	621	type	True	98.78	82.18	73.95	99.2	below_threshold
+Shigella boydii	strain=DMB SH130	GCA_003572535.1	621	621	type	True	98.77	88.32	71.23	99.2	below_threshold
+Shigella boydii	strain=NCTC12985	GCA_900457095.1	621	621	suspected-type	True	98.59	74.99	74.46	99.2	below_threshold
+Escherichia coli	strain=SE11	GCA_000010385.1	562	562	claderef	True	98.59	78.04	79.59	95	indistinguishable
+Escherichia coli	strain=HVH 200 (4-4449924)	GCA_000459055.1	562	562	claderef	True	98.53	76.6	80.1	95	indistinguishable
+Escherichia coli O103:H25	strain=CVM9340	GCA_000263895.1	991913	562	claderef	True	98.46	76.24	79.08	95	indistinguishable
+Shigella flexneri 2a	strain=24570	GCA_001078805.1	42897	623	type	True	98.36	80.85	75.36	99.2	below_threshold

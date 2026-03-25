@@ -1,0 +1,10 @@
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_900457155.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_002950395.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_965139055.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_003572535.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_001078805.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_000459055.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_000263895.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_000010385.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_900457095.1.fna.gz
+/home/dfast/project/dfast_qc/dqc_reference/genomes/GCA_016726285.1.fna.gz

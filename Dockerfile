@@ -5,13 +5,18 @@ LABEL maintainer=nigyta
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
 	pip install checkm-genome --no-cache-dir && \
-	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal && \
+	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal blast && \
 	conda clean --all -y
 
 RUN pip install ete3 more-itertools peewee --no-cache-dir
 
 ARG VERSION=1.0.4-1  # Increment this when the source code is updated (to disable cache)
-RUN	git clone https://github.com/nigyta/dfast_qc.git
+RUN	git clone https://github.com/nigyta/dfast_qc.git && \
+	git clone https://github.com/imanyass/ShigaPass.git && \
+	mkdir -p /dfast_qc/dqc/shigapass && \
+	cp ShigaPass/SCRIPT/ShigaPass.sh /dfast_qc/dqc/shigapass/ && \
+	cp -r ShigaPass/SCRIPT/ShigaPass_DataBases /dfast_qc/dqc/shigapass/ && \
+	rm -rf ShigaPass
 
 FROM debian:bookworm-slim
 
