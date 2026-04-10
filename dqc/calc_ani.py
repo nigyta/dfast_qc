@@ -59,8 +59,8 @@ def get_species_specific_threshold():
 
 def run_skani(input_file, reference_list_file,skani_result_file,skani_database):
     num_threads = config.NUM_THREADS
-    cmd_sketch = ["skani", "sketch", "-l",reference_list_file,"-o",skani_database,"-t",str(num_threads)]
-    cmd_skani = ["skani", "search", input_file, "-d",skani_database,"-o",skani_result_file,"-t",str(num_threads)]
+    cmd_sketch = ["skani", "sketch", "-l", reference_list_file, "-o", skani_database, "-t", str(num_threads)]
+    cmd_skani = ["skani", "search", input_file, "-d", skani_database, "-o", skani_result_file, "-t" , str(num_threads)]
     run_command(cmd_sketch, task_name="skani_sketch")
     run_command(cmd_skani, task_name="skani_search")
 
@@ -140,7 +140,7 @@ def add_organism_info_to_skani_result_for_gtdb(skani_result_file, output_file):
             mean_intra_species_ani, min_intra_species_ani, mean_intra_species_af = ref.mean_intra_species_ani, ref.min_intra_species_ani, ref.mean_intra_species_af
             min_intra_species_af, num_clustered_genomes, status = ref.min_intra_species_af, ref.num_clustered_genomes, "-" # ref.clustered_genomes
         else:
-            gtdb_species, gtdb_taxonomy, ani_circumscription_radius = "-", "-", "-"
+            gtdb_species, gtdb_taxonomy, ani_circumscription_radius = "-", "-", 95
             mean_intra_species_ani, min_intra_species_ani, mean_intra_species_af = "-", "-", "-"
             min_intra_species_af, num_clustered_genomes, status = "-", "-", "-"
         hit_cnt += 1
