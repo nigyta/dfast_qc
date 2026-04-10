@@ -5,16 +5,16 @@ import shutil
 import csv
 
 from .config import config
-from .common import get_logger, run_command
+from .common import get_logger, run_command, get_ref_path
 
 logger = get_logger(__name__)
 
-_SHIGAPASS_GENERA = ["escherichia", "shigella"]
+_SHIGAPASS_TARGETS = ["escherichia coli", "shigella"]
 
 
-def _is_shigapass_genus(organism_name):
+def _is_shigapass_target(organism_name):
     """Check if organism_name contains a ShigaPass-relevant genus."""
-    return any(genus in organism_name.lower() for genus in _SHIGAPASS_GENERA)
+    return any(organism_name.lower().startswith(target) for target in _SHIGAPASS_TARGETS)
 
 
 def should_run_shigapass(tc_result):
@@ -28,12 +28,12 @@ def should_run_shigapass(tc_result):
         return False
     if tc_result[0].get("status") != "indistinguishable":
         return False
-    return any(_is_shigapass_genus(hit.get("organism_name", "")) for hit in tc_result)
+    return any(_is_shigapass_target(hit.get("organism_name", "")) for hit in tc_result)
 
 
 def _needs_db_init():
     """Check if ShigaPass BLAST databases need initialization."""
-    db_dir = config.SHIGAPASS_DB_DIR
+    db_dir = get_ref_path(config.SHIGAPASS_DB_DIR)
     for subdir in ["IPAH", "RFB", "FLIC", "CRISPR", "MLST"]:
         fasta_files = glob.glob(os.path.join(db_dir, subdir, "*.fasta"))
         if fasta_files:
@@ -155,15 +155,22 @@ def run():
 
     logger.info("===== Start ShigaPass serotype prediction =====")
 
+    # Auto-install ShigaPass if the script is not found
+    shigapass_script = get_ref_path(config.SHIGAPASS_SCRIPT)
+    if not os.path.exists(shigapass_script):
+        logger.info("ShigaPass script not found. Running setup_shigapass to install it.")
+        from .admin.setup_shigapass import setup_shigapass
+        setup_shigapass()
+
     # Prepare input
     input_list_file, temp_fasta = _prepare_input(input_file, out_dir)
 
     # Build command
     cmd = [
-        "bash", config.SHIGAPASS_SCRIPT,
+        "bash", shigapass_script,
         "-l", input_list_file,
         "-o", shigapass_out_dir,
-        "-p", config.SHIGAPASS_DB_DIR,
+        "-p", get_ref_path(config.SHIGAPASS_DB_DIR),
         "-t", str(config.NUM_THREADS),
     ]
 

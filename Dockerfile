@@ -10,13 +10,8 @@ RUN cd / && \
 
 RUN pip install ete3 more-itertools peewee --no-cache-dir
 
-ARG VERSION=1.0.4-1  # Increment this when the source code is updated (to disable cache)
-RUN	git clone https://github.com/nigyta/dfast_qc.git && \
-	git clone https://github.com/imanyass/ShigaPass.git && \
-	mkdir -p /dfast_qc/dqc/shigapass && \
-	cp ShigaPass/SCRIPT/ShigaPass.sh /dfast_qc/dqc/shigapass/ && \
-	cp -r ShigaPass/SCRIPT/ShigaPass_DataBases /dfast_qc/dqc/shigapass/ && \
-	rm -rf ShigaPass
+ARG VERSION=1.1.0  # Increment this when the source code is updated (to disable cache)
+RUN	git clone https://github.com/nigyta/dfast_qc.git
 
 FROM debian:bookworm-slim
 

@@ -14,7 +14,7 @@ The genome size is also checked to ensure it falls within the expected range.
 As of ver. 0.5.0, DFAST_QC can calculate ANI against GTDB representative genomes, thereby enabling species-level identification in the GTDB Taxonomy. Thie employs the same 2-step search as Taxonomy check
 
 - ShigaPass
-When the taxonomy check identifies the query genome as *Escherichia*/*Shigella* (with an "indistinguishable" status), DFAST_QC automatically runs [ShigaPass](https://github.com/imanyass/ShigaPass) to predict the *Shigella* serotype. ShigaPass can be disabled with `--disable_shigapass`.
+When the taxonomy check identifies the query genome as *Escherichia coli*/*Shigella* (with an "indistinguishable" status), DFAST_QC automatically runs [ShigaPass](https://github.com/imanyass/ShigaPass) to predict the *Shigella* serotype. ShigaPass can be disabled with `--disable_shigapass`.
 
 ---
 
@@ -302,7 +302,11 @@ Instead of running `dqc_initial_setup.sh`, you can prepare reference data by man
     ```
     dqc_admin_tools.py prepare_genome_size_data
     ```
-9. Add timestamp to the reference data
+9. Install Shigapass and its reference data
+    ```
+    dqc_admin_tools.py setup_shigapass
+    ```
+10. Add timestamp to the reference data
     ```
     dqc_admin_tools.py add_ref_info
     ```
