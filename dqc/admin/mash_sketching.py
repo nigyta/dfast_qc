@@ -21,7 +21,12 @@ def sketching():
 
     # Define the command for running mash sketch with the specified parameters
     mash_sketch_file = get_ref_path(config.MASH_SKETCH_FILE)
-    cmd_sketch = ["mash", "sketch", "-l", paths_file, "-o", mash_sketch_file, "-p", str(config.NUM_THREADS)]
+    # As a workaround for the issue of MASH hanging when using multiple threads, we will use single thread for MASH search for now. We will investigate the issue and update this part in the future.
+    num_threads = config.NUM_THREADS
+    if num_threads > 1:
+        logger.warning("MASH search is currently running with a single thread due to an issue with MASH hanging when using multiple threads. We are investigating the issue and will update this part in the future.")
+    num_threads = 1
+    cmd_sketch = ["mash", "sketch", "-l", paths_file, "-o", mash_sketch_file, "-p", num_threads]
     run_command(cmd_sketch, task_name="mash sketching reference genomes")
     
     logger.info("===== Sketching reference genomes is done =====")
