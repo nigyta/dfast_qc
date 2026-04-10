@@ -12,12 +12,7 @@ def print_selected_genomes(str_result):
     logger.debug("\n%s\n%s%s", "-"*80, str_result, "-"*80)
 
 def run_mash(input_file, mash_sketch_file, mash_result_file):
-    # num_threads = config.NUM_THREADS
-    # As a workaround for the issue of MASH hanging when using multiple threads, we will use single thread for MASH search for now. We will investigate the issue and update this part in the future.
-    if num_threads > 1:
-        logger.warning("MASH search is currently running with a single thread due to an issue with MASH hanging when using multiple threads. We are investigating the issue and will update this part in the future.")
-    num_threads = 1
-
+    num_threads = config.NUM_THREADS
     cmd_mash = ["mash", "dist", mash_sketch_file,input_file, "-p" , str(num_threads), ">", mash_result_file]
     run_command(cmd_mash, task_name="mash_search")
     return mash_result_file
