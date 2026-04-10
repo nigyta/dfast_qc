@@ -19,7 +19,7 @@ When the taxonomy check identifies the query genome as *Escherichia coli*/*Shige
 ---
 
 ## System requirements and software dependencies
-DFAST_QC runs on Linux / Mac (Intel CPU) with Python ver. 3.7 or later. It requires approximately 2Gbyte of memory.
+DFAST_QC runs on Linux with Python ver. 3.11 or later. It requires approximately 2Gbyte of memory. DFAST_QC previously supported macOS, but as of version 1.1.0, official macOS support has been dropped. It may still work on macOS, but the tool is mainly developed and tested on Linux.
 The following third party softwares/packages are required.
 - Skani
 - Mash
@@ -265,7 +265,7 @@ Instead of running `dqc_initial_setup.sh`, you can prepare reference data by man
 
 1. Download master files  
     ```
-    dqc_admin_tools.py download_master_files --targets asm ani tsr igp 
+    dqc_admin_tools.py download_master_files --targets asm ani tsr igp sst
     ```
     This will download "Assembly report", "ANI report", "Type strain report", and "indistinguishable_groups_prokaryotes.txt" from the NCBI FTP server and HMMer profile for TIGR.  
 

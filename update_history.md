@@ -1,4 +1,6 @@
 ### v. 1.1.0 (2026.04.10)
+- Supported Python version: We recommend using Python 3.11, because some of the module may not work on other versions.
+- Dropped macOS support: DFAST_QC previously supported macOS, but as of version 1.1.0, official macOS support has been dropped. It may still work on macOS, but the tool is mainly developed and tested on Linux.
 - ShigaPass integration: When the taxonomy check identifies the query genome as *Escherichia coli*/*Shigella* (status: "indistinguishable"), [ShigaPass](https://github.com/imanyass/ShigaPass) is automatically run to predict the *Shigella* serotype. ShigaPass can be disabled with `--disable_shigapass`.
 - If ShigaPass is not installed and the query genome is identified as *E. coli*/*Shigella*, ShigaPass and its reference databases are automatically installed at runtime. They can also be manually installed via `dqc_admin_tools.py setup_shigapass`.
 - ShigaPass is installed under $DQC_REFERENCE/shigapass
