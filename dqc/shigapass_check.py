@@ -155,6 +155,11 @@ def run():
 
     logger.info("===== Start ShigaPass serotype prediction =====")
 
+    # Check if blastn is available
+    if shutil.which("blastn") is None:
+        logger.warning("blastn not found in PATH. Skipping ShigaPass analysis.")
+        return {}
+
     # Auto-install ShigaPass if the script is not found
     shigapass_script = get_ref_path(config.SHIGAPASS_SCRIPT)
     if not os.path.exists(shigapass_script):

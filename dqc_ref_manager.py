@@ -65,6 +65,18 @@ def dump_dqc_reference(args):
     logger.debug("Copying %s to %s", checkm_data_root, dest_dir)
     shutil.copytree(checkm_data_root, dest_dir)
 
+    # ShigaPass files
+    logger.info("Dumping ShigaPass reference data.")
+    shigapass_script = get_ref_path(config.SHIGAPASS_SCRIPT)
+    shigapass_db_dir = get_ref_path(config.SHIGAPASS_DB_DIR)
+    dest_script = os.path.join(tmp_out_dir, config.SHIGAPASS_SCRIPT)
+    dest_db_dir = os.path.join(tmp_out_dir, config.SHIGAPASS_DB_DIR)
+    logger.debug("Copying %s to %s", shigapass_script, dest_script)
+    logger.debug("Copying %s to %s", shigapass_db_dir, dest_db_dir)
+    os.makedirs(os.path.dirname(dest_script), exist_ok=True)
+    shutil.copy(shigapass_script, dest_script)
+    shutil.copytree(shigapass_db_dir, dest_db_dir)
+
     # Writing inf.json file
     out_json_file = os.path.join(tmp_out_dir, config.REFERENCE_INF)
     logger.info("Writing reference info. [version=%s, type=%s]", ref_inf["version"], ref_inf["type"])
