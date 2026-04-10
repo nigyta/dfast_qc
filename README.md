@@ -3,7 +3,7 @@
 DFAST_QC conducts taxonomy and completeness check of the assembled genome.  
 
 - Taxonomy check  
-DFAST_QC evaluates taxonomic identity of the genome by querying against more than 20,000 reference genomes from type strains. To shorten the runtime , it first run MASH on the query against reference nucleotide databases to narrow down the number of genomes used in the downstream process based on the number of shared hashes. Then, pass it on to Skani against the selected reference genomes to calculate the ANI value.  
+DFAST_QC evaluates taxonomic identity of the genome by querying against more than 28,000 reference genomes from type strains. To shorten the runtime , it first run MASH on the query against reference nucleotide databases to narrow down the number of genomes used in the downstream process based on the number of shared hashes. Then, pass it on to Skani against the selected reference genomes to calculate the ANI value.  
 DFAST_QC uses [MASH](https://doi.org/10.1186/s13059-016-0997-x) for the former process and [Skani](https://doi.org/10.1038/s41592-023-02018-3) for the latter process.
 
 - Completeness check  
@@ -19,7 +19,7 @@ When the taxonomy check identifies the query genome as *Escherichia coli*/*Shige
 ---
 
 ## System requirements and software dependencies
-DFAST_QC runs on Linux with Python ver. 3.11 or later. It requires approximately 2Gbyte of memory. DFAST_QC previously supported macOS, but as of version 1.1.0, official macOS support has been dropped. It may still work on macOS, but the tool is mainly developed and tested on Linux.
+DFAST_QC runs on Linux with Python version 3.11 or earlier and requires approximately 2 GB of memory. While newer Python versions may be installed, some dependencies (e.g., CheckM) can produce errors, so Python 3.11 or lower is recommended. Alternatively, users are encouraged to run DFAST_QC within the provided environment to ensure compatibility.
 The following third party softwares/packages are required.
 - Skani
 - Mash
