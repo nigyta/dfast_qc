@@ -5,12 +5,12 @@ LABEL maintainer=nigyta
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
 	pip install checkm-genome --no-cache-dir && \
-	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal && \
+	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal blast && \
 	conda clean --all -y
 
 RUN pip install ete3 more-itertools peewee --no-cache-dir
 
-ARG VERSION=1.0.4-1  # Increment this when the source code is updated (to disable cache)
+ARG VERSION=1.1.0  # Increment this when the source code is updated (to disable cache)
 RUN	git clone https://github.com/nigyta/dfast_qc.git
 
 FROM debian:bookworm-slim

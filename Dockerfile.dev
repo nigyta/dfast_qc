@@ -11,7 +11,7 @@ ENV CHECKM_DATA_PATH /dqc_reference/checkm_data
 RUN cd / && \
 	mkdir /work && chmod 777 /work && \
 	pip install checkm-genome && \
-	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal
+	conda install -y -c bioconda -c conda-forge mash skani gsl==2.6 hmmer prodigal blast
 
 RUN pip install ete3 more-itertools peewee
 

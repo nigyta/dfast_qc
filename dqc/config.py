@@ -13,6 +13,7 @@ class DefaultConfig:
     DISABLE_CC = False
     ENABLE_GTDB = False
 
+
     AUTO_DOWNLOAD = True
 
     DQC_ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -38,6 +39,17 @@ class DefaultConfig:
     GTDB_MASH_SKETCH_FILE = "gtdb_genomes_sketch.msh"
     GTDB_SPECIES_LIST = "sp_clusters.tsv"
     GTDB_REFERENCE_SUMMARY_TSV = "reference_summary_gtdb.tsv"
+
+
+    # ShigaPass settings (reference data and output files)
+    ENABLE_SHIGAPASS = False       # Auto-set to True when Shigella/E. coli detected
+    DISABLE_SHIGAPASS = False      # User override to skip ShigaPass
+    SHIGAPASS_SCRIPT = os.path.join("shigapass", "ShigaPass.sh")  # Installed under DQC_REFERENCE_DIR/
+    SHIGAPASS_DB_DIR = os.path.join("shigapass", "ShigaPass_DataBases")  # Installed under DQC_REFERENCE_DIR/
+    SHIGAPASS_OUTPUT_DIR = "shigapass_output"
+    SHIGAPASS_SUMMARY = "ShigaPass_summary.csv"
+    SHIGAPASS_FLEX_SUMMARY = "ShigaPass_Flex_summary.csv"
+
 
     # output file names and options for prepare_marker_fasta
     PRODIGAL_CDS_FASTA = "cds.fna" 

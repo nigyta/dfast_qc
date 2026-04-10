@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 tc_header = ["organism_name", "strain", "accession", "species_taxid", "ani", "align_fraction_ref", "align_fraction_query", "ani_threshold", "status"]
 cc_header = ["completeness", "contamination", "strain_heterogeneity", "ungapped_genome_size", "expected_size", "genome_size_check"]
 gtdb_header = ["accession", "gtdb_species", "ani", "align_fraction_ref", "align_fraction_query", "ani_circumscription_radius", "status"]
+shigapass_header = ["name", "rfb", "rfb_hits", "mlst", "fliC", "crispr", "ipaH", "predicted_serotype", "predicted_flex_serotype", "comments"]
 
 @dataclass
 class TCResult:
@@ -75,6 +76,22 @@ class GTDBResult:
         return [getattr(self, key) for key in gtdb_header]
 
 @dataclass
+class ShigaPassResult:
+    name: str
+    rfb: str
+    rfb_hits: str
+    mlst: str
+    fliC: str
+    crispr: str
+    ipaH: str
+    predicted_serotype: str
+    predicted_flex_serotype: str
+    comments: str
+
+    def to_list(self):
+        return [getattr(self, key) for key in shigapass_header]
+
+@dataclass
 class SourceData:
     organism: str
     strain: str
@@ -127,6 +144,13 @@ def load_dqc_result(file_path: str) -> List[TCResult]:
         else:
             cc_result = None
     return tc_result_list, cc_result
+
+def load_shigapass_result(file_path: str) -> Optional[ShigaPassResult]:
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+        if "shigapass_result" in data and len(data["shigapass_result"]) > 0:
+            return ShigaPassResult(**data["shigapass_result"])
+    return None
 
 def load_gtdb_result(file_path: str) -> List[GTDBResult]:
     with open(file_path, 'r') as file:
@@ -189,12 +213,14 @@ class DQCResult:
     tc_result_list: List[TCResult]|None = None
     cc_result: CCResult|None = None
     gtdb_result: List[GTDBResult]|None = None
+    shigapass_result: ShigaPassResult|None = None
 
     @staticmethod
     def load(query, dqc_result_file) -> 'DQCResult':
         tc_result_list, cc_result = load_dqc_result(dqc_result_file)
         gtdb_result = load_gtdb_result(dqc_result_file)
-        return DQCResult(query, tc_result_list, cc_result, gtdb_result)
+        shigapass_result = load_shigapass_result(dqc_result_file)
+        return DQCResult(query, tc_result_list, cc_result, gtdb_result, shigapass_result)
 
     def to_list(self, disable_tc=False, disable_cc=False, enable_gtdb=False):
         ret = [self.query]

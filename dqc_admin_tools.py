@@ -82,6 +82,10 @@ def prepare_genome_size_data(args):
     from dqc.admin.prepare_genome_size_data import prepare_genome_size_data
     prepare_genome_size_data()
 
+def setup_shigapass(args):
+    from dqc.admin.setup_shigapass import setup_shigapass
+    setup_shigapass()
+
 def update_all(args):
     from dqc.admin.download_master_files import download_master_files
     download_master_files(target_files=["asm", "ani", "tsr", "igp", "sst", "egs"])
@@ -97,6 +101,8 @@ def update_all(args):
     sketching()
     from dqc.admin.prepare_genome_size_data import prepare_genome_size_data
     prepare_genome_size_data()
+    from dqc.admin.setup_shigapass import setup_shigapass
+    setup_shigapass()
     add_ref_info()
 
 def parse_args():
@@ -163,6 +169,10 @@ def parse_args():
     # subparser for add_ref_info
     parser_add_ref_info = subparsers.add_parser('add_ref_info', help='Add reference info to the reference data', parents=[common_parser])
     parser_add_ref_info.set_defaults(func=add_ref_info)
+
+    # subparser for setup_shigapass
+    parser_setup_shigapass = subparsers.add_parser('setup_shigapass', help='Download and install ShigaPass script and databases.', parents=[common_parser])
+    parser_setup_shigapass.set_defaults(func=setup_shigapass)
 
     # subparser for update_all
     parser_update_all = subparsers.add_parser('update_all', help='Update all reference data', parents=[common_parser])

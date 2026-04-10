@@ -82,6 +82,11 @@ def parse_args():
         help='Disable completeness check using CheckM'
     )
     parser.add_argument(
+        '--disable_shigapass',
+        action='store_true',
+        help='Disable ShigaPass analysis even when Shigella/E. coli is detected'
+    )
+    parser.add_argument(
         '--disable_auto_download',
         action='store_true',
         help='Disable auto-download for missing reference genomes'
@@ -155,6 +160,8 @@ if args.disable_tc:
     config.DISABLE_TC = True
 if args.disable_cc:
     config.DISABLE_CC = True
+if args.disable_shigapass:
+    config.DISABLE_SHIGAPASS = True
 if args.disable_auto_download:
     config.AUTO_DOWNLOAD = False
 if args.debug:
@@ -187,7 +194,7 @@ else:
     logger.info("DQC Reference Directory: %s", config.DQC_REFERENCE_DIR)
     logger.info(get_ref_inf(as_str=True))
 
-from dqc import taxonomy_check, completeness_check, gtdb_search
+from dqc import taxonomy_check, completeness_check, gtdb_search, shigapass_check
 
 best_hit_species_taxid = None  # for genome size check
 
@@ -210,6 +217,14 @@ if not config.DISABLE_TC:
 else:
     tc_result = []
 
+# ShigaPass serotype prediction
+shigapass_result = {}
+if not config.DISABLE_SHIGAPASS and not config.DISABLE_TC:
+    if shigapass_check.should_run_shigapass(tc_result):
+        config.ENABLE_SHIGAPASS = True
+        logger.info("Shigella/E. coli detected. Running ShigaPass.")
+        shigapass_result = shigapass_check.run()
+
 if not config.DISABLE_CC:
     cc_result = completeness_check.run()
 
@@ -228,7 +243,7 @@ if config.ENABLE_GTDB:
     gtdb_result = gtdb_search.run()
 else:
     gtdb_result = []
-dqc_result = {"tc_result": tc_result, "cc_result": cc_result, "gtdb_result": gtdb_result}
+dqc_result = {"tc_result": tc_result, "cc_result": cc_result, "gtdb_result": gtdb_result, "shigapass_result": shigapass_result}
 dqc_result_file_json = os.path.join(config.OUT_DIR, config.DQC_RESULT_JSON)
 logger.debug("DQC result json %s\n%s\n%s", "-"*80, json.dumps(dqc_result, indent=4), "-"*80)
 with open(dqc_result_file_json, "w") as f:

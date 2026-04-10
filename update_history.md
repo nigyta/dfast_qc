@@ -1,3 +1,24 @@
+### v. 1.1.0 (2026.04.10)
+- ShigaPass integration: When the taxonomy check identifies the query genome as *Escherichia coli*/*Shigella* (status: "indistinguishable"), [ShigaPass](https://github.com/imanyass/ShigaPass) is automatically run to predict the *Shigella* serotype. ShigaPass can be disabled with `--disable_shigapass`.
+- If ShigaPass is not installed and the query genome is identified as *E. coli*/*Shigella*, ShigaPass and its reference databases are automatically installed at runtime. They can also be manually installed via `dqc_admin_tools.py setup_shigapass`.
+- ShigaPass is installed under $DQC_REFERENCE/shigapass
+- The ShigaPass result is added to `dqc_result.json` as `shigapass_result`, e.g.:
+  ```json
+  "shigapass_result": {
+      "name": "GCA_000012025",
+      "rfb": "C4",
+      "rfb_hits": "130,(100.0%)",
+      "MLST": "ST1130",
+      "fliC": "ShH15(ShH3cplx)",
+      "CRISPR": "A-var2",
+      "ipaH": "ipaH+",
+      "organism": "Shigella boydii",
+      "Predicted_Serotype": "SB4",
+      "Predicted_FlexSerotype": "",
+      "Comments": ""
+  }
+  ```
+
 ### v. 1.0.7 (2025.04.30)
 - Minor change. Updated to use GTDB_r226  
 - The reference data for GTDB has been changed (config.py)  

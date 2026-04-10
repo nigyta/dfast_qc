@@ -62,6 +62,8 @@ def prepare_output_directory():
             config.GTDB_SKANI_RESULT,
             config.GTDB_RESULT,
             config.LOG_FILE,
+            config.SHIGAPASS_SUMMARY,
+            config.SHIGAPASS_FLEX_SUMMARY,
             "checkm.log",
         ]
         for file_name in result_file_names:
@@ -73,6 +75,7 @@ def prepare_output_directory():
             config.CHECKM_RESULT_DIR,
             config.SKANI_DATABASE_REF,
             config.SKANI_DATABASE_GTDB,
+            config.SHIGAPASS_OUTPUT_DIR,
         ]
         for dir_name in result_dir_names:
             dir_path = os.path.join(config.OUT_DIR, dir_name)
