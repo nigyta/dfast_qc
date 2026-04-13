@@ -13,7 +13,7 @@ RUN pip install ete3 more-itertools peewee --no-cache-dir
 ARG VERSION=1.1.0  # Increment this when the source code is updated (to disable cache)
 RUN	git clone https://github.com/nigyta/dfast_qc.git
 
-FROM debian:bookworm-slim
+FROM --platform=linux/amd64 debian:bookworm-slim
 
 COPY --from=build /opt/conda/. /opt/conda/
 COPY --from=build /dfast_qc /dfast_qc
