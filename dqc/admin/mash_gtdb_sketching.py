@@ -27,7 +27,7 @@ def gtdb_sketching():
     if num_threads > 1:
         logger.warning("MASH search is currently running with a single thread due to an issue with MASH hanging when using multiple threads. We are investigating the issue and will update this part in the future.")
     num_threads = 1
-    cmd_gtdb_sketch = ["mash", "sketch", "-l", gtdb_paths_file, "-o", gtdb_mash_sketch_file, "-p", num_threads]
+    cmd_gtdb_sketch = ["mash", "sketch", "-l", gtdb_paths_file, "-o", gtdb_mash_sketch_file, "-p", str(num_threads)]
     run_command(cmd_gtdb_sketch, task_name="mash sketching GTDB genomes")
     
     logger.info("===== Sketching GTDB genomes is done =====") 

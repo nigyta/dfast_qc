@@ -26,7 +26,7 @@ def sketching():
     if num_threads > 1:
         logger.warning("MASH search is currently running with a single thread due to an issue with MASH hanging when using multiple threads. We are investigating the issue and will update this part in the future.")
     num_threads = 1
-    cmd_sketch = ["mash", "sketch", "-l", paths_file, "-o", mash_sketch_file, "-p", num_threads]
+    cmd_sketch = ["mash", "sketch", "-l", paths_file, "-o", mash_sketch_file, "-p", str(num_threads)]
     run_command(cmd_sketch, task_name="mash sketching reference genomes")
     
     logger.info("===== Sketching reference genomes is done =====")
