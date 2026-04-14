@@ -23,7 +23,7 @@ done
 echo "===================== DFAST_QC initial setup ====================="
 
 
-$SCRIPT_DIR/dqc_admin_tools.py download_master_files --targets asm ani tsr igp sst --num_threads $NUM_THREADS ${REF_DIR}
+$SCRIPT_DIR/dqc_admin_tools.py download_master_files --targets asm ani tsr igp sst egs --num_threads $NUM_THREADS ${REF_DIR}
 $SCRIPT_DIR/dqc_admin_tools.py update_taxdump ${REF_DIR}
 $SCRIPT_DIR/dqc_admin_tools.py download_genomes --num_threads $NUM_THREADS ${REF_DIR}
 $SCRIPT_DIR/dqc_admin_tools.py mash_ref_sketch --num_threads $NUM_THREADS ${REF_DIR}

@@ -10,6 +10,7 @@ dependencies:
   - gsl==2.6
   - hmmer
   - prodigal
+  - blast
   - pip:
     - checkm-genome
     - ete3

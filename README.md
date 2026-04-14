@@ -29,6 +29,13 @@ The following third party softwares/packages are required.
 - BLAST+ (required for ShigaPass)
 - Python packages: peewee, more-itertools, ete3
 
+__[For macOS]__  
+DFAST_QC is not officially supported on macOS and has not been thoroughly tested. On Macs with ARM CPUs (Apple Silicon), some dependencies are not supported. We recommend creating a conda environment with the platform explicitly specified:
+```
+conda create --platform osx-64 -n myenv
+```
+ShigaPass does not work due to differences in how the `paste` command works between macOS and Linux. Use `--disable_shigapass` when running DFAST_QC on macOS.
+
 ## Installation from Bioconda
 DFAST_QC is also available from [BioConda](https://bioconda.github.io/recipes/dfast_qc/README.html).
 ```
@@ -104,8 +111,8 @@ If you want to prepre `DQC_REFERENCE_FULL`, please follow the procedure [below](
 ```
 usage: dfast_qc [-h] [--version] [-i PATH] [-o PATH] [-hits INT] [-a INT]
                 [-t INT] [-r PATH] [-n INT] [--enable_gtdb] [--disable_tc] 
-                [--disable_cc] [--disable_auto_download] [--force] 
-                [--debug] [-p STR] [--show_taxon]
+                [--disable_cc] [--disable_shigapass] [--disable_auto_download]  
+                [--force] [--debug] [-p STR] [--show_taxon]
 
 DFAST_QC: Taxonomy and completeness check
 
@@ -265,7 +272,7 @@ Instead of running `dqc_initial_setup.sh`, you can prepare reference data by man
 
 1. Download master files  
     ```
-    dqc_admin_tools.py download_master_files --targets asm ani tsr igp sst
+    dqc_admin_tools.py download_master_files --targets asm ani tsr igp sst egs
     ```
     This will download "Assembly report", "ANI report", "Type strain report", and "indistinguishable_groups_prokaryotes.txt" from the NCBI FTP server and HMMer profile for TIGR.  
 
@@ -311,6 +318,7 @@ Instead of running `dqc_initial_setup.sh`, you can prepare reference data by man
     dqc_admin_tools.py add_ref_info
     ```
 
+Mash sketching (step 4) may fail when running with multiple threads. To avoid error, please specify `--num-threads 1`.
 
 ## Preparation for the GTDB reference data.
 1. Download the representative genomes from GTDB and unarchive it.

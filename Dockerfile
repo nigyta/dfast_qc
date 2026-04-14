@@ -10,7 +10,7 @@ RUN cd / && \
 
 RUN pip install ete3 more-itertools peewee --no-cache-dir
 
-ARG VERSION=1.1.0  # Increment this when the source code is updated (to disable cache)
+ARG VERSION=1.1.1  # Increment this when the source code is updated (to disable cache)
 RUN	git clone https://github.com/nigyta/dfast_qc.git
 
 FROM --platform=linux/amd64 debian:bookworm-slim
@@ -24,6 +24,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DQC_ENV docker
 ENV CHECKM_DATA_PATH /dqc_reference/checkm_data
+
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN ln -s /dfast_qc/dfast_qc /usr/local/bin/ && \
 	ln -s /dfast_qc/dqc_admin_tools.py /usr/local/bin/ && \
