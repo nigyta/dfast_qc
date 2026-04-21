@@ -323,30 +323,30 @@ Mash sketching (step 4) may fail when running with multiple threads. To avoid er
 ## Preparation for the GTDB reference data.
 1. Download the representative genomes from GTDB and unarchive it.
     ```
-    curl -LO https://data.gtdb.ecogenomic.org/releases/latest/genomic_files_reps/gtdb_genomes_reps.tar.gz
+    curl -LO https://data.gtdb.aau.ecogenomic.org/releases/latest/genomic_files_reps/gtdb_genomes_reps.tar.gz
     tar xfz gtdb_genomes_reps.tar.gz
     ```
 
     If the downloading is slow from the above link, try downloading it from the mirror site,
     ```
-    curl -LO https://data.ace.uq.edu.au/public/gtdb/data/releases/release226/226.0/genomic_files_reps/gtdb_genomes_reps_r226.tar.gz
-    tar xfz gtdb_genomes_reps_r226.tar.gz
+    curl -LO https://data.ace.uq.edu.au/public/gtdb/data/releases/release232/232.0/genomic_files_reps/gtdb_genomes_reps_r232.tar.gz
+    tar xfz gtdb_genomes_reps_r232.tar.gz
     ```
 
 2. Create a link under `DQC_REFERENCE` 
     ```
-    ln -s gtdb_genomes_reps_r226 gtdb_genomes_reps
+    ln -s gtdb_genomes_reps_r232 gtdb_genomes_reps
     ```
  
     Alternatively, place the unarchived folder under `DQC_REFERENCE`, and modify the value `GTDB_GENOME_DIR` specified in [config.py](dqc/config.py).  
     ```
-    GTDB_GENOME_DIR = "gtdb_genomes_reps_r226/database"
+    GTDB_GENOME_DIR = "gtdb_genomes_reps_r232/database"
     ```
 3. Download the species list from GTDB.  
     ```
-    curl -LO https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv
+    curl -LO https://data.gtdb.aau.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv
     ```
-    The above command will download [this file](https://data.gtdb.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv) from GTDB.  
+    The above command will download [this file](https://data.gtdb.aau.ecogenomic.org/releases/latest/auxillary_files/sp_clusters.tsv from GTDB.  
     Place the file in `DQC_REFERENCE` directory.
 
 4. Sketch representative genomes from GTDB using MASH
