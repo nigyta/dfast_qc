@@ -63,20 +63,11 @@ If this did not work, please try [Installation from source code](#installation-f
     pip install -r requirements.txt
     ```
 
+3. ShigaPass (optional, for *Shigella* serotyping)  
+    ShigaPass is automatically downloaded and installed into `DQC_REFERENCE_DIR` on the first run when the query genome is identified as *Escherichia coli*/*Shigella*, so no manual setup is required. This requires `git` (used to download ShigaPass) and BLAST+ (`blastn`/`makeblastdb`) to be available on your `$PATH`. To skip ShigaPass, run DFAST_QC with `--disable_shigapass`.
+
 
 Reference data is not included in the conda package. Please install it following the steps below.
-
-## Install ShigaPass
-ShigaPass is required for *Shigella* serotype prediction. Clone the ShigaPass repository and copy the script and databases into the DFAST_QC source tree:
-```
-git clone https://github.com/imanyass/ShigaPass.git
-cp ShigaPass/SCRIPT/ShigaPass.sh dqc/shigapass/
-cp -r ShigaPass/SCRIPT/ShigaPass_DataBases dqc/shigapass/
-```
-BLAST+ must also be installed and available on your `$PATH` (e.g. `sudo apt-get install ncbi-blast+` or `conda install -c bioconda blast`).
-The ShigaPass databases will be automatically initialized (via `makeblastdb`) on the first run.
-
-If you do not need ShigaPass, you can skip this step and use `--disable_shigapass` when running DFAST_QC.
 
 ## Quick set up (recommended)
 Since the full data set of DFAST_QC's reference data (`DQC_REFERENCE_FULL`) is huge (>100GB, including GTDB representative genomes), we have made the pre-built reference data (`DQC_REFERENCE_COMPACT`, <1.5GB) available for download using the `dqc_ref_manager.py` script. 　
