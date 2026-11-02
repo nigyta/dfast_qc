@@ -19,7 +19,7 @@ RUN conda install -y "brotli-python>=1.2.1" && \
 # Source version to build. Docker has no inline comments, so this must stay on its own
 # line: anything after "=" would otherwise become part of VERSION.
 # Keep in step with dqc/__init__.py, and tag the repository before building.
-ARG VERSION=1.1.2
+ARG VERSION=1.1.3
 RUN	git clone --branch ${VERSION} --depth 1 https://github.com/nigyta/dfast_qc.git
 
 FROM --platform=linux/amd64 debian:bookworm-slim
@@ -34,9 +34,16 @@ ENV PYTHONUNBUFFERED 1
 ENV DQC_ENV docker
 ENV CHECKM_DATA_PATH /dqc_reference/checkm_data
 
-# Security: CVE-2026-111497. libbrotli1 comes from the base image, so it needs an
-# explicit upgrade. Debian 12 (bookworm) fixes it in 1.0.9-2+deb12u1 (DLA-4855-1).
+# git and ca-certificates are not in debian:bookworm-slim but were present in the
+# published 1.1.1 image, so they are installed here: dqc_admin_tools.py and the
+# reference setup need git, and the system CA store is what non-conda TLS uses.
+#
+# Installing them also brings in libbrotli1 (via libcurl). CVE-2026-111497 is an
+# out-of-bounds write in the Brotli decoder; a fresh install already picks up the
+# fixed Debian 12 build (1.0.9-2+deb12u1, DLA-4855-1), and --only-upgrade makes
+# that explicit if the base image ever ships its own copy.
 RUN apt-get update && \
+	apt-get install -y --no-install-recommends git ca-certificates && \
 	apt-get install -y --only-upgrade libbrotli1 && \
 	rm -rf /var/lib/apt/lists/* && \
 	dpkg -l libbrotli1 | tail -1
